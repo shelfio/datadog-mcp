@@ -453,47 +453,85 @@ async def fetch_metric_available_fields(
     metric_name: str,
     time_range: str = "1h",
 ) -> List[str]:
-    """Fetch available fields/tags for a metric from Datadog API."""
-    
+    """Fetch available fields/tags for a metric from Datadog API.
+
+    Uses a hybrid approach:
+    1. First tries the /all-tags metadata endpoint (fast, but misses custom tags)
+    2. Then probes for common custom tag names by querying actual data
+
+    This ensures we find both indexed infrastructure tags AND custom application tags.
+    """
+
     headers = {
         "DD-API-KEY": DATADOG_API_KEY,
         "DD-APPLICATION-KEY": DATADOG_APP_KEY,
     }
-    
-    # Use the proper Datadog API endpoint to get all tags for a metric
-    url = f"{DATADOG_API_URL}/api/v2/metrics/{metric_name}/all-tags"
-    
-    async with httpx.AsyncClient() as client:
-        try:
+
+    available_fields = set()
+
+    # Method 1: Try the metadata endpoint first (fast)
+    try:
+        url = f"{DATADOG_API_URL}/api/v2/metrics/{metric_name}/all-tags"
+        async with httpx.AsyncClient() as client:
             response = await client.get(url, headers=headers)
             response.raise_for_status()
             data = response.json()
-            
-            available_fields = set()
-            
-            # Extract tags from the response
+
             if "data" in data and "attributes" in data["data"]:
                 attributes = data["data"]["attributes"]
-                
-                # Get tags from the attributes
                 if "tags" in attributes:
                     for tag in attributes["tags"]:
-                        # Tags are in format "field:value", extract just the field name
                         if ":" in tag:
                             field_name = tag.split(":", 1)[0]
                             available_fields.add(field_name)
-            
-            return sorted(list(available_fields))
-            
-        except httpx.HTTPError as e:
-            logger.error(f"HTTP error fetching metric tags: {e}")
-            if hasattr(e, 'response') and e.response.status_code == 404:
-                logger.warning(f"Metric {metric_name} not found or has no tags")
-                return []
-            raise
-        except Exception as e:
-            logger.error(f"Error fetching metric tags: {e}")
-            raise
+    except Exception as e:
+        logger.warning(f"Could not fetch from /all-tags endpoint: {e}")
+
+    # Method 2: Probe for common custom tag names by actually querying with them
+    # These are common custom application tags that often aren't indexed
+    common_custom_tags = ["variant", "status", "version", "release", "deployment"]
+
+    import time
+    to_timestamp = int(time.time())
+    time_deltas = {
+        "1h": 3600,
+        "4h": 14400,
+        "8h": 28800,
+        "1d": 86400,
+        "7d": 604800,
+        "14d": 1209600,
+        "30d": 2592000,
+    }
+    seconds_back = time_deltas.get(time_range, 604800)  # Default to 7 days for better coverage
+    from_timestamp = to_timestamp - seconds_back
+
+    url = f"{DATADOG_API_URL}/api/v1/query"
+
+    async with httpx.AsyncClient() as client:
+        for tag_name in common_custom_tags:
+            try:
+                # Query with this tag to see if it exists
+                query = f"avg:{metric_name}{{*}} by {{{tag_name}}}"
+                params = {
+                    "query": query,
+                    "from": from_timestamp,
+                    "to": to_timestamp,
+                }
+
+                response = await client.get(url, headers=headers, params=params)
+                response.raise_for_status()
+                data = response.json()
+
+                # If we got series back, this tag exists
+                if "series" in data and data["series"]:
+                    available_fields.add(tag_name)
+
+            except Exception as e:
+                # Tag doesn't exist or query failed, skip it
+                logger.debug(f"Tag '{tag_name}' not found or query failed: {e}")
+                continue
+
+    return sorted(list(available_fields))
 
 
 
