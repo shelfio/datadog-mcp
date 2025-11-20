@@ -435,5 +435,31 @@ class TestMetricsValidation:
             pass
 
 
+class TestAsCountParameter:
+    """Test as_count parameter functionality"""
+
+    def test_as_count_parameter_in_schema(self):
+        """Test as_count parameter is properly defined in tool schema"""
+        tool_def = get_metrics.get_tool_definition()
+        as_count_param = tool_def.inputSchema["properties"]["as_count"]
+
+        assert as_count_param["type"] == "boolean"
+        assert as_count_param["default"] is False
+        assert "count" in as_count_param["description"].lower() or "rate" in as_count_param["description"].lower()
+
+    @pytest.mark.asyncio
+    async def test_as_count_parameter_passed_to_fetch(self):
+        """Test that as_count parameter is passed from handler to fetch_metrics"""
+        mock_request = MagicMock()
+        mock_request.arguments = {"metric_name": "test.metric", "as_count": True, "format": "json"}
+
+        with patch('datadog_mcp.tools.get_metrics.fetch_metrics', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = {"series": [{"metric": "test.metric", "points": []}]}
+            await get_metrics.handle_call(mock_request)
+
+            assert mock_fetch.called
+            assert mock_fetch.call_args.kwargs['as_count'] is True
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
