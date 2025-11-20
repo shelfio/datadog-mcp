@@ -578,7 +578,196 @@ def format_metrics_timeseries(metrics: Dict[str, Dict[str, Any]], limit_points: 
                 dt = datetime.datetime.fromtimestamp(timestamp / 1000)
                 time_str = dt.strftime("%H:%M:%S")
                 lines.append(f"  {time_str}: {value:.2f}{unit_str}")
-        
+
         lines.append("")
-    
+
     return "\n".join(lines)
+
+
+def extract_trace_info(trace_events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Extract relevant information from trace events.
+
+    Args:
+        trace_events: List of trace event dictionaries from Datadog API
+
+    Returns:
+        List of processed trace dictionaries with extracted fields
+    """
+    from datetime import datetime
+
+    traces = []
+
+    for event in trace_events:
+        attrs = event.get("attributes", {})
+
+        # Calculate duration from timestamps if not provided directly
+        duration_ns = attrs.get("duration", 0)
+        if duration_ns == 0:
+            start_ts = attrs.get("start_timestamp", "")
+            end_ts = attrs.get("end_timestamp", "")
+            if start_ts and end_ts:
+                try:
+                    start_dt = datetime.fromisoformat(start_ts.replace('Z', '+00:00'))
+                    end_dt = datetime.fromisoformat(end_ts.replace('Z', '+00:00'))
+                    duration_seconds = (end_dt - start_dt).total_seconds()
+                    duration_ns = int(duration_seconds * 1_000_000_000)
+                except (ValueError, AttributeError):
+                    pass
+
+        # Extract key fields
+        trace = {
+            "trace_id": attrs.get("trace_id", ""),
+            "span_id": attrs.get("span_id", ""),
+            "parent_id": attrs.get("parent_id"),
+            "service": attrs.get("service", ""),
+            "resource_name": attrs.get("resource_name", ""),
+            "operation_name": attrs.get("operation_name", ""),
+            "duration_ns": duration_ns,
+            "duration_ms": round(duration_ns / 1_000_000, 2),
+            "start_timestamp": attrs.get("start_timestamp", attrs.get("start", 0)),
+            "status": attrs.get("status", ""),
+            "error": attrs.get("error", 0),
+            "env": attrs.get("env", ""),
+            "tags": attrs.get("tags", []),
+        }
+
+        # Extract custom tags (@ prefixed attributes)
+        custom_attrs = {}
+        for key, value in attrs.items():
+            if key.startswith("@"):
+                custom_attrs[key] = value
+
+        trace["custom_attributes"] = custom_attrs
+
+        traces.append(trace)
+
+    return traces
+
+
+def format_traces_as_table(traces: List[Dict[str, Any]]) -> str:
+    """Format traces as a text table.
+
+    Args:
+        traces: List of processed trace dictionaries
+
+    Returns:
+        Formatted table string
+    """
+    if not traces:
+        return "No traces found"
+
+    lines = []
+    lines.append("SERVICE | RESOURCE | OPERATION | DURATION (ms) | STATUS | ENV")
+    lines.append("-" * 100)
+
+    for trace in traces:
+        service = trace.get("service", "")[:20]
+        resource = trace.get("resource_name", "")[:30]
+        operation = trace.get("operation_name", "")[:20]
+        duration = trace.get("duration_ms", 0)
+        status = trace.get("status", "")
+        env = trace.get("env", "")
+        error_indicator = "❌" if trace.get("error") else ""
+
+        lines.append(
+            f"{service:<20} | {resource:<30} | {operation:<20} | {duration:>13.2f} | {status:<6} {error_indicator} | {env}"
+        )
+
+    return "\n".join(lines)
+
+
+def format_traces_as_text(traces: List[Dict[str, Any]]) -> str:
+    """Format traces as detailed text output.
+
+    Args:
+        traces: List of processed trace dictionaries
+
+    Returns:
+        Formatted text string
+    """
+    if not traces:
+        return "No traces found"
+
+    lines = []
+
+    for i, trace in enumerate(traces, 1):
+        lines.append(f"\n[{i}] {trace.get('service', 'unknown')} - {trace.get('resource_name', 'unknown')}")
+        lines.append(f"    Trace ID: {trace.get('trace_id', '')}")
+        lines.append(f"    Span ID: {trace.get('span_id', '')}")
+        if trace.get("parent_id"):
+            lines.append(f"    Parent ID: {trace.get('parent_id')}")
+        lines.append(f"    Operation: {trace.get('operation_name', '')}")
+        lines.append(f"    Duration: {trace.get('duration_ms', 0):.2f}ms")
+        lines.append(f"    Status: {trace.get('status', '')} {'❌ ERROR' if trace.get('error') else ''}")
+        lines.append(f"    Environment: {trace.get('env', '')}")
+
+        # Show custom attributes if present
+        custom_attrs = trace.get("custom_attributes", {})
+        if custom_attrs:
+            lines.append("    Custom Attributes:")
+            for key, value in list(custom_attrs.items())[:5]:  # Limit to 5 attributes
+                lines.append(f"      {key}: {value}")
+
+    return "\n".join(lines)
+
+
+def format_traces_as_hierarchy(traces: List[Dict[str, Any]]) -> str:
+    """Format traces as a hierarchical tree structure showing parent-child relationships.
+
+    Args:
+        traces: List of processed trace dictionaries
+
+    Returns:
+        Formatted hierarchy string
+    """
+    if not traces:
+        return "No traces found"
+
+    # Build parent-child mapping
+    trace_map = {trace["span_id"]: trace for trace in traces}
+    root_traces = []
+    children_map = {}
+
+    for trace in traces:
+        parent_id = trace.get("parent_id")
+        if not parent_id or parent_id not in trace_map:
+            root_traces.append(trace)
+        else:
+            if parent_id not in children_map:
+                children_map[parent_id] = []
+            children_map[parent_id].append(trace)
+
+    def format_trace_node(trace: Dict[str, Any], indent: int = 0) -> List[str]:
+        """Recursively format a trace and its children."""
+        lines = []
+        prefix = "  " * indent + ("└─ " if indent > 0 else "")
+
+        duration = trace.get("duration_ms", 0)
+        status = trace.get("status", "")
+        error_indicator = "❌" if trace.get("error") else ""
+
+        service = trace.get("service", "unknown")
+        operation = trace.get("operation_name", "")
+        resource = trace.get("resource_name", "")
+
+        lines.append(
+            f"{prefix}{service} - {operation} ({duration:.2f}ms) {status} {error_indicator}"
+        )
+        if resource and indent == 0:  # Only show resource for root spans
+            lines.append(f"{'  ' * (indent + 1)}Resource: {resource}")
+
+        # Add children
+        span_id = trace["span_id"]
+        if span_id in children_map:
+            for child in children_map[span_id]:
+                lines.extend(format_trace_node(child, indent + 1))
+
+        return lines
+
+    # Format all root traces
+    all_lines = []
+    for root in root_traces:
+        all_lines.extend(format_trace_node(root))
+        all_lines.append("")  # Blank line between traces
+
+    return "\n".join(all_lines)
