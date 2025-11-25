@@ -2,6 +2,7 @@
 Datadog API client utilities
 """
 
+import json
 import logging
 import os
 from typing import Any, Dict, List, Optional
@@ -142,9 +143,10 @@ async def fetch_logs(
             result = {
                 "data": [log.to_dict() for log in response.data] if response.data else [],
                 "meta": response.meta.to_dict() if response.meta else {},
-                "links": response.links.to_dict() if response.links else {},
+                # Note: LogsListResponse doesn't have a 'links' attribute in the current API version
+                # Pagination is handled via cursor in meta.page.after
             }
-            
+
             return result
     
     except Exception as e:
@@ -313,8 +315,20 @@ async def fetch_metrics(
     aggregation: str = "avg",
     filters: Optional[Dict[str, str]] = None,
     aggregation_by: Optional[List[str]] = None,
+    as_count: bool = False,
 ) -> Dict[str, Any]:
-    """Fetch metrics from Datadog API with flexible filtering."""
+    """Fetch metrics from Datadog API with flexible filtering.
+
+    Args:
+        metric_name: The metric to query
+        time_range: Time window to query
+        aggregation: Aggregation method (avg, sum, min, max, count)
+        filters: Tag filters to apply
+        aggregation_by: Fields to group by
+        as_count: If True, applies .as_count() to get totals instead of rates.
+                  Use for count/rate metrics (e.g., request.hits, error.count).
+                  Do NOT use for gauge metrics (e.g., cpu.percent, memory.usage).
+    """
     
     headers = {
         "DD-API-KEY": DATADOG_API_KEY,
@@ -333,12 +347,22 @@ async def fetch_metrics(
     # Combine filters with proper syntax first
     if filter_list:
         query_parts.append("{" + ",".join(filter_list) + "}")
-    
-    # Add aggregation_by to the query if specified (after filters)
+    else:
+        # Datadog requires a scope - use {*} for "all sources" when no filters
+        query_parts.append("{*}")
+
+    # Add .as_count() modifier if requested (for count/rate metrics)
+    # This converts rate metrics to totals instead of per-second rates
+    # Only use for count/rate metrics, NOT for gauge metrics
+    # MUST come before the 'by' clause in Datadog query syntax
+    if as_count:
+        query_parts.append(".as_count()")
+
+    # Add aggregation_by to the query if specified (after scope and modifiers)
     if aggregation_by:
         by_clause = ",".join(aggregation_by)
         query_parts.append(f" by {{{by_clause}}}")
-    
+
     query = "".join(query_parts)
     
     # Log the constructed query for debugging
@@ -713,31 +737,238 @@ async def fetch_slo_history(
 ) -> Dict[str, Any]:
     """Fetch SLO history data."""
     url = f"{DATADOG_API_URL}/api/v1/slo/{slo_id}/history"
-    
+
     headers = {
         "Content-Type": "application/json",
         "DD-API-KEY": DATADOG_API_KEY,
         "DD-APPLICATION-KEY": DATADOG_APP_KEY,
     }
-    
+
     params = {
         "from_ts": from_ts,
         "to_ts": to_ts,
     }
-    
+
     if target is not None:
         params["target"] = target
-    
+
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(url, headers=headers, params=params)
             response.raise_for_status()
             data = response.json()
             return data.get("data", {})
-            
+
         except httpx.HTTPError as e:
             logger.error(f"HTTP error fetching SLO history: {e}")
             raise
         except Exception as e:
             logger.error(f"Error fetching SLO history: {e}")
+            raise
+
+
+async def fetch_traces(
+    time_range: str = "1h",
+    filters: Optional[Dict[str, str]] = None,
+    query: Optional[str] = None,
+    limit: int = 50,
+    cursor: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Fetch APM traces (spans) from Datadog API with flexible filtering.
+
+    Args:
+        time_range: Time range to look back (e.g., '1h', '4h', '1d')
+        filters: Filters to apply (e.g., {'service': 'web', 'env': 'prod', 'resource_name': 'GET /api/users'})
+        query: Free-text search query (e.g., 'error', 'status:error', 'service:web AND env:prod')
+        limit: Maximum number of spans to return (default: 50, max: 1000)
+        cursor: Pagination cursor from previous response
+
+    Returns:
+        Dict containing traces data and pagination info
+    """
+    url = f"{DATADOG_API_URL}/api/v2/spans/events/search"
+
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    # Build query filter
+    query_parts = []
+
+    # Add filters from the filters dictionary
+    if filters:
+        for key, value in filters.items():
+            # Handle special characters in values by quoting them
+            if " " in value or ":" in value:
+                query_parts.append(f'{key}:"{value}"')
+            else:
+                query_parts.append(f"{key}:{value}")
+
+    # Add free-text query
+    if query:
+        query_parts.append(query)
+
+    combined_query = " AND ".join(query_parts) if query_parts else "*"
+
+    # Build request body
+    payload = {
+        "data": {
+            "attributes": {
+                "filter": {
+                    "from": f"now-{time_range}",
+                    "to": "now",
+                    "query": combined_query,
+                },
+                "options": {
+                    "timezone": "GMT",
+                },
+                "page": {
+                    "limit": min(limit, 1000),  # API max is 1000
+                },
+                "sort": "timestamp",  # Most recent first (use "-timestamp" for oldest first)
+            },
+            "type": "search_request",
+        }
+    }
+
+    # Add cursor for pagination if provided
+    if cursor:
+        payload["data"]["attributes"]["page"]["cursor"] = cursor
+
+    async with httpx.AsyncClient() as client:
+        try:
+            logger.debug(f"Fetching traces with query: {combined_query}")
+            logger.debug(f"Request payload: {json.dumps(payload, indent=2)}")
+
+            response = await client.post(url, headers=headers, json=payload, timeout=30.0)
+            response.raise_for_status()
+
+            result = response.json()
+
+            # Validate we got a proper response
+            if result is None:
+                logger.error("API returned None")
+                raise ValueError("Datadog API returned null response")
+
+            if not isinstance(result, dict):
+                logger.error(f"API returned non-dict: {type(result)}")
+                raise ValueError(f"Datadog API returned unexpected type: {type(result)}")
+
+            logger.debug(f"Successfully fetched {len(result.get('data', []))} traces")
+            return result
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching traces: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                logger.error(f"Response status: {e.response.status_code}")
+                logger.error(f"Response body: {e.response.text}")
+            raise
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to decode JSON response: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching traces: {e}", exc_info=True)
+            raise
+
+
+async def aggregate_traces(
+    time_range: str = "1h",
+    filters: Optional[Dict[str, str]] = None,
+    query: Optional[str] = None,
+    group_by: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """Aggregate APM traces using Datadog Analytics API.
+
+    Args:
+        time_range: Time range to look back (e.g., '1h', '4h', '1d', '7d')
+        filters: Filters to apply (e.g., {'service': 'web', 'env': 'prod'})
+        query: Free-text search query (e.g., '@duration:>8000000000')
+        group_by: List of fields to group by (e.g., ['env', 'service'])
+
+    Returns:
+        Dict containing aggregated trace counts grouped by specified fields
+    """
+    url = f"{DATADOG_API_URL}/api/v2/spans/analytics/aggregate"
+
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    # Build query filter
+    query_parts = []
+
+    # Add filters from the filters dictionary
+    if filters:
+        for key, value in filters.items():
+            # Handle special characters in values by quoting them
+            if " " in value or ":" in value:
+                query_parts.append(f'{key}:"{value}"')
+            else:
+                query_parts.append(f"{key}:{value}")
+
+    # Add free-text query
+    if query:
+        query_parts.append(query)
+
+    combined_query = " AND ".join(query_parts) if query_parts else "*"
+
+    # Build request body
+    payload = {
+        "data": {
+            "attributes": {
+                "filter": {
+                    "from": f"now-{time_range}",
+                    "to": "now",
+                    "query": combined_query,
+                },
+                "compute": [
+                    {
+                        "aggregation": "count",
+                        "type": "total"
+                    }
+                ],
+            },
+            "type": "aggregate_request",
+        }
+    }
+
+    # Add group by if specified
+    if group_by:
+        payload["data"]["attributes"]["group_by"] = [
+            {
+                "facet": field,
+                "type": "facet"
+            }
+            for field in group_by
+        ]
+
+    async with httpx.AsyncClient() as client:
+        try:
+            logger.debug(f"Aggregating traces with query: {combined_query}")
+            logger.debug(f"Group by: {group_by}")
+            logger.debug(f"Request payload: {json.dumps(payload, indent=2)}")
+
+            response = await client.post(url, headers=headers, json=payload, timeout=30.0)
+            response.raise_for_status()
+
+            result = response.json()
+
+            logger.debug(f"Successfully aggregated traces")
+            return result
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error aggregating traces: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                logger.error(f"Response status: {e.response.status_code}")
+                logger.error(f"Response body: {e.response.text}")
+            raise
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to decode JSON response: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error aggregating traces: {e}", exc_info=True)
             raise

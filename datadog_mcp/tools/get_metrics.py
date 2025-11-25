@@ -54,6 +54,11 @@ def get_tool_definition() -> Tool:
                     "description": "Fields to group/aggregate the metric by (e.g., ['service'], ['region', 'env'], ['aws_account']). Use get_metric_fields tool to see available fields.",
                     "default": [],
                 },
+                "as_count": {
+                    "type": "boolean",
+                    "description": "If true, applies .as_count() to convert rate metrics to totals. Use for count/rate metrics (e.g., 'request.hits', 'error.count'). Do NOT use for gauge metrics (e.g., 'cpu.percent', 'memory.usage'). Default: false",
+                    "default": False,
+                },
                 "format": {
                     "type": "string",
                     "description": "Output format",
@@ -77,18 +82,19 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         aggregation = args.get("aggregation", "avg")
         filters = args.get("filters", {})
         aggregation_by = args.get("aggregation_by", [])
+        as_count = args.get("as_count", False)
         format_type = args.get("format", "table")
-        
+
         # Handle legacy single aggregation_by string
         if isinstance(aggregation_by, str):
             aggregation_by = [aggregation_by]
-        
+
         if not metric_name:
             return CallToolResult(
                 content=[TextContent(type="text", text="Error: metric_name parameter is required")],
                 isError=True,
             )
-        
+
         # Fetch metrics data
         metric_result = await fetch_metrics(
             metric_name=metric_name,
@@ -96,6 +102,7 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
             aggregation=aggregation,
             filters=filters,
             aggregation_by=aggregation_by,
+            as_count=as_count,
         )
         
         # Wrap single result in dict for consistent formatting

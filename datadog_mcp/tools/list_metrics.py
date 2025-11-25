@@ -23,7 +23,7 @@ def get_tool_definition() -> Tool:
             "properties": {
                 "filter": {
                     "type": "string",
-                    "description": "Optional filter to search for metrics by tags (e.g., 'aws:*', 'env:*', 'service:web'). Leave empty to list all metrics.",
+                    "description": "Optional filter. Supports two modes: 1) Tag filter (e.g., 'aws:*', 'env:*', 'service:web') sent to API, or 2) Metric name search (e.g., 'kubernetes', 'system.cpu') filtered client-side. Leave empty to list all metrics.",
                     "default": "",
                 },
                 "limit": {
@@ -60,21 +60,38 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         limit = args.get("limit", 50)
         cursor = args.get("cursor", "")
         format_type = args.get("format", "list")
-        
+
+        # Determine if filter is a tag filter (contains ':') or metric name search
+        is_tag_filter = ':' in filter_query if filter_query else False
+        api_filter = filter_query if is_tag_filter else ""
+        name_filter = filter_query.lower() if not is_tag_filter and filter_query else ""
+
+        # If doing client-side name filtering, fetch many more results (up to API max)
+        # since we need to search through them
+        fetch_limit = 1000 if name_filter else limit
+
         # Fetch metrics list
         metrics_response = await fetch_metrics_list(
-            filter_query=filter_query,
-            limit=limit,
+            filter_query=api_filter,
+            limit=fetch_limit,
             cursor=cursor if cursor else None
         )
-        
+
         if "data" not in metrics_response:
             return CallToolResult(
                 content=[TextContent(type="text", text="No metrics data returned from API")],
                 isError=True,
             )
-        
-        metrics = metrics_response["data"]
+
+        all_metrics = metrics_response["data"]
+
+        # Apply client-side name filtering if needed
+        if name_filter:
+            metrics = [m for m in all_metrics if name_filter in m.get("id", "").lower()]
+            # Limit results after filtering
+            metrics = metrics[:limit]
+        else:
+            metrics = all_metrics[:limit]
         
         # Get pagination info
         meta = metrics_response.get("meta", {})
