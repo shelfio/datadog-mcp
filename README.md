@@ -335,10 +335,38 @@ Ask Claude to help you with:
 
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DD_API_KEY` | Datadog API Key | Yes |
-| `DD_APP_KEY` | Datadog Application Key | Yes |
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `DD_API_KEY` | Datadog API Key | Yes | - |
+| `DD_APP_KEY` | Datadog Application Key | Yes | - |
+| `DD_SITE` | Datadog site/region | No | `datadoghq.com` |
+
+### Supported Datadog Sites
+
+| Site | `DD_SITE` Value | Region |
+|------|-----------------|--------|
+| US1 (default) | `datadoghq.com` | United States |
+| US3 | `us3.datadoghq.com` | United States |
+| US5 | `us5.datadoghq.com` | United States |
+| EU1 | `datadoghq.eu` | Europe |
+| AP1 | `ap1.datadoghq.com` | Asia Pacific |
+
+**Example for EU region:**
+```json
+{
+  "mcpServers": {
+    "datadog": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/your-username/datadog-mcp.git", "datadog-mcp"],
+      "env": {
+        "DD_API_KEY": "your-datadog-api-key",
+        "DD_APP_KEY": "your-datadog-application-key",
+        "DD_SITE": "datadoghq.eu"
+      }
+    }
+  }
+}
+```
 
 ### Obtaining Datadog Credentials
 

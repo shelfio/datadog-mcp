@@ -24,9 +24,23 @@ from datadog_api_client.v2.model.logs_aggregate_sort import LogsAggregateSort
 logger = logging.getLogger(__name__)
 
 # Datadog API configuration
-DATADOG_API_URL = "https://api.datadoghq.com"
 DATADOG_API_KEY = os.getenv("DD_API_KEY")
 DATADOG_APP_KEY = os.getenv("DD_APP_KEY")
+DATADOG_SITE = os.getenv("DD_SITE", "datadoghq.com")
+
+# Construct API URL based on site
+# EU: datadoghq.eu -> api.datadoghq.eu
+# US1: datadoghq.com -> api.datadoghq.com
+# US3: us3.datadoghq.com -> api.us3.datadoghq.com
+# US5: us5.datadoghq.com -> api.us5.datadoghq.com
+# AP1: ap1.datadoghq.com -> api.ap1.datadoghq.com
+if DATADOG_SITE.startswith("us3.") or DATADOG_SITE.startswith("us5.") or DATADOG_SITE.startswith("ap1."):
+    DATADOG_API_URL = f"https://api.{DATADOG_SITE}"
+else:
+    # For datadoghq.com and datadoghq.eu
+    DATADOG_API_URL = f"https://api.{DATADOG_SITE}"
+
+logger.info(f"Datadog API URL configured: {DATADOG_API_URL}")
 
 # Datadog API configuration loaded from environment
 
@@ -40,6 +54,9 @@ def get_datadog_configuration() -> Configuration:
     configuration = Configuration()
     configuration.api_key["apiKeyAuth"] = DATADOG_API_KEY
     configuration.api_key["appKeyAuth"] = DATADOG_APP_KEY
+    # Set the server/site for the SDK
+    # The SDK expects the site without 'api.' prefix
+    configuration.server_variables["site"] = DATADOG_SITE
     return configuration
 
 
