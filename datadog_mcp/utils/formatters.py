@@ -195,13 +195,15 @@ def format_logs_as_table(logs: List[Dict[str, str]], max_message_length: int = 8
     if not logs:
         return "No logs found."
     
-    # Truncate long messages for table display
+    # Sanitize and truncate messages for table display
     display_logs = []
     for log in logs:
         display_log = log.copy()
-        message = display_log.get("message", "")
+        # Remove newlines that would break table formatting
+        message = display_log.get("message", "").replace("\n", " ").replace("\r", "")
         if len(message) > max_message_length:
-            display_log["message"] = message[:max_message_length - 3] + "..."
+            message = message[:max_message_length - 3] + "..."
+        display_log["message"] = message
         display_logs.append(display_log)
     
     # Calculate column widths
