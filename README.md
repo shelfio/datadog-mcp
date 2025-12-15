@@ -339,6 +339,37 @@ Ask Claude to help you with:
 |----------|-------------|----------|
 | `DD_API_KEY` | Datadog API Key | Yes |
 | `DD_APP_KEY` | Datadog Application Key | Yes |
+| `DD_SITE` | Datadog site/region (default: `datadoghq.com`) | No |
+
+### Datadog Site Configuration
+
+By default, the server connects to the US1 Datadog site (`datadoghq.com`). If your organization uses a different Datadog site, set the `DD_SITE` environment variable:
+
+| Site | `DD_SITE` Value |
+|------|-----------------|
+| US1 (default) | `datadoghq.com` |
+| US3 | `us3.datadoghq.com` |
+| US5 | `us5.datadoghq.com` |
+| EU | `datadoghq.eu` |
+| AP1 | `ap1.datadoghq.com` |
+| US1-FED | `ddog-gov.com` |
+
+**Example for US5:**
+```json
+{
+  "mcpServers": {
+    "datadog": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/shelfio/datadog-mcp.git", "datadog-mcp"],
+      "env": {
+        "DD_API_KEY": "your-datadog-api-key",
+        "DD_APP_KEY": "your-datadog-application-key",
+        "DD_SITE": "us5.datadoghq.com"
+      }
+    }
+  }
+}
+```
 
 ### Obtaining Datadog Credentials
 
