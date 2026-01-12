@@ -24,14 +24,17 @@ from datadog_api_client.v2.model.logs_aggregate_sort import LogsAggregateSort
 
 logger = logging.getLogger(__name__)
 
+# Default Datadog site (US1) - used as fallback when DD_SITE is not set
+DEFAULT_DD_SITE = "datadoghq.com"
+
 # Supported Datadog sites - see https://docs.datadoghq.com/getting_started/site/
 VALID_DD_SITES = {
-    "datadoghq.com",      # US1 (default)
-    "us3.datadoghq.com",  # US3
-    "us5.datadoghq.com",  # US5
-    "datadoghq.eu",       # EU1
-    "ap1.datadoghq.com",  # AP1 (Japan)
-    "ddog-gov.com",       # US1-FED (GovCloud)
+    DEFAULT_DD_SITE,          # US1 (default)
+    "us3.datadoghq.com",      # US3
+    "us5.datadoghq.com",      # US5
+    "datadoghq.eu",           # EU1
+    "ap1.datadoghq.com",      # AP1 (Japan)
+    "ddog-gov.com",           # US1-FED (GovCloud)
 }
 
 
@@ -44,7 +47,7 @@ def _get_validated_dd_site() -> str:
     Raises:
         ValueError: If DD_SITE is set to an invalid value.
     """
-    dd_site = os.getenv("DD_SITE", "datadoghq.com")
+    dd_site = os.getenv("DD_SITE", DEFAULT_DD_SITE)
     
     # Basic validation - reject obviously malformed values
     if not dd_site or not re.match(r"^[a-z0-9.-]+$", dd_site):
