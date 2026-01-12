@@ -122,6 +122,23 @@ Add to Claude Desktop configuration:
 }
 ```
 
+**For non-US regions (EU, AP1, etc.)**:
+```json
+{
+  "mcpServers": {
+    "datadog": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/shelfio/datadog-mcp.git", "datadog-mcp"],
+      "env": {
+        "DD_API_KEY": "your-datadog-api-key",
+        "DD_APP_KEY": "your-datadog-application-key",
+        "DD_SITE": "datadoghq.eu"
+      }
+    }
+  }
+}
+```
+
 ### Using Local Development Setup
 
 For development with local cloned repository:
@@ -335,10 +352,34 @@ Ask Claude to help you with:
 
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DD_API_KEY` | Datadog API Key | Yes |
-| `DD_APP_KEY` | Datadog Application Key | Yes |
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `DD_API_KEY` | Datadog API Key | Yes | - |
+| `DD_APP_KEY` | Datadog Application Key | Yes | - |
+| `DD_SITE` | Datadog site/region (see table below) | No | `datadoghq.com` |
+
+### Multi-Region Support
+
+Datadog operates in multiple regions. Set the `DD_SITE` environment variable to connect to your Datadog region:
+
+| Region | DD_SITE Value | Description |
+|--------|---------------|-------------|
+| US1 | `datadoghq.com` | US (default) |
+| US3 | `us3.datadoghq.com` | US3 |
+| US5 | `us5.datadoghq.com` | US5 |
+| EU1 | `datadoghq.eu` | Europe |
+| AP1 | `ap1.datadoghq.com` | Asia Pacific (Japan) |
+| US1-FED | `ddog-gov.com` | US Government |
+
+**Example for EU region:**
+```bash
+export DD_SITE="datadoghq.eu"
+export DD_API_KEY="your-api-key"
+export DD_APP_KEY="your-app-key"
+uvx --from git+https://github.com/shelfio/datadog-mcp.git datadog-mcp
+```
+
+See [Datadog's Getting Started with Sites](https://docs.datadoghq.com/getting_started/site/) for more information.
 
 ### Obtaining Datadog Credentials
 
