@@ -4,6 +4,7 @@ Datadog API client utilities
 
 import logging
 import os
+import re
 from typing import Any, Dict, List, Optional
 
 import httpx
@@ -23,8 +24,49 @@ from datadog_api_client.v2.model.logs_aggregate_sort import LogsAggregateSort
 
 logger = logging.getLogger(__name__)
 
+# Supported Datadog sites - see https://docs.datadoghq.com/getting_started/site/
+VALID_DD_SITES = {
+    "datadoghq.com",      # US1 (default)
+    "us3.datadoghq.com",  # US3
+    "us5.datadoghq.com",  # US5
+    "datadoghq.eu",       # EU1
+    "ap1.datadoghq.com",  # AP1 (Japan)
+    "ddog-gov.com",       # US1-FED (GovCloud)
+}
+
+
+def _get_validated_dd_site() -> str:
+    """Get and validate DD_SITE environment variable.
+    
+    Returns:
+        Validated Datadog site domain.
+        
+    Raises:
+        ValueError: If DD_SITE is set to an invalid value.
+    """
+    dd_site = os.getenv("DD_SITE", "datadoghq.com")
+    
+    # Basic validation - reject obviously malformed values
+    if not dd_site or not re.match(r"^[a-z0-9.-]+$", dd_site):
+        raise ValueError(
+            f"Invalid DD_SITE value: '{dd_site}'. "
+            f"Must be one of: {', '.join(sorted(VALID_DD_SITES))}"
+        )
+    
+    # Warn if using unknown site (don't block - Datadog may add new regions)
+    if dd_site not in VALID_DD_SITES:
+        logger.warning(
+            f"DD_SITE '{dd_site}' is not a known Datadog site. "
+            f"Known sites: {', '.join(sorted(VALID_DD_SITES))}. "
+            "Proceeding anyway in case this is a new region."
+        )
+    
+    return dd_site
+
+
 # Datadog API configuration
-DATADOG_API_URL = "https://api.datadoghq.com"
+DD_SITE = _get_validated_dd_site()
+DATADOG_API_URL = f"https://api.{DD_SITE}"
 DATADOG_API_KEY = os.getenv("DD_API_KEY")
 DATADOG_APP_KEY = os.getenv("DD_APP_KEY")
 
@@ -40,6 +82,8 @@ def get_datadog_configuration() -> Configuration:
     configuration = Configuration()
     configuration.api_key["apiKeyAuth"] = DATADOG_API_KEY
     configuration.api_key["appKeyAuth"] = DATADOG_APP_KEY
+    # Configure SDK to use the correct regional server
+    configuration.server_variables["site"] = DD_SITE
     return configuration
 
 
