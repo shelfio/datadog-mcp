@@ -122,7 +122,7 @@ Add to Claude Desktop configuration:
 }
 ```
 
-**For non-US regions (EU, AP1, etc.)**:
+**For EU region** (see [Multi-Region Support](#multi-region-support) for other regions):
 ```json
 {
   "mcpServers": {
