@@ -17,16 +17,20 @@ class TestBasicIntegration:
         expected_tools = [
             "list_ci_pipelines",
             "get_pipeline_fingerprints",
-            "get_logs", 
+            "get_logs",
+            "get_logs_field_values",
             "get_teams",
             "get_metrics",
             "get_metric_fields",
             "get_metric_field_values",
             "list_metrics",
             "list_service_definitions",
-            "get_service_definition"
+            "get_service_definition",
+            "list_monitors",
+            "list_slos",
+            "dashboard_update_title",
         ]
-        
+
         for tool_name in expected_tools:
             assert tool_name in TOOLS, f"Tool {tool_name} not registered"
             assert "definition" in TOOLS[tool_name]
@@ -141,8 +145,16 @@ class TestToolParameters:
     def test_common_parameters_exist(self):
         """Test that common parameters exist where expected"""
         # Tools that should have format parameter
-        format_tools = ["get_logs", "get_teams", "get_metrics", "list_metrics"]
-        
+        format_tools = [
+            "get_logs",
+            "get_logs_field_values",
+            "get_teams",
+            "get_metrics",
+            "list_metrics",
+            "list_monitors",
+            "list_slos",
+        ]
+
         for tool_name in format_tools:
             if tool_name in TOOLS:
                 tool_def = TOOLS[tool_name]["definition"]()
@@ -188,15 +200,16 @@ class TestModuleStructure:
         # Test core modules
         from datadog_mcp import server
         from datadog_mcp.utils import datadog_client, formatters
-        
+
         # Test tool modules
         from datadog_mcp.tools import (
-            get_logs, get_teams, get_metrics,
+            get_logs, get_logs_field_values, get_teams, get_metrics,
             list_metrics, get_metric_fields, get_metric_field_values,
             list_pipelines, get_fingerprints,
-            list_service_definitions, get_service_definition
+            list_service_definitions, get_service_definition,
+            list_monitors, list_slos, dashboard_update_title
         )
-        
+
         # All imports should succeed
         assert server is not None
         assert datadog_client is not None
@@ -205,20 +218,162 @@ class TestModuleStructure:
     def test_tool_modules_have_required_functions(self):
         """Test that tool modules have required functions"""
         tool_modules = [
-            "get_logs", "get_teams", "get_metrics", "list_metrics",
+            "get_logs", "get_logs_field_values", "get_teams",
+            "get_metrics", "list_metrics",
             "get_metric_fields", "get_metric_field_values",
-            "list_pipelines", "get_fingerprints", 
-            "list_service_definitions", "get_service_definition"
+            "list_pipelines", "get_fingerprints",
+            "list_service_definitions", "get_service_definition",
+            "list_monitors", "list_slos", "dashboard_update_title"
         ]
-        
+
         for module_name in tool_modules:
             module = __import__(f"datadog_mcp.tools.{module_name}", fromlist=[module_name])
-            
+
             # Each tool module should have these functions
             assert hasattr(module, "get_tool_definition"), f"{module_name} missing get_tool_definition"
             assert hasattr(module, "handle_call"), f"{module_name} missing handle_call"
             assert callable(getattr(module, "get_tool_definition"))
             assert callable(getattr(module, "handle_call"))
+
+
+class TestNewToolsIntegration:
+    """Integration tests for newly added tools"""
+
+    @pytest.mark.asyncio
+    async def test_list_monitors_integration(self):
+        """Test list_monitors tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.list_monitors.fetch_monitors', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = [
+                {"id": 1, "name": "Test Monitor", "type": "metric alert", "overall_state": "OK", "tags": []}
+            ]
+
+            result = await handle_call_tool("list_monitors", {"format": "table"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "Test Monitor" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_list_slos_integration(self):
+        """Test list_slos tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.list_slos.fetch_slos', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = [
+                {"id": "slo-1", "name": "Test SLO", "type": "metric", "thresholds": [{"target": 0.99}], "tags": []}
+            ]
+
+            result = await handle_call_tool("list_slos", {"format": "table"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "Test SLO" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_get_logs_field_values_integration(self):
+        """Test get_logs_field_values tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.get_logs_field_values.fetch_logs_filter_values', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = {
+                "field": "service",
+                "time_range": "1h",
+                "values": [{"value": "web-api", "count": 100}],
+                "total_values": 1,
+            }
+
+            result = await handle_call_tool("get_logs_field_values", {"field_name": "service", "format": "table"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "service" in result[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_dashboard_update_title_integration(self):
+        """Test dashboard_update_title tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.dashboard_update_title.update_dashboard_title', new_callable=AsyncMock) as mock_update:
+            mock_update.return_value = {
+                "id": "abc-123",
+                "title": "New Title",
+                "url": "/dashboard/abc-123",
+                "_old_title": "Old Title",
+            }
+
+            result = await handle_call_tool("dashboard_update_title", {
+                "dashboard_id": "abc-123",
+                "new_title": "New Title"
+            })
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "New Title" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_dashboard_update_title_missing_params(self):
+        """Test dashboard_update_title with missing required params"""
+        result = await handle_call_tool("dashboard_update_title", {})
+
+        assert isinstance(result, list)
+        assert len(result) >= 1
+        assert isinstance(result[0], TextContent)
+        # Should return error about missing params
+        assert "error" in result[0].text.lower() or "required" in result[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_get_logs_field_values_missing_field_name(self):
+        """Test get_logs_field_values with missing required field_name"""
+        result = await handle_call_tool("get_logs_field_values", {})
+
+        assert isinstance(result, list)
+        assert len(result) >= 1
+        assert isinstance(result[0], TextContent)
+        # Should return error about missing field_name
+        assert "error" in result[0].text.lower() or "field_name" in result[0].text.lower()
+
+
+class TestNewToolsParameters:
+    """Test parameter validation for new tools"""
+
+    def test_dashboard_update_title_has_required_params(self):
+        """Test dashboard_update_title has required parameters"""
+        tool_def = TOOLS["dashboard_update_title"]["definition"]()
+        schema = tool_def.inputSchema
+
+        assert "required" in schema
+        assert "dashboard_id" in schema["required"]
+        assert "new_title" in schema["required"]
+
+    def test_get_logs_field_values_has_required_params(self):
+        """Test get_logs_field_values has required parameters"""
+        tool_def = TOOLS["get_logs_field_values"]["definition"]()
+        schema = tool_def.inputSchema
+
+        assert "required" in schema
+        assert "field_name" in schema["required"]
+
+    def test_list_monitors_has_pagination_params(self):
+        """Test list_monitors has pagination parameters"""
+        tool_def = TOOLS["list_monitors"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "page_size" in properties
+        assert "page" in properties
+
+    def test_list_slos_has_pagination_params(self):
+        """Test list_slos has pagination parameters"""
+        tool_def = TOOLS["list_slos"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "limit" in properties
+        assert "offset" in properties
 
 
 if __name__ == "__main__":

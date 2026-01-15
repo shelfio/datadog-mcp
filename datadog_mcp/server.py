@@ -14,7 +14,7 @@ from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, ServerCapabilities, TextContent
 
-from .tools import get_fingerprints, list_pipelines, get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values
+from .tools import get_fingerprints, list_pipelines, get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values, dashboard_update_title
 
 # Configure logging
 logging.basicConfig(
@@ -80,6 +80,10 @@ TOOLS = {
     "list_slos": {
         "definition": list_slos.get_tool_definition,
         "handler": list_slos.handle_call,
+    },
+    "dashboard_update_title": {
+        "definition": dashboard_update_title.get_tool_definition,
+        "handler": dashboard_update_title.handle_call,
     },
 }
 
