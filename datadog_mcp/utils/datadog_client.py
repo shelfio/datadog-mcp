@@ -788,3 +788,72 @@ async def fetch_slo_history(
         except Exception as e:
             logger.error(f"Error fetching SLO history: {e}")
             raise
+
+
+async def fetch_dashboard(dashboard_id: str) -> Dict[str, Any]:
+    """Fetch a dashboard from Datadog API."""
+    url = f"{DATADOG_API_URL}/api/v1/dashboard/{dashboard_id}"
+
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching dashboard '{dashboard_id}': {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching dashboard '{dashboard_id}': {e}")
+            raise
+
+
+async def update_dashboard_title(
+    dashboard_id: str,
+    new_title: str,
+) -> Dict[str, Any]:
+    """Update a dashboard's title in Datadog.
+
+    Args:
+        dashboard_id: The ID of the dashboard to update (e.g., 'giw-w7a-maj')
+        new_title: The new title for the dashboard
+
+    Returns:
+        Dict containing the updated dashboard data
+    """
+    # First, fetch the current dashboard
+    dashboard = await fetch_dashboard(dashboard_id)
+
+    # Update the title
+    old_title = dashboard.get("title", "")
+    dashboard["title"] = new_title
+
+    # PUT the updated dashboard back
+    url = f"{DATADOG_API_URL}/api/v1/dashboard/{dashboard_id}"
+
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.put(url, headers=headers, json=dashboard)
+            response.raise_for_status()
+            result = response.json()
+            result["_old_title"] = old_title
+            return result
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error updating dashboard title: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error updating dashboard title: {e}")
+            raise
