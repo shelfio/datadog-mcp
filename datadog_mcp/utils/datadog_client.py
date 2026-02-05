@@ -933,3 +933,54 @@ async def update_monitor(monitor_id: int, **updates) -> Dict[str, Any]:
         except Exception as e:
             logger.error(f"Error updating monitor '{monitor_id}': {e}")
             raise
+
+
+async def fetch_notification_rules(
+    text: str = "",
+    tags: str = "",
+    recipients: str = "",
+    page_size: int = 50,
+    page: int = 0,
+) -> List[Dict[str, Any]]:
+    """Fetch monitor notification rules from Datadog API.
+
+    Args:
+        text: Free-text search on name, tags, recipients
+        tags: Filter rules with any of these tags (comma-separated)
+        recipients: Filter rules with any of these recipients (comma-separated)
+        page_size: Number of results per page (default: 50)
+        page: Page offset (default: 0)
+
+    Returns:
+        List of notification rule objects from response.data
+    """
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    url = f"{DATADOG_API_URL}/api/v2/monitor/notification_rules"
+
+    params = {}
+    if text:
+        params["filter[text]"] = text
+    if tags:
+        params["filter[tags]"] = tags
+    if recipients:
+        params["filter[recipients]"] = recipients
+    params["page[size]"] = page_size
+    params["page[offset]"] = page
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers, params=params)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", [])
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching notification rules: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching notification rules: {e}")
+            raise
