@@ -5,7 +5,8 @@ Tests for notification rules functionality
 import pytest
 import json
 from unittest.mock import patch, AsyncMock, MagicMock
-from datadog_mcp.tools import list_notification_rules
+import httpx
+from datadog_mcp.tools import list_notification_rules, get_notification_rule
 from datadog_mcp.utils import datadog_client
 from mcp.types import CallToolResult, TextContent
 
@@ -329,6 +330,255 @@ class TestNotificationRulesToolHandlers:
             mock_fetch.side_effect = Exception("API error")
 
             result = await list_notification_rules.handle_call(mock_request)
+
+            assert isinstance(result, CallToolResult)
+            assert result.isError is True
+            assert "error" in result.content[0].text.lower()
+
+
+class TestGetNotificationRuleToolDefinition:
+    """Test get_notification_rule tool definition"""
+
+    def test_get_notification_rule_tool_definition(self):
+        """Test get_notification_rule tool definition has correct schema"""
+        tool_def = get_notification_rule.get_tool_definition()
+
+        assert tool_def.name == "get_notification_rule"
+        assert "notification" in tool_def.description.lower()
+        assert hasattr(tool_def, "inputSchema")
+
+        schema = tool_def.inputSchema
+        assert "properties" in schema
+
+        properties = schema["properties"]
+        assert "rule_id" in properties
+        assert "format" in properties
+
+        assert "rule_id" in schema.get("required", [])
+
+    def test_get_notification_rule_format_options(self):
+        """Test get_notification_rule format options"""
+        tool_def = get_notification_rule.get_tool_definition()
+        schema = tool_def.inputSchema
+
+        format_prop = schema["properties"]["format"]
+        assert "enum" in format_prop
+        assert "table" in format_prop["enum"]
+        assert "json" in format_prop["enum"]
+        assert "summary" in format_prop["enum"]
+
+
+class TestGetNotificationRuleRetrieval:
+    """Test get_notification_rule data retrieval"""
+
+    @pytest.mark.asyncio
+    async def test_fetch_notification_rule_success(self):
+        """Test fetching a single notification rule by ID"""
+        mock_response = {
+            "data": {
+                "id": "rule-123",
+                "type": "monitor-notification-rule",
+                "attributes": {
+                    "name": "Production Alerts",
+                    "filter": {
+                        "scope": "env:prod",
+                        "tags": ["team:platform"]
+                    },
+                    "recipients": ["@slack-alerts"],
+                    "conditional_recipients": None
+                }
+            }
+        }
+
+        with patch("datadog_mcp.utils.datadog_client.httpx.AsyncClient") as mock_client:
+            mock_resp = MagicMock()
+            mock_resp.json.return_value = mock_response
+            mock_resp.raise_for_status = MagicMock()
+
+            mock_client.return_value.__aenter__.return_value.get = AsyncMock(
+                return_value=mock_resp
+            )
+
+            result = await datadog_client.fetch_notification_rule("rule-123")
+
+            assert isinstance(result, dict)
+            assert result["id"] == "rule-123"
+            assert result["attributes"]["name"] == "Production Alerts"
+
+    @pytest.mark.asyncio
+    async def test_fetch_notification_rule_not_found(self):
+        """Test fetching a notification rule that doesn't exist raises exception"""
+        with patch("datadog_mcp.utils.datadog_client.httpx.AsyncClient") as mock_client:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 404
+            mock_resp.raise_for_status.side_effect = httpx.HTTPStatusError(
+                "Not Found",
+                request=MagicMock(),
+                response=mock_resp
+            )
+
+            mock_client.return_value.__aenter__.return_value.get = AsyncMock(
+                return_value=mock_resp
+            )
+
+            with pytest.raises(httpx.HTTPStatusError):
+                await datadog_client.fetch_notification_rule("nonexistent-rule")
+
+
+class TestGetNotificationRuleToolHandlers:
+    """Test get_notification_rule tool handlers"""
+
+    @pytest.mark.asyncio
+    async def test_handle_get_notification_rule_table_format(self):
+        """Test table format shows ID, name, scope, tags, recipients, conditional recipients"""
+        mock_request = MagicMock()
+        mock_request.arguments = {"rule_id": "rule-123", "format": "table"}
+
+        mock_rule = {
+            "id": "rule-123",
+            "type": "monitor-notification-rule",
+            "attributes": {
+                "name": "Production Alerts",
+                "filter": {
+                    "scope": "env:prod",
+                    "tags": ["team:platform", "priority:high"]
+                },
+                "recipients": ["@slack-alerts", "@pagerduty"],
+                "conditional_recipients": {
+                    "conditions": [
+                        {"scope": "severity:critical", "recipients": ["@pagerduty-oncall"]}
+                    ],
+                    "fallback_recipients": ["@slack-fallback"]
+                }
+            }
+        }
+
+        with patch(
+            "datadog_mcp.tools.get_notification_rule.fetch_notification_rule",
+            new_callable=AsyncMock,
+        ) as mock_fetch:
+            mock_fetch.return_value = mock_rule
+
+            result = await get_notification_rule.handle_call(mock_request)
+
+            assert isinstance(result, CallToolResult)
+            assert result.isError is False
+
+            content_text = result.content[0].text
+            assert "rule-123" in content_text
+            assert "Production Alerts" in content_text
+            assert "env:prod" in content_text
+            assert "team:platform" in content_text
+            assert "@slack-alerts" in content_text
+            assert "@pagerduty-oncall" in content_text
+
+    @pytest.mark.asyncio
+    async def test_handle_get_notification_rule_json_format(self):
+        """Test JSON format returns raw rule data"""
+        mock_request = MagicMock()
+        mock_request.arguments = {"rule_id": "rule-123", "format": "json"}
+
+        mock_rule = {
+            "id": "rule-123",
+            "type": "monitor-notification-rule",
+            "attributes": {
+                "name": "Test Rule",
+                "filter": {"scope": "env:test", "tags": []},
+                "recipients": ["@slack-test"],
+            }
+        }
+
+        with patch(
+            "datadog_mcp.tools.get_notification_rule.fetch_notification_rule",
+            new_callable=AsyncMock,
+        ) as mock_fetch:
+            mock_fetch.return_value = mock_rule
+
+            result = await get_notification_rule.handle_call(mock_request)
+
+            assert isinstance(result, CallToolResult)
+            assert result.isError is False
+
+            content_text = result.content[0].text
+            parsed = json.loads(content_text)
+            assert parsed["id"] == "rule-123"
+            assert parsed["attributes"]["name"] == "Test Rule"
+
+    @pytest.mark.asyncio
+    async def test_handle_get_notification_rule_summary_format(self):
+        """Test summary format returns concise rule info"""
+        mock_request = MagicMock()
+        mock_request.arguments = {"rule_id": "rule-123", "format": "summary"}
+
+        mock_rule = {
+            "id": "rule-123",
+            "type": "monitor-notification-rule",
+            "attributes": {
+                "name": "Production Alerts",
+                "filter": {"scope": "env:prod", "tags": ["team:platform"]},
+                "recipients": ["@slack-alerts", "@pagerduty", "@email"],
+                "conditional_recipients": {
+                    "conditions": [
+                        {"scope": "severity:critical", "recipients": ["@oncall"]}
+                    ],
+                    "fallback_recipients": []
+                }
+            }
+        }
+
+        with patch(
+            "datadog_mcp.tools.get_notification_rule.fetch_notification_rule",
+            new_callable=AsyncMock,
+        ) as mock_fetch:
+            mock_fetch.return_value = mock_rule
+
+            result = await get_notification_rule.handle_call(mock_request)
+
+            assert isinstance(result, CallToolResult)
+            assert result.isError is False
+
+            content_text = result.content[0].text
+            assert "Production Alerts" in content_text
+            assert "3" in content_text or "recipients" in content_text.lower()
+
+    @pytest.mark.asyncio
+    async def test_handle_get_notification_rule_not_found(self):
+        """Test appropriate error message when rule not found"""
+        mock_request = MagicMock()
+        mock_request.arguments = {"rule_id": "nonexistent", "format": "table"}
+
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+
+        with patch(
+            "datadog_mcp.tools.get_notification_rule.fetch_notification_rule",
+            new_callable=AsyncMock,
+        ) as mock_fetch:
+            mock_fetch.side_effect = httpx.HTTPStatusError(
+                "Not Found",
+                request=MagicMock(),
+                response=mock_response
+            )
+
+            result = await get_notification_rule.handle_call(mock_request)
+
+            assert isinstance(result, CallToolResult)
+            assert result.isError is True
+            assert "not found" in result.content[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_handle_get_notification_rule_api_error(self):
+        """Test isError=True with message on API failure"""
+        mock_request = MagicMock()
+        mock_request.arguments = {"rule_id": "rule-123"}
+
+        with patch(
+            "datadog_mcp.tools.get_notification_rule.fetch_notification_rule",
+            new_callable=AsyncMock,
+        ) as mock_fetch:
+            mock_fetch.side_effect = Exception("API connection failed")
+
+            result = await get_notification_rule.handle_call(mock_request)
 
             assert isinstance(result, CallToolResult)
             assert result.isError is True

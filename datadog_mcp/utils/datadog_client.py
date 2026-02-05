@@ -984,3 +984,37 @@ async def fetch_notification_rules(
         except Exception as e:
             logger.error(f"Error fetching notification rules: {e}")
             raise
+
+
+async def fetch_notification_rule(rule_id: str) -> Dict[str, Any]:
+    """Fetch a single monitor notification rule by ID from Datadog API.
+
+    Args:
+        rule_id: The notification rule ID
+
+    Returns:
+        Single notification rule object from response.data
+
+    Raises:
+        httpx.HTTPStatusError: On 404 (rule not found) or other HTTP errors
+    """
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    url = f"{DATADOG_API_URL}/api/v2/monitor/notification_rules/{rule_id}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching notification rule '{rule_id}': {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching notification rule '{rule_id}': {e}")
+            raise
