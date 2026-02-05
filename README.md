@@ -13,10 +13,11 @@ A Model Context Protocol (MCP) server that provides comprehensive Datadog monito
 This MCP server enables Claude to:
 
 - **CI/CD Pipeline Management**: List CI pipelines, extract fingerprints
-- **Service Logs Analysis**: Retrieve and analyze service logs with environment and time filtering  
+- **Service Logs Analysis**: Retrieve and analyze service logs with environment and time filtering
 - **Metrics Monitoring**: Query any Datadog metric with flexible filtering, aggregation, and field discovery
 - **Monitoring & Alerting**: List and manage Datadog monitors and Service Level Objectives (SLOs)
 - **Service Definitions**: List and retrieve detailed service definitions with metadata, ownership, and configuration
+- **Dashboard Management**: Update dashboard titles and properties
 - **Team Management**: List teams, view member details, and manage team information
 
 ## Quick Start
@@ -312,6 +313,13 @@ Lists Service Level Objectives (SLOs) from Datadog with filtering capabilities.
 - `offset` (optional): Number of SLOs to skip (default: 0)
 - `format` (optional): Output format - "table", "json", or "summary"
 
+### `dashboard_update_title`
+Updates the title of an existing Datadog dashboard.
+
+**Arguments:**
+- `dashboard_id` (required): The ID of the dashboard to update (e.g., 'giw-w7a-maj'). Can be found in the dashboard URL.
+- `new_title` (required): The new title for the dashboard.
+
 ### `get_teams`
 Lists teams and their members.
 
@@ -346,6 +354,8 @@ Ask Claude to help you with:
 "List SLOs with less than 99% uptime"
 
 "Extract pipeline fingerprints for Terraform configuration"
+
+"Update the title of dashboard giw-w7a-maj to 'Production Overview'"
 ```
 
 ## Configuration

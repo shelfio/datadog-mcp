@@ -788,3 +788,233 @@ async def fetch_slo_history(
         except Exception as e:
             logger.error(f"Error fetching SLO history: {e}")
             raise
+
+
+async def fetch_dashboard(dashboard_id: str) -> Dict[str, Any]:
+    """Fetch a dashboard from Datadog API."""
+    url = f"{DATADOG_API_URL}/api/v1/dashboard/{dashboard_id}"
+
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching dashboard '{dashboard_id}': {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching dashboard '{dashboard_id}': {e}")
+            raise
+
+
+async def update_dashboard_title(
+    dashboard_id: str,
+    new_title: str,
+) -> Dict[str, Any]:
+    """Update a dashboard's title in Datadog.
+
+    Args:
+        dashboard_id: The ID of the dashboard to update (e.g., 'giw-w7a-maj')
+        new_title: The new title for the dashboard
+
+    Returns:
+        Dict containing the updated dashboard data
+    """
+    # First, fetch the current dashboard
+    dashboard = await fetch_dashboard(dashboard_id)
+
+    # Update the title
+    old_title = dashboard.get("title", "")
+    dashboard["title"] = new_title
+
+    # PUT the updated dashboard back
+    url = f"{DATADOG_API_URL}/api/v1/dashboard/{dashboard_id}"
+
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.put(url, headers=headers, json=dashboard)
+            response.raise_for_status()
+            result = response.json()
+            result["_old_title"] = old_title
+            return result
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error updating dashboard title: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error updating dashboard title: {e}")
+            raise
+
+
+async def fetch_monitor(monitor_id: int) -> Dict[str, Any]:
+    """Fetch a single monitor by ID from Datadog.
+
+    Args:
+        monitor_id: The numeric ID of the monitor to fetch
+
+    Returns:
+        Dict containing the full monitor object
+    """
+    url = f"{DATADOG_API_URL}/api/v1/monitor/{monitor_id}"
+
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching monitor '{monitor_id}': {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching monitor '{monitor_id}': {e}")
+            raise
+
+
+async def update_monitor(monitor_id: int, **updates) -> Dict[str, Any]:
+    """Update a monitor in Datadog.
+
+    Fetches the current monitor state, applies the provided updates,
+    and PUTs the updated monitor back to the API.
+
+    Args:
+        monitor_id: The numeric ID of the monitor to update
+        **updates: Optional keyword arguments to update:
+            - name: New name for the monitor
+            - message: New message/description for the monitor
+            - tags: New list of tags for the monitor
+            - priority: New priority level (1-5) for the monitor
+
+    Returns:
+        Dict containing the updated monitor data
+    """
+    monitor = await fetch_monitor(monitor_id)
+
+    allowed_fields = {"name", "message", "tags", "priority", "query"}
+    for field, value in updates.items():
+        if field in allowed_fields:
+            monitor[field] = value
+
+    url = f"{DATADOG_API_URL}/api/v1/monitor/{monitor_id}"
+
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.put(url, headers=headers, json=monitor)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error updating monitor '{monitor_id}': {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error updating monitor '{monitor_id}': {e}")
+            raise
+
+
+async def fetch_notification_rules(
+    text: str = "",
+    tags: str = "",
+    recipients: str = "",
+    page_size: int = 50,
+    page: int = 0,
+) -> List[Dict[str, Any]]:
+    """Fetch monitor notification rules from Datadog API.
+
+    Args:
+        text: Free-text search on name, tags, recipients
+        tags: Filter rules with any of these tags (comma-separated)
+        recipients: Filter rules with any of these recipients (comma-separated)
+        page_size: Number of results per page (default: 50)
+        page: Page offset (default: 0)
+
+    Returns:
+        List of notification rule objects from response.data
+    """
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    url = f"{DATADOG_API_URL}/api/v2/monitor/notification_rule"
+
+    params = {}
+    if text:
+        params["filter[text]"] = text
+    if tags:
+        params["filter[tags]"] = tags
+    if recipients:
+        params["filter[recipients]"] = recipients
+    params["page[size]"] = page_size
+    params["page[offset]"] = page
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers, params=params)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", [])
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching notification rules: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching notification rules: {e}")
+            raise
+
+
+async def fetch_notification_rule(rule_id: str) -> Dict[str, Any]:
+    """Fetch a single monitor notification rule by ID from Datadog API.
+
+    Args:
+        rule_id: The notification rule ID
+
+    Returns:
+        Single notification rule object from response.data
+
+    Raises:
+        httpx.HTTPStatusError: On 404 (rule not found) or other HTTP errors
+    """
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    url = f"{DATADOG_API_URL}/api/v2/monitor/notification_rule/{rule_id}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching notification rule '{rule_id}': {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching notification rule '{rule_id}': {e}")
+            raise

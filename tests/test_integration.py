@@ -17,16 +17,24 @@ class TestBasicIntegration:
         expected_tools = [
             "list_ci_pipelines",
             "get_pipeline_fingerprints",
-            "get_logs", 
+            "get_logs",
+            "get_logs_field_values",
             "get_teams",
             "get_metrics",
             "get_metric_fields",
             "get_metric_field_values",
             "list_metrics",
             "list_service_definitions",
-            "get_service_definition"
+            "get_service_definition",
+            "list_monitors",
+            "get_monitor",
+            "monitor_edit",
+            "list_slos",
+            "dashboard_update_title",
+            "list_notification_rules",
+            "get_notification_rule",
         ]
-        
+
         for tool_name in expected_tools:
             assert tool_name in TOOLS, f"Tool {tool_name} not registered"
             assert "definition" in TOOLS[tool_name]
@@ -141,8 +149,16 @@ class TestToolParameters:
     def test_common_parameters_exist(self):
         """Test that common parameters exist where expected"""
         # Tools that should have format parameter
-        format_tools = ["get_logs", "get_teams", "get_metrics", "list_metrics"]
-        
+        format_tools = [
+            "get_logs",
+            "get_logs_field_values",
+            "get_teams",
+            "get_metrics",
+            "list_metrics",
+            "list_monitors",
+            "list_slos",
+        ]
+
         for tool_name in format_tools:
             if tool_name in TOOLS:
                 tool_def = TOOLS[tool_name]["definition"]()
@@ -188,15 +204,17 @@ class TestModuleStructure:
         # Test core modules
         from datadog_mcp import server
         from datadog_mcp.utils import datadog_client, formatters
-        
+
         # Test tool modules
         from datadog_mcp.tools import (
-            get_logs, get_teams, get_metrics,
+            get_logs, get_logs_field_values, get_teams, get_metrics,
             list_metrics, get_metric_fields, get_metric_field_values,
             list_pipelines, get_fingerprints,
-            list_service_definitions, get_service_definition
+            list_service_definitions, get_service_definition,
+            list_monitors, get_monitor, monitor_edit, list_slos, dashboard_update_title,
+            list_notification_rules, get_notification_rule
         )
-        
+
         # All imports should succeed
         assert server is not None
         assert datadog_client is not None
@@ -205,20 +223,458 @@ class TestModuleStructure:
     def test_tool_modules_have_required_functions(self):
         """Test that tool modules have required functions"""
         tool_modules = [
-            "get_logs", "get_teams", "get_metrics", "list_metrics",
+            "get_logs", "get_logs_field_values", "get_teams",
+            "get_metrics", "list_metrics",
             "get_metric_fields", "get_metric_field_values",
-            "list_pipelines", "get_fingerprints", 
-            "list_service_definitions", "get_service_definition"
+            "list_pipelines", "get_fingerprints",
+            "list_service_definitions", "get_service_definition",
+            "list_monitors", "get_monitor", "monitor_edit", "list_slos", "dashboard_update_title",
+            "list_notification_rules", "get_notification_rule"
         ]
-        
+
         for module_name in tool_modules:
             module = __import__(f"datadog_mcp.tools.{module_name}", fromlist=[module_name])
-            
+
             # Each tool module should have these functions
             assert hasattr(module, "get_tool_definition"), f"{module_name} missing get_tool_definition"
             assert hasattr(module, "handle_call"), f"{module_name} missing handle_call"
             assert callable(getattr(module, "get_tool_definition"))
             assert callable(getattr(module, "handle_call"))
+
+
+class TestNewToolsIntegration:
+    """Integration tests for newly added tools"""
+
+    @pytest.mark.asyncio
+    async def test_list_monitors_integration(self):
+        """Test list_monitors tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.list_monitors.fetch_monitors', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = [
+                {"id": 1, "name": "Test Monitor", "type": "metric alert", "overall_state": "OK", "tags": []}
+            ]
+
+            result = await handle_call_tool("list_monitors", {"format": "table"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "Test Monitor" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_get_monitor_integration(self):
+        """Test get_monitor tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.get_monitor.fetch_monitor', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = {
+                "id": 12345,
+                "name": "Test Monitor",
+                "type": "metric alert",
+                "overall_state": "OK",
+                "priority": 3,
+                "query": "avg(last_5m):avg:system.cpu.user{*} > 90",
+                "message": "CPU is high",
+                "tags": ["env:prod"]
+            }
+
+            result = await handle_call_tool("get_monitor", {"monitor_id": 12345})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "Test Monitor" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_monitor_edit_integration(self):
+        """Test monitor_edit tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.monitor_edit.update_monitor', new_callable=AsyncMock) as mock_update:
+            mock_update.return_value = {"id": 12345, "name": "Updated Monitor"}
+
+            result = await handle_call_tool("monitor_edit", {
+                "monitor_id": 12345,
+                "name": "Updated Monitor"
+            })
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "12345" in result[0].text
+            assert "updated" in result[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_monitor_edit_query_integration(self):
+        """Test monitor_edit tool with query parameter"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.monitor_edit.update_monitor', new_callable=AsyncMock) as mock_update:
+            mock_update.return_value = {"id": 12345}
+
+            result = await handle_call_tool("monitor_edit", {
+                "monitor_id": 12345,
+                "query": 'logs("@level:ERROR env:prod").index("*").rollup("count").last("30m") > 0'
+            })
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "12345" in result[0].text
+            assert "updated" in result[0].text.lower()
+            mock_update.assert_called_once_with(
+                12345,
+                query='logs("@level:ERROR env:prod").index("*").rollup("count").last("30m") > 0'
+            )
+
+    @pytest.mark.asyncio
+    async def test_monitor_edit_missing_monitor_id(self):
+        """Test monitor_edit with missing required monitor_id"""
+        result = await handle_call_tool("monitor_edit", {"name": "Test"})
+
+        assert isinstance(result, list)
+        assert len(result) >= 1
+        assert isinstance(result[0], TextContent)
+        assert "monitor_id" in result[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_list_slos_integration(self):
+        """Test list_slos tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.list_slos.fetch_slos', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = [
+                {"id": "slo-1", "name": "Test SLO", "type": "metric", "thresholds": [{"target": 0.99}], "tags": []}
+            ]
+
+            result = await handle_call_tool("list_slos", {"format": "table"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "Test SLO" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_get_logs_field_values_integration(self):
+        """Test get_logs_field_values tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.get_logs_field_values.fetch_logs_filter_values', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = {
+                "field": "service",
+                "time_range": "1h",
+                "values": [{"value": "web-api", "count": 100}],
+                "total_values": 1,
+            }
+
+            result = await handle_call_tool("get_logs_field_values", {"field_name": "service", "format": "table"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "service" in result[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_dashboard_update_title_integration(self):
+        """Test dashboard_update_title tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.dashboard_update_title.update_dashboard_title', new_callable=AsyncMock) as mock_update:
+            mock_update.return_value = {
+                "id": "abc-123",
+                "title": "New Title",
+                "url": "/dashboard/abc-123",
+                "_old_title": "Old Title",
+            }
+
+            result = await handle_call_tool("dashboard_update_title", {
+                "dashboard_id": "abc-123",
+                "new_title": "New Title"
+            })
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "New Title" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_dashboard_update_title_missing_params(self):
+        """Test dashboard_update_title with missing required params"""
+        result = await handle_call_tool("dashboard_update_title", {})
+
+        assert isinstance(result, list)
+        assert len(result) >= 1
+        assert isinstance(result[0], TextContent)
+        # Should return error about missing params
+        assert "error" in result[0].text.lower() or "required" in result[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_get_logs_field_values_missing_field_name(self):
+        """Test get_logs_field_values with missing required field_name"""
+        result = await handle_call_tool("get_logs_field_values", {})
+
+        assert isinstance(result, list)
+        assert len(result) >= 1
+        assert isinstance(result[0], TextContent)
+        # Should return error about missing field_name
+        assert "error" in result[0].text.lower() or "field_name" in result[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_list_notification_rules_integration(self):
+        """Test list_notification_rules tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.list_notification_rules.fetch_notification_rules', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = [
+                {
+                    "id": "rule-001",
+                    "type": "monitor-notification-rule",
+                    "attributes": {
+                        "name": "Production Alerts",
+                        "filter": {"scope": "env:prod", "tags": ["team:platform"]},
+                        "recipients": ["@slack-alerts", "@pagerduty-oncall"]
+                    }
+                },
+                {
+                    "id": "rule-002",
+                    "type": "monitor-notification-rule",
+                    "attributes": {
+                        "name": "Critical Alerts",
+                        "filter": {"scope": "priority:critical", "tags": []},
+                        "recipients": ["@pagerduty-critical"]
+                    }
+                }
+            ]
+
+            result = await handle_call_tool("list_notification_rules", {"format": "table"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "Production Alerts" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_list_notification_rules_json_format(self):
+        """Test list_notification_rules with JSON format"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.list_notification_rules.fetch_notification_rules', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = [
+                {
+                    "id": "rule-001",
+                    "type": "monitor-notification-rule",
+                    "attributes": {
+                        "name": "Test Rule",
+                        "filter": {"scope": "env:test", "tags": []},
+                        "recipients": ["@slack-test"]
+                    }
+                }
+            ]
+
+            result = await handle_call_tool("list_notification_rules", {"format": "json"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "rule-001" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_list_notification_rules_empty(self):
+        """Test list_notification_rules with no results"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.list_notification_rules.fetch_notification_rules', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = []
+
+            result = await handle_call_tool("list_notification_rules", {})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "no notification rules found" in result[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_get_notification_rule_integration(self):
+        """Test get_notification_rule tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.get_notification_rule.fetch_notification_rule', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = {
+                "id": "rule-001",
+                "type": "monitor-notification-rule",
+                "attributes": {
+                    "name": "Production Alerts",
+                    "filter": {"scope": "env:prod", "tags": ["team:platform"]},
+                    "recipients": ["@slack-alerts", "@pagerduty-oncall"],
+                    "conditional_recipients": {
+                        "conditions": [
+                            {"scope": "priority:critical", "recipients": ["@pagerduty-critical"]}
+                        ],
+                        "fallback_recipients": ["@slack-fallback"]
+                    }
+                }
+            }
+
+            result = await handle_call_tool("get_notification_rule", {"rule_id": "rule-001"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "Production Alerts" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_get_notification_rule_not_found(self):
+        """Test get_notification_rule with non-existent rule"""
+        from unittest.mock import AsyncMock
+        import httpx
+
+        with patch('datadog_mcp.tools.get_notification_rule.fetch_notification_rule', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.side_effect = httpx.HTTPStatusError(
+                "Not Found",
+                request=MagicMock(),
+                response=MagicMock(status_code=404)
+            )
+
+            result = await handle_call_tool("get_notification_rule", {"rule_id": "nonexistent"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "not found" in result[0].text.lower() or "error" in result[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_get_notification_rule_missing_rule_id(self):
+        """Test get_notification_rule with missing required rule_id"""
+        result = await handle_call_tool("get_notification_rule", {})
+
+        assert isinstance(result, list)
+        assert len(result) >= 1
+        assert isinstance(result[0], TextContent)
+        assert "rule_id" in result[0].text.lower() or "error" in result[0].text.lower()
+
+
+class TestNewToolsParameters:
+    """Test parameter validation for new tools"""
+
+    def test_dashboard_update_title_has_required_params(self):
+        """Test dashboard_update_title has required parameters"""
+        tool_def = TOOLS["dashboard_update_title"]["definition"]()
+        schema = tool_def.inputSchema
+
+        assert "required" in schema
+        assert "dashboard_id" in schema["required"]
+        assert "new_title" in schema["required"]
+
+    def test_get_logs_field_values_has_required_params(self):
+        """Test get_logs_field_values has required parameters"""
+        tool_def = TOOLS["get_logs_field_values"]["definition"]()
+        schema = tool_def.inputSchema
+
+        assert "required" in schema
+        assert "field_name" in schema["required"]
+
+    def test_list_monitors_has_pagination_params(self):
+        """Test list_monitors has pagination parameters"""
+        tool_def = TOOLS["list_monitors"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "page_size" in properties
+        assert "page" in properties
+
+    def test_list_slos_has_pagination_params(self):
+        """Test list_slos has pagination parameters"""
+        tool_def = TOOLS["list_slos"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "limit" in properties
+        assert "offset" in properties
+
+    def test_get_monitor_has_required_params(self):
+        """Test get_monitor has required parameters"""
+        tool_def = TOOLS["get_monitor"]["definition"]()
+        schema = tool_def.inputSchema
+
+        assert "required" in schema
+        assert "monitor_id" in schema["required"]
+        properties = schema.get("properties", {})
+        assert "monitor_id" in properties
+        assert properties["monitor_id"]["type"] == "integer"
+
+    def test_monitor_edit_has_required_params(self):
+        """Test monitor_edit has required parameters"""
+        tool_def = TOOLS["monitor_edit"]["definition"]()
+        schema = tool_def.inputSchema
+
+        assert "required" in schema
+        assert "monitor_id" in schema["required"]
+
+    def test_monitor_edit_has_query_param(self):
+        """Test monitor_edit has query parameter for updating monitor queries"""
+        tool_def = TOOLS["monitor_edit"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "query" in properties
+        assert properties["query"]["type"] == "string"
+
+    def test_monitor_edit_has_all_update_fields(self):
+        """Test monitor_edit has all expected update fields"""
+        tool_def = TOOLS["monitor_edit"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        expected_fields = ["monitor_id", "name", "message", "tags", "priority", "query"]
+        for field in expected_fields:
+            assert field in properties, f"monitor_edit missing {field} parameter"
+
+
+    def test_list_notification_rules_has_filter_params(self):
+        """Test list_notification_rules has filter parameters"""
+        tool_def = TOOLS["list_notification_rules"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "text" in properties
+        assert "tags" in properties
+        assert "recipients" in properties
+
+    def test_list_notification_rules_has_pagination_params(self):
+        """Test list_notification_rules has pagination parameters"""
+        tool_def = TOOLS["list_notification_rules"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "page_size" in properties
+        assert "page" in properties
+
+    def test_list_notification_rules_has_format_param(self):
+        """Test list_notification_rules has format parameter"""
+        tool_def = TOOLS["list_notification_rules"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "format" in properties
+        assert "enum" in properties["format"]
+        assert "table" in properties["format"]["enum"]
+        assert "json" in properties["format"]["enum"]
+        assert "summary" in properties["format"]["enum"]
+
+    def test_get_notification_rule_has_required_params(self):
+        """Test get_notification_rule has required parameters"""
+        tool_def = TOOLS["get_notification_rule"]["definition"]()
+        schema = tool_def.inputSchema
+
+        assert "required" in schema
+        assert "rule_id" in schema["required"]
+        properties = schema.get("properties", {})
+        assert "rule_id" in properties
+
+    def test_get_notification_rule_has_format_param(self):
+        """Test get_notification_rule has format parameter"""
+        tool_def = TOOLS["get_notification_rule"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "format" in properties
+        assert "enum" in properties["format"]
+        assert "table" in properties["format"]["enum"]
+        assert "json" in properties["format"]["enum"]
+        assert "summary" in properties["format"]["enum"]
 
 
 if __name__ == "__main__":

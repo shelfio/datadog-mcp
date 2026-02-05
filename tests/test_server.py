@@ -29,17 +29,21 @@ class TestServerConfiguration:
         """Test that all expected tools are registered"""
         expected_tools = [
             "list_ci_pipelines",
-            "get_pipeline_fingerprints", 
+            "get_pipeline_fingerprints",
             "get_logs",
+            "get_logs_field_values",
             "get_teams",
             "get_metrics",
             "get_metric_fields",
             "get_metric_field_values",
             "list_metrics",
             "list_service_definitions",
-            "get_service_definition"
+            "get_service_definition",
+            "list_monitors",
+            "list_slos",
+            "dashboard_update_title",
         ]
-        
+
         for tool_name in expected_tools:
             assert tool_name in TOOLS, f"Tool {tool_name} not registered"
 
