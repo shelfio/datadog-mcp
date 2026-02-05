@@ -959,7 +959,7 @@ async def fetch_notification_rules(
         "DD-APPLICATION-KEY": DATADOG_APP_KEY,
     }
 
-    url = f"{DATADOG_API_URL}/api/v2/monitor/notification_rules"
+    url = f"{DATADOG_API_URL}/api/v2/monitor/notification_rule"
 
     params = {}
     if text:
@@ -1003,7 +1003,7 @@ async def fetch_notification_rule(rule_id: str) -> Dict[str, Any]:
         "DD-APPLICATION-KEY": DATADOG_APP_KEY,
     }
 
-    url = f"{DATADOG_API_URL}/api/v2/monitor/notification_rules/{rule_id}"
+    url = f"{DATADOG_API_URL}/api/v2/monitor/notification_rule/{rule_id}"
 
     async with httpx.AsyncClient() as client:
         try:
