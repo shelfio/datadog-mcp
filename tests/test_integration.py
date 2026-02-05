@@ -31,6 +31,8 @@ class TestBasicIntegration:
             "monitor_edit",
             "list_slos",
             "dashboard_update_title",
+            "list_notification_rules",
+            "get_notification_rule",
         ]
 
         for tool_name in expected_tools:
@@ -209,7 +211,8 @@ class TestModuleStructure:
             list_metrics, get_metric_fields, get_metric_field_values,
             list_pipelines, get_fingerprints,
             list_service_definitions, get_service_definition,
-            list_monitors, get_monitor, monitor_edit, list_slos, dashboard_update_title
+            list_monitors, get_monitor, monitor_edit, list_slos, dashboard_update_title,
+            list_notification_rules, get_notification_rule
         )
 
         # All imports should succeed
@@ -225,7 +228,8 @@ class TestModuleStructure:
             "get_metric_fields", "get_metric_field_values",
             "list_pipelines", "get_fingerprints",
             "list_service_definitions", "get_service_definition",
-            "list_monitors", "get_monitor", "monitor_edit", "list_slos", "dashboard_update_title"
+            "list_monitors", "get_monitor", "monitor_edit", "list_slos", "dashboard_update_title",
+            "list_notification_rules", "get_notification_rule"
         ]
 
         for module_name in tool_modules:
@@ -416,6 +420,139 @@ class TestNewToolsIntegration:
         # Should return error about missing field_name
         assert "error" in result[0].text.lower() or "field_name" in result[0].text.lower()
 
+    @pytest.mark.asyncio
+    async def test_list_notification_rules_integration(self):
+        """Test list_notification_rules tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.list_notification_rules.fetch_notification_rules', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = [
+                {
+                    "id": "rule-001",
+                    "type": "monitor-notification-rule",
+                    "attributes": {
+                        "name": "Production Alerts",
+                        "filter": {"scope": "env:prod", "tags": ["team:platform"]},
+                        "recipients": ["@slack-alerts", "@pagerduty-oncall"]
+                    }
+                },
+                {
+                    "id": "rule-002",
+                    "type": "monitor-notification-rule",
+                    "attributes": {
+                        "name": "Critical Alerts",
+                        "filter": {"scope": "priority:critical", "tags": []},
+                        "recipients": ["@pagerduty-critical"]
+                    }
+                }
+            ]
+
+            result = await handle_call_tool("list_notification_rules", {"format": "table"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "Production Alerts" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_list_notification_rules_json_format(self):
+        """Test list_notification_rules with JSON format"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.list_notification_rules.fetch_notification_rules', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = [
+                {
+                    "id": "rule-001",
+                    "type": "monitor-notification-rule",
+                    "attributes": {
+                        "name": "Test Rule",
+                        "filter": {"scope": "env:test", "tags": []},
+                        "recipients": ["@slack-test"]
+                    }
+                }
+            ]
+
+            result = await handle_call_tool("list_notification_rules", {"format": "json"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "rule-001" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_list_notification_rules_empty(self):
+        """Test list_notification_rules with no results"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.list_notification_rules.fetch_notification_rules', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = []
+
+            result = await handle_call_tool("list_notification_rules", {})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "no notification rules found" in result[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_get_notification_rule_integration(self):
+        """Test get_notification_rule tool integration"""
+        from unittest.mock import AsyncMock
+
+        with patch('datadog_mcp.tools.get_notification_rule.fetch_notification_rule', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = {
+                "id": "rule-001",
+                "type": "monitor-notification-rule",
+                "attributes": {
+                    "name": "Production Alerts",
+                    "filter": {"scope": "env:prod", "tags": ["team:platform"]},
+                    "recipients": ["@slack-alerts", "@pagerduty-oncall"],
+                    "conditional_recipients": {
+                        "conditions": [
+                            {"scope": "priority:critical", "recipients": ["@pagerduty-critical"]}
+                        ],
+                        "fallback_recipients": ["@slack-fallback"]
+                    }
+                }
+            }
+
+            result = await handle_call_tool("get_notification_rule", {"rule_id": "rule-001"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "Production Alerts" in result[0].text
+
+    @pytest.mark.asyncio
+    async def test_get_notification_rule_not_found(self):
+        """Test get_notification_rule with non-existent rule"""
+        from unittest.mock import AsyncMock
+        import httpx
+
+        with patch('datadog_mcp.tools.get_notification_rule.fetch_notification_rule', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.side_effect = httpx.HTTPStatusError(
+                "Not Found",
+                request=MagicMock(),
+                response=MagicMock(status_code=404)
+            )
+
+            result = await handle_call_tool("get_notification_rule", {"rule_id": "nonexistent"})
+
+            assert isinstance(result, list)
+            assert len(result) >= 1
+            assert isinstance(result[0], TextContent)
+            assert "not found" in result[0].text.lower() or "error" in result[0].text.lower()
+
+    @pytest.mark.asyncio
+    async def test_get_notification_rule_missing_rule_id(self):
+        """Test get_notification_rule with missing required rule_id"""
+        result = await handle_call_tool("get_notification_rule", {})
+
+        assert isinstance(result, list)
+        assert len(result) >= 1
+        assert isinstance(result[0], TextContent)
+        assert "rule_id" in result[0].text.lower() or "error" in result[0].text.lower()
+
 
 class TestNewToolsParameters:
     """Test parameter validation for new tools"""
@@ -488,6 +625,56 @@ class TestNewToolsParameters:
         expected_fields = ["monitor_id", "name", "message", "tags", "priority", "query"]
         for field in expected_fields:
             assert field in properties, f"monitor_edit missing {field} parameter"
+
+
+    def test_list_notification_rules_has_filter_params(self):
+        """Test list_notification_rules has filter parameters"""
+        tool_def = TOOLS["list_notification_rules"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "text" in properties
+        assert "tags" in properties
+        assert "recipients" in properties
+
+    def test_list_notification_rules_has_pagination_params(self):
+        """Test list_notification_rules has pagination parameters"""
+        tool_def = TOOLS["list_notification_rules"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "page_size" in properties
+        assert "page" in properties
+
+    def test_list_notification_rules_has_format_param(self):
+        """Test list_notification_rules has format parameter"""
+        tool_def = TOOLS["list_notification_rules"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "format" in properties
+        assert "enum" in properties["format"]
+        assert "table" in properties["format"]["enum"]
+        assert "json" in properties["format"]["enum"]
+        assert "summary" in properties["format"]["enum"]
+
+    def test_get_notification_rule_has_required_params(self):
+        """Test get_notification_rule has required parameters"""
+        tool_def = TOOLS["get_notification_rule"]["definition"]()
+        schema = tool_def.inputSchema
+
+        assert "required" in schema
+        assert "rule_id" in schema["required"]
+        properties = schema.get("properties", {})
+        assert "rule_id" in properties
+
+    def test_get_notification_rule_has_format_param(self):
+        """Test get_notification_rule has format parameter"""
+        tool_def = TOOLS["get_notification_rule"]["definition"]()
+        properties = tool_def.inputSchema.get("properties", {})
+
+        assert "format" in properties
+        assert "enum" in properties["format"]
+        assert "table" in properties["format"]["enum"]
+        assert "json" in properties["format"]["enum"]
+        assert "summary" in properties["format"]["enum"]
 
 
 if __name__ == "__main__":
