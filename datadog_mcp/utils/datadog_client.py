@@ -28,10 +28,34 @@ DATADOG_API_URL = "https://api.datadoghq.com"
 DATADOG_API_KEY = os.getenv("DD_API_KEY")
 DATADOG_APP_KEY = os.getenv("DD_APP_KEY")
 
-# Datadog API configuration loaded from environment
+# Cookie-based authentication (preferred for MCP)
+DATADOG_COOKIE_FILE = os.getenv("DD_COOKIE_FILE")
+DATADOG_CSRF_FILE = os.getenv("DD_CSRF_FILE")
 
-if not DATADOG_API_KEY or not DATADOG_APP_KEY:
-    logger.error("DD_API_KEY and DD_APP_KEY environment variables must be set")
+# Load cookies if available
+DATADOG_COOKIE = None
+DATADOG_CSRF_TOKEN = None
+
+if DATADOG_COOKIE_FILE and os.path.exists(DATADOG_COOKIE_FILE):
+    try:
+        with open(DATADOG_COOKIE_FILE, 'r') as f:
+            DATADOG_COOKIE = f.read().strip()
+    except Exception as e:
+        logger.warning(f"Failed to load cookie from {DATADOG_COOKIE_FILE}: {e}")
+
+if DATADOG_CSRF_FILE and os.path.exists(DATADOG_CSRF_FILE):
+    try:
+        with open(DATADOG_CSRF_FILE, 'r') as f:
+            DATADOG_CSRF_TOKEN = f.read().strip()
+    except Exception as e:
+        logger.warning(f"Failed to load CSRF token from {DATADOG_CSRF_FILE}: {e}")
+
+# Datadog API configuration loaded from environment
+# Use cookies if available, fall back to API keys
+USE_COOKIES = bool(DATADOG_COOKIE and DATADOG_CSRF_TOKEN)
+
+if not USE_COOKIES and (not DATADOG_API_KEY or not DATADOG_APP_KEY):
+    logger.error("Either (DD_COOKIE_FILE + DD_CSRF_FILE) or (DD_API_KEY + DD_APP_KEY) must be configured")
     raise ValueError("Datadog API credentials not configured")
 
 
@@ -41,6 +65,32 @@ def get_datadog_configuration() -> Configuration:
     configuration.api_key["apiKeyAuth"] = DATADOG_API_KEY
     configuration.api_key["appKeyAuth"] = DATADOG_APP_KEY
     return configuration
+
+
+def get_auth_headers(include_csrf: bool = False) -> Dict[str, str]:
+    """Get headers for API calls, using cookies if available."""
+    if USE_COOKIES:
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+        }
+        if include_csrf and DATADOG_CSRF_TOKEN:
+            headers["x-csrf-token"] = DATADOG_CSRF_TOKEN
+        return headers
+    else:
+        return {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "DD-API-KEY": DATADOG_API_KEY,
+            "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+        }
+
+
+def get_api_cookies() -> Optional[Dict[str, str]]:
+    """Get cookies for API calls if using cookie auth."""
+    if USE_COOKIES and DATADOG_COOKIE:
+        return {"dogweb": DATADOG_COOKIE}
+    return None
 
 
 async def fetch_ci_pipelines(
@@ -762,6 +812,10 @@ async def create_notebook(
             "type": "notebooks",
             "attributes": {
                 "name": title,
+                "cells": cells or [],
+                "time": {
+                    "live_span": "1h"
+                }
             }
         }
     }
@@ -769,15 +823,13 @@ async def create_notebook(
     if description:
         payload["data"]["attributes"]["description"] = description
 
-    if tags:
-        payload["data"]["attributes"]["tags"] = tags
-
-    if cells:
-        payload["data"]["attributes"]["cells"] = cells
+    # Note: Datadog API has strict tag format requirements (team key only)
+    # Skipping tags for now as they require special formatting
 
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(url, headers=headers, json=payload)
+            cookies = get_api_cookies()
+            response = await client.post(url, headers=headers, json=payload, cookies=cookies)
             response.raise_for_status()
             data = response.json()
             return data.get("data", {})
