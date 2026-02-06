@@ -651,8 +651,8 @@ async def fetch_monitors(
     monitor_tags: str = "",
     page_size: int = 50,
     page: int = 0,
-) -> List[Dict[str, Any]]:
-    """Fetch monitors from Datadog API."""
+) -> Dict[str, Any]:
+    """Fetch monitors from Datadog API with pagination metadata."""
 
     headers = get_auth_headers(include_csrf=False)
     cookies = get_api_cookies()
@@ -678,7 +678,17 @@ async def fetch_monitors(
         try:
             response = await client.get(url, headers=headers, params=params, cookies=cookies)
             response.raise_for_status()
-            return response.json()
+            monitors = response.json()
+
+            # Return structured response with metadata
+            return {
+                "monitors": monitors,
+                "page": page,
+                "page_size": page_size,
+                "returned": len(monitors),
+                "has_more": len(monitors) == page_size,  # If we got full page, assume more exists
+                "next_page": page + 1 if len(monitors) == page_size else None,
+            }
 
         except httpx.HTTPError as e:
             logger.error(f"HTTP error fetching monitors: {e}")

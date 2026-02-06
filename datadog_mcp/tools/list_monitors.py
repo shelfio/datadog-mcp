@@ -75,14 +75,19 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         page = args.get("page", 0)
         
         # Fetch monitors list
-        monitors = await fetch_monitors(
+        result = await fetch_monitors(
             tags=tags,
             name=name,
             monitor_tags=monitor_tags,
             page_size=page_size,
             page=page
         )
-        
+
+        monitors = result.get("monitors", [])
+        returned = result.get("returned", 0)
+        has_more = result.get("has_more", False)
+        next_page = result.get("next_page")
+
         if not monitors:
             return CallToolResult(
                 content=[TextContent(type="text", text="No monitors found")],
@@ -91,11 +96,20 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         
         # Format output
         if format_type == "json":
-            content = json.dumps(monitors, indent=2)
+            content = json.dumps({
+                "monitors": monitors,
+                "pagination": {
+                    "page": page,
+                    "page_size": page_size,
+                    "returned": returned,
+                    "has_more": has_more,
+                    "next_page": next_page,
+                },
+            }, indent=2)
         elif format_type == "summary":
-            content = f"Found {len(monitors)} monitors"
-            if page_size < 1000:
-                content += f" (page {page + 1}, showing up to {page_size} per page)"
+            content = f"Found {returned} monitors on page {page + 1}"
+            if has_more:
+                content += f" (more available, page_size={page_size})"
             if tags or name or monitor_tags:
                 filters = []
                 if tags:
@@ -104,7 +118,9 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
                     filters.append(f"name: '{name}'")
                 if monitor_tags:
                     filters.append(f"monitor_tags: '{monitor_tags}'")
-                content += f" matching filters: {', '.join(filters)}"
+                content += f"\nFilters: {', '.join(filters)}"
+            if has_more and next_page is not None:
+                content += f"\nNext page: page={next_page}"
             
             # Group by type and state
             by_type = {}
@@ -125,7 +141,7 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
                 content += f"\n  {state}: {count}"
             
         else:  # table format
-            content = f"Datadog Monitors"
+            content = f"Datadog Monitors - Page {page + 1}"
             filters = []
             if tags:
                 filters.append(f"tags: '{tags}'")
@@ -133,13 +149,13 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
                 filters.append(f"name: '{name}'")
             if monitor_tags:
                 filters.append(f"monitor_tags: '{monitor_tags}'")
-            
+
             if filters:
-                content += f" (filtered by: {', '.join(filters)})"
-            content += f" | Total: {len(monitors)}"
-            if page_size < 1000:
-                content += f" (page {page + 1}, up to {page_size} per page)"
-            content += "\n" + "=" * len(content.split('\n')[-1]) + "\n\n"
+                content += f" | Filters: {', '.join(filters)}"
+            content += f" | Showing: {returned}/{page_size}"
+            if has_more:
+                content += f" | More available"
+            content += "\n" + "=" * 80 + "\n\n"
             
             for i, monitor in enumerate(monitors, 1):
                 monitor_id = monitor.get("id", "unknown")
