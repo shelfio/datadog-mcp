@@ -1271,10 +1271,11 @@ async def fetch_metric_formula(
     }
 
     url = f"{DATADOG_API_URL}/api/v2/query/timeseries"
+    cookies = get_api_cookies()
 
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(url, headers=headers, json=payload)
+            response = await client.post(url, headers=headers, json=payload, cookies=cookies)
             response.raise_for_status()
             return await response.json()
         except httpx.HTTPError as e:
