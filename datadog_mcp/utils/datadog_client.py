@@ -31,8 +31,9 @@ DATADOG_API_KEY = os.getenv("DD_API_KEY")
 DATADOG_APP_KEY = os.getenv("DD_APP_KEY")
 
 # Cookie-based authentication (preferred for MCP)
-DATADOG_COOKIE_FILE = os.getenv("DD_COOKIE_FILE")
-DATADOG_CSRF_FILE = os.getenv("DD_CSRF_FILE")
+# Use environment variables if set, otherwise use default paths
+DATADOG_COOKIE_FILE = os.getenv("DD_COOKIE_FILE", os.path.expanduser("~/.datadog_cookie"))
+DATADOG_CSRF_FILE = os.getenv("DD_CSRF_FILE", os.path.expanduser("~/.datadog_csrf"))
 
 # Load cookies if available
 DATADOG_COOKIE = None
