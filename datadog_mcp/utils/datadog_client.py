@@ -184,7 +184,7 @@ async def fetch_logs(
     limit: int = 50,
     cursor: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Fetch logs from Datadog API with flexible filtering using raw HTTP."""
+    """Fetch logs from Datadog API with flexible filtering using SDK."""
     try:
         # Build query filter
         query_parts = []
@@ -200,48 +200,35 @@ async def fetch_logs(
 
         combined_query = " AND ".join(query_parts) if query_parts else "*"
 
-        # Use raw HTTP with proper fallback authentication
-        headers, cookies = await get_auth_credentials()
+        # Create request body using SDK models
+        body = LogsListRequest(
+            filter=LogsQueryFilter(
+                query=combined_query,
+                _from=f"now-{time_range}",
+                to="now",
+            ),
+            options=LogsQueryOptions(
+                timezone="GMT",
+            ),
+            page=LogsListRequestPage(
+                limit=limit,
+                cursor=cursor,
+            ),
+            sort=LogsSort.TIMESTAMP_DESCENDING,  # Most recent first
+        )
 
-        # Build payload for logs list API
-        payload = {
-            "filter": {
-                "query": combined_query,
-                "from": f"now-{time_range}",
-                "to": "now",
-            },
-            "options": {
-                "timezone": "GMT",
-            },
-            "page": {
-                "limit": limit,
-            },
-            "sort": "-timestamp"  # Simplified sort format (descending timestamp)
-        }
+        configuration = get_datadog_configuration()
+        with ApiClient(configuration) as api_client:
+            api_instance = LogsApi(api_client)
+            response = api_instance.list_logs(body=body)
 
-        if cursor:
-            payload["page"]["cursor"] = cursor
+            # Convert to dict format for backward compatibility
+            result = {
+                "data": [log.to_dict() for log in response.data] if response.data else [],
+                "meta": response.meta.to_dict() if response.meta else {},
+            }
 
-        url = f"{DATADOG_API_URL}/api/v2/logs/events/search"
-
-        async with httpx.AsyncClient() as client:
-            try:
-                response = await client.post(url, headers=headers, json=payload, cookies=cookies)
-                response.raise_for_status()
-                data = response.json()
-
-                # Normalize response format
-                result = {
-                    "data": data.get("data", []),
-                    "meta": data.get("meta", {}),
-                }
-
-                return result
-            except httpx.HTTPError as e:
-                logger.error(f"HTTP error fetching logs: {e}")
-                if hasattr(e, "response"):
-                    logger.error(f"Response: {e.response.text}")
-                raise
+            return result
 
     except Exception as e:
         logger.error(f"Error fetching logs: {e}")
