@@ -653,35 +653,33 @@ async def fetch_monitors(
     page: int = 0,
 ) -> List[Dict[str, Any]]:
     """Fetch monitors from Datadog API."""
-    
-    headers = {
-        "DD-API-KEY": DATADOG_API_KEY,
-        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
-    }
-    
+
+    headers = get_auth_headers(include_csrf=False)
+    cookies = get_api_cookies()
+
     # Use the v1 monitors endpoint
     url = f"{DATADOG_API_URL}/api/v1/monitor"
-    
+
     # Build query parameters
     params = {}
-    
+
     if tags:
         params["tags"] = tags
     if name:
         params["name"] = name
     if monitor_tags:
         params["monitor_tags"] = monitor_tags
-    
+
     # Add pagination parameters
     params["page_size"] = page_size
     params["page"] = page
-    
+
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(url, headers=headers, params=params)
+            response = await client.get(url, headers=headers, params=params, cookies=cookies)
             response.raise_for_status()
             return response.json()
-            
+
         except httpx.HTTPError as e:
             logger.error(f"HTTP error fetching monitors: {e}")
             raise
@@ -692,16 +690,13 @@ async def fetch_monitors(
 
 async def get_monitor(monitor_id: int) -> Dict[str, Any]:
     """Get a specific monitor from Datadog API."""
-    headers = {
-        "DD-API-KEY": DATADOG_API_KEY,
-        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
-    }
-
     url = f"{DATADOG_API_URL}/api/v1/monitor/{monitor_id}"
+    cookies = get_api_cookies()
+    headers = get_auth_headers(include_csrf=False)
 
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(url, headers=headers)
+            response = await client.get(url, headers=headers, cookies=cookies)
             response.raise_for_status()
             return response.json()
 
@@ -744,9 +739,10 @@ async def create_monitor(
     # Add any additional parameters
     payload.update(kwargs)
 
+    cookies = get_api_cookies()
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(url, headers=headers, json=payload)
+            response = await client.post(url, headers=headers, json=payload, cookies=cookies)
             response.raise_for_status()
             return response.json()
 
@@ -789,9 +785,10 @@ async def update_monitor(
     # Add any additional parameters
     payload.update(kwargs)
 
+    cookies = get_api_cookies()
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.put(url, headers=headers, json=payload)
+            response = await client.put(url, headers=headers, json=payload, cookies=cookies)
             response.raise_for_status()
             return response.json()
 
@@ -806,12 +803,13 @@ async def update_monitor(
 async def delete_monitor(monitor_id: int) -> Dict[str, Any]:
     """Delete a monitor from Datadog API."""
     headers = get_auth_headers(include_csrf=True)
+    cookies = get_api_cookies()
 
     url = f"{DATADOG_API_URL}/api/v1/monitor/{monitor_id}"
 
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.delete(url, headers=headers)
+            response = await client.delete(url, headers=headers, cookies=cookies)
             response.raise_for_status()
             return response.json()
 
