@@ -71,7 +71,9 @@ def get_datadog_configuration() -> Configuration:
 
 
 async def get_auth_credentials(include_csrf: bool = False) -> tuple[Dict[str, str], Optional[Dict[str, str]]]:
-    """Get authentication credentials with fallback priority: AWS Secrets > Cookies > Environment Variables.
+    """Get authentication credentials with priority: Cookies (if available) > AWS Secrets > Environment Variables.
+
+    Cookies are prioritized because they represent browser authentication with full user permissions.
 
     Returns:
         Tuple of (headers_dict, cookies_dict_or_none)
@@ -83,7 +85,15 @@ async def get_auth_credentials(include_csrf: bool = False) -> tuple[Dict[str, st
         "content-type": "application/json",
     }
 
-    # Try AWS Secrets Manager first
+    # Try cookies first - browser auth has full permissions
+    if DATADOG_COOKIE and DATADOG_CSRF_TOKEN:
+        logger.debug("Using cookie-based authentication (highest priority)")
+        if include_csrf:
+            headers["x-csrf-token"] = DATADOG_CSRF_TOKEN
+        cookies = {"dogweb": DATADOG_COOKIE}
+        return headers, cookies
+
+    # Fall back to AWS Secrets Manager
     if is_aws_secrets_configured():
         try:
             provider = await get_secret_provider()
@@ -94,15 +104,7 @@ async def get_auth_credentials(include_csrf: bool = False) -> tuple[Dict[str, st
                 logger.debug("Using AWS Secrets Manager for authentication")
                 return headers, None  # No cookies needed
         except Exception as e:
-            logger.warning(f"Failed to fetch AWS credentials: {e}. Falling back to cookies or environment variables.")
-
-    # Fall back to cookies if available (when token auth failed or not configured)
-    if DATADOG_COOKIE and DATADOG_CSRF_TOKEN:
-        logger.debug("Using cookie-based authentication (AWS unavailable or not configured)")
-        if include_csrf:
-            headers["x-csrf-token"] = DATADOG_CSRF_TOKEN
-        cookies = {"dogweb": DATADOG_COOKIE}
-        return headers, cookies
+            logger.warning(f"Failed to fetch AWS credentials: {e}. Falling back to environment variables.")
 
     # Fall back to environment variables
     logger.debug("Using environment variable-based authentication")
