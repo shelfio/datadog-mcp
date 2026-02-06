@@ -206,56 +206,83 @@ async def fetch_logs(
     limit: int = 50,
     cursor: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Fetch logs from Datadog API with flexible filtering using SDK.
+    """Fetch logs from Datadog API with flexible filtering.
 
     Supports multiple authentication methods: cookies (highest priority), AWS Secrets Manager, environment variables.
-    Falls back automatically based on what's available.
+    Uses raw HTTP for cookie support, SDK for token-based auth.
     """
     try:
         # Build query filter
         query_parts = []
-
-        # Add filters from the filters dictionary
         if filters:
             for key, value in filters.items():
                 query_parts.append(f"{key}:{value}")
-
-        # Add free-text query
         if query:
             query_parts.append(query)
 
         combined_query = " AND ".join(query_parts) if query_parts else "*"
 
-        # Create request body using SDK models
+        # Get authentication credentials
+        headers, cookies = await get_auth_credentials()
+
+        # REST API doesn't accept browser cookies—it only accepts API key headers
+        # If only cookies available (no token headers), fall through to token-based auth
+        has_tokens = headers.get("DD-API-KEY") and headers.get("DD-APPLICATION-KEY")
+
+        # Use raw HTTP with token headers for compatibility
+        # (SDK has better error handling but httpx gives more control)
+        if has_tokens:
+            url = f"{DATADOG_API_URL}/api/v2/logs/events/search"
+            payload = {
+                "filter": {
+                    "query": combined_query,
+                    "from": f"now-{time_range}",
+                    "to": "now",
+                },
+                "options": {
+                    "timezone": "GMT",
+                },
+                "page": {
+                    "limit": limit,
+                },
+                "sort": "-timestamp",  # String format for REST API
+            }
+            if cursor:
+                payload["page"]["cursor"] = cursor
+
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, headers=headers, json=payload)
+                response.raise_for_status()
+                data = response.json()
+                return {
+                    "data": data.get("data", []),
+                    "meta": data.get("meta", {}),
+                }
+
+        # Use SDK as fallback (usually won't reach here since tokens are usually available)
         body = LogsListRequest(
             filter=LogsQueryFilter(
                 query=combined_query,
                 _from=f"now-{time_range}",
                 to="now",
             ),
-            options=LogsQueryOptions(
-                timezone="GMT",
-            ),
-            page=LogsListRequestPage(
-                limit=limit,
-                cursor=cursor,
-            ),
-            sort=LogsSort.TIMESTAMP_DESCENDING,  # Most recent first
+            options=LogsQueryOptions(timezone="GMT"),
+            page=LogsListRequestPage(limit=limit, cursor=cursor),
+            sort=LogsSort.TIMESTAMP_DESCENDING,
         )
 
-        # Use flexible authentication that supports tokens, AWS, and fallback
-        configuration, cookies = await get_datadog_configuration_with_auth()
+        configuration = Configuration()
+        if headers.get("DD-API-KEY") and headers.get("DD-APPLICATION-KEY"):
+            configuration.api_key["apiKeyAuth"] = headers["DD-API-KEY"]
+            configuration.api_key["appKeyAuth"] = headers["DD-APPLICATION-KEY"]
+
         with ApiClient(configuration) as api_client:
             api_instance = LogsApi(api_client)
             response = api_instance.list_logs(body=body)
-
-            # Convert to dict format for backward compatibility
-            result = {
+            return {
                 "data": [log.to_dict() for log in response.data] if response.data else [],
                 "meta": response.meta.to_dict() if response.meta else {},
             }
-
-            return result
 
     except Exception as e:
         logger.error(f"Error fetching logs: {e}")
