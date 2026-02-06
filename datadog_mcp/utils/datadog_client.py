@@ -8,6 +8,7 @@ import os
 from typing import Any, Dict, List, Optional
 
 import httpx
+from datadog_api_client import Configuration
 
 logger = logging.getLogger(__name__)
 
@@ -19,9 +20,16 @@ COOKIE_FILE_PATH = os.getenv("DD_COOKIE_FILE", DEFAULT_COOKIE_FILE)
 DEFAULT_CSRF_FILE = os.path.expanduser("~/.datadog_csrf")
 CSRF_FILE_PATH = os.getenv("DD_CSRF_FILE", DEFAULT_CSRF_FILE)
 
-# API key credentials (static, loaded once)
-DATADOG_API_KEY = os.getenv("DD_API_KEY")
-DATADOG_APP_KEY = os.getenv("DD_APP_KEY")
+# API key file locations - allows updates without restarting
+DEFAULT_API_KEY_FILE = os.path.expanduser("~/.datadog_api_key")
+API_KEY_FILE_PATH = os.getenv("DD_API_KEY_FILE", DEFAULT_API_KEY_FILE)
+
+DEFAULT_APP_KEY_FILE = os.path.expanduser("~/.datadog_app_key")
+APP_KEY_FILE_PATH = os.getenv("DD_APP_KEY_FILE", DEFAULT_APP_KEY_FILE)
+
+# Optional: Force specific auth method (overrides automatic detection)
+# Set DD_FORCE_AUTH=cookie or DD_FORCE_AUTH=token to bypass auto-detection
+FORCE_AUTH_METHOD = os.getenv("DD_FORCE_AUTH", "").lower()
 
 
 def get_cookie() -> Optional[str]:
@@ -139,12 +147,121 @@ def save_csrf_token(csrf_token: str) -> str:
     return CSRF_FILE_PATH
 
 
+def get_api_key() -> Optional[str]:
+    """Get API key from environment variable or file (read fresh each time).
+
+    Priority: Environment variable > File
+    This allows updating the API key without restarting the server.
+    """
+    # First check environment variable
+    env_key = os.getenv("DD_API_KEY")
+    if env_key:
+        return env_key
+
+    # Then check API key file
+    if os.path.isfile(API_KEY_FILE_PATH):
+        try:
+            with open(API_KEY_FILE_PATH, "r") as f:
+                key = f.read().strip()
+                if key:
+                    return key
+        except Exception as e:
+            logger.warning(f"Failed to read API key file {API_KEY_FILE_PATH}: {e}")
+
+    return None
+
+
+def get_app_key() -> Optional[str]:
+    """Get application key from environment variable or file (read fresh each time).
+
+    Priority: Environment variable > File
+    This allows updating the application key without restarting the server.
+    """
+    # First check environment variable
+    env_key = os.getenv("DD_APP_KEY")
+    if env_key:
+        return env_key
+
+    # Then check app key file
+    if os.path.isfile(APP_KEY_FILE_PATH):
+        try:
+            with open(APP_KEY_FILE_PATH, "r") as f:
+                key = f.read().strip()
+                if key:
+                    return key
+        except Exception as e:
+            logger.warning(f"Failed to read app key file {APP_KEY_FILE_PATH}: {e}")
+
+    return None
+
+
+def save_api_key(api_key: str) -> str:
+    """Save API key to file for persistence.
+
+    Args:
+        api_key: The API key to save
+
+    Returns:
+        Path where API key was saved
+    """
+    os.makedirs(os.path.dirname(API_KEY_FILE_PATH) or ".", exist_ok=True)
+    with open(API_KEY_FILE_PATH, "w") as f:
+        f.write(api_key.strip())
+    os.chmod(API_KEY_FILE_PATH, 0o600)  # Restrict permissions
+    logger.info(f"API key saved to {API_KEY_FILE_PATH}")
+    return API_KEY_FILE_PATH
+
+
+def save_app_key(app_key: str) -> str:
+    """Save application key to file for persistence.
+
+    Args:
+        app_key: The application key to save
+
+    Returns:
+        Path where application key was saved
+    """
+    os.makedirs(os.path.dirname(APP_KEY_FILE_PATH) or ".", exist_ok=True)
+    with open(APP_KEY_FILE_PATH, "w") as f:
+        f.write(app_key.strip())
+    os.chmod(APP_KEY_FILE_PATH, 0o600)  # Restrict permissions
+    logger.info(f"App key saved to {APP_KEY_FILE_PATH}")
+    return APP_KEY_FILE_PATH
+
+
 def get_auth_mode() -> tuple[bool, str]:
     """Determine authentication mode and API URL dynamically.
+
+    Respects DD_FORCE_AUTH environment variable if set:
+    - DD_FORCE_AUTH=cookie → Force cookie authentication (requires DD_COOKIE env/file)
+    - DD_FORCE_AUTH=token → Force token authentication (requires DD_API_KEY/DD_APP_KEY)
+    - Otherwise: Auto-detect (prefer cookie if available, else token)
 
     Returns:
         Tuple of (use_cookie_auth, api_url)
     """
+    # Check if auth method is forced
+    if FORCE_AUTH_METHOD == "cookie":
+        cookie = get_cookie()
+        if not cookie:
+            raise ValueError(
+                "DD_FORCE_AUTH=cookie set but no cookie available. "
+                "Set DD_COOKIE env var or create ~/.datadog_cookie"
+            )
+        logger.info("Using forced cookie authentication")
+        return True, "https://app.datadoghq.com"
+    elif FORCE_AUTH_METHOD == "token":
+        api_key = get_api_key()
+        app_key = get_app_key()
+        if not api_key or not app_key:
+            raise ValueError(
+                "DD_FORCE_AUTH=token set but API keys not available. "
+                "Set DD_API_KEY/DD_APP_KEY env vars or create ~/.datadog_api_key/~/.datadog_app_key"
+            )
+        logger.info("Using forced token authentication")
+        return False, "https://api.datadoghq.com"
+
+    # Auto-detect: prefer cookie if available, else token
     cookie = get_cookie()
     if cookie:
         return True, "https://app.datadoghq.com"
@@ -162,13 +279,30 @@ def get_api_url() -> str:
 DATADOG_API_URL = "https://api.datadoghq.com"  # Default, overridden dynamically
 
 
-# Validate that at least one auth method is available at startup
-# (but allow cookie to be added later via file)
+# Validate that appropriate auth credentials are available at startup
+# (but allow credentials to be added later via file or setup_auth tool)
 _initial_cookie = get_cookie()
-if not _initial_cookie and (not DATADOG_API_KEY or not DATADOG_APP_KEY):
+_initial_api_key = get_api_key()
+_initial_app_key = get_app_key()
+
+if FORCE_AUTH_METHOD == "cookie":
+    if not _initial_cookie:
+        logger.error(
+            "DD_FORCE_AUTH=cookie set but no cookie available. "
+            f"Set DD_COOKIE env var or create {COOKIE_FILE_PATH}"
+        )
+elif FORCE_AUTH_METHOD == "token":
+    if not _initial_api_key or not _initial_app_key:
+        logger.error(
+            "DD_FORCE_AUTH=token set but API keys not available. "
+            f"Set DD_API_KEY/DD_APP_KEY env vars or create {API_KEY_FILE_PATH}/{APP_KEY_FILE_PATH}"
+        )
+elif not _initial_cookie and (not _initial_api_key or not _initial_app_key):
     logger.warning(
         "No credentials configured. Set DD_COOKIE env var, "
-        f"create {COOKIE_FILE_PATH}, or set DD_API_KEY and DD_APP_KEY."
+        f"create {COOKIE_FILE_PATH}, or set DD_API_KEY and DD_APP_KEY. "
+        "Optionally use DD_FORCE_AUTH=cookie or DD_FORCE_AUTH=token to force a method. "
+        "Or use setup_auth tool to configure authentication."
     )
 
 
@@ -176,7 +310,7 @@ def get_auth_headers(include_csrf: bool = False) -> Dict[str, str]:
     """Get authentication headers based on auth mode (read fresh each call).
 
     Priority: Cookie (if available) > API keys
-    This allows dynamic cookie updates without restart while still supporting API keys.
+    This allows dynamic credential updates without restart.
 
     Args:
         include_csrf: If True and using cookie auth, include x-csrf-token header.
@@ -195,17 +329,23 @@ def get_auth_headers(include_csrf: bool = False) -> Dict[str, str]:
             else:
                 logger.warning("CSRF token requested but not available. Some endpoints may fail.")
         return headers
-    elif DATADOG_API_KEY and DATADOG_APP_KEY:
-        return {
-            "Content-Type": "application/json",
-            "DD-API-KEY": DATADOG_API_KEY,
-            "DD-APPLICATION-KEY": DATADOG_APP_KEY,
-        }
     else:
-        raise ValueError(
-            "No Datadog credentials available. Set DD_COOKIE env var, "
-            f"create {COOKIE_FILE_PATH}, or set DD_API_KEY and DD_APP_KEY."
-        )
+        # Use API keys (read fresh each call, not cached)
+        api_key = get_api_key()
+        app_key = get_app_key()
+        if api_key and app_key:
+            return {
+                "Content-Type": "application/json",
+                "DD-API-KEY": api_key,
+                "DD-APPLICATION-KEY": app_key,
+            }
+        else:
+            raise ValueError(
+                "No Datadog credentials available. Set DD_COOKIE env var, "
+                f"create {COOKIE_FILE_PATH}, or set DD_API_KEY/DD_APP_KEY env vars "
+                f"or create {API_KEY_FILE_PATH}/{APP_KEY_FILE_PATH}. "
+                "Use setup_auth tool to configure authentication."
+            )
 
 
 async def fetch_ci_pipelines(
@@ -420,22 +560,25 @@ async def fetch_logs(
 
                     if status == 401:
                         logger.error(
-                            "\n❌ AUTHENTICATION FAILED (401 Unauthorized)\n"
-                            "Cookies may be invalid or in wrong format.\n\n"
-                            "COOKIE SETUP:\n"
-                            "1. Save cookies to: ~/.datadog_cookie\n"
-                            "2. Save CSRF token to: ~/.datadog_csrf\n\n"
-                            "TO EXTRACT FROM BROWSER:\n"
+                            "\n❌ AUTHENTICATION FAILED (401 Unauthorized)\n\n"
+                            "🔑 COOKIE SETUP (REQUIRED):\n\n"
+                            "Save to ~/.datadog_cookie (NETSCAPE FORMAT):\n"
+                            "  dogweb    c9829ab768105289702a99dcf45d2d9511430cbe67c628ce2f7b4460b0a1beda0e084d2e\n\n"
+                            "OR (NAMED FORMAT):\n"
+                            "  dogweb=c9829ab768105289702a99dcf45d2d9511430cbe67c628ce2f7b4460b0a1beda0e084d2e\n\n"
+                            "⚠️  KEY POINT: Cookie name MUST be 'dogweb' (not 'session' or others)\n\n"
+                            "🔐 CSRF TOKEN SETUP (REQUIRED):\n"
+                            "Save to ~/.datadog_csrf:\n"
+                            "  633591dfef19d8a51260ae1442d822a1e3ca9932\n\n"
+                            "📖 TO EXTRACT FROM BROWSER:\n"
                             "1. Go to https://app.datadoghq.com\n"
-                            "2. Open DevTools → Application → Cookies\n"
-                            "3. Export as Netscape format OR\n"
-                            "4. Copy specific cookie value (dd-session, etc.)\n\n"
-                            "CSRF TOKEN:\n"
-                            "1. Make any POST request in DevTools → Network\n"
-                            "2. Find request header: x-csrf-token: <value>\n"
-                            "3. Save that value to ~/.datadog_csrf\n\n"
-                            "Current cookie file: ~/.datadog_cookie\n"
-                            "Current CSRF file: ~/.datadog_csrf"
+                            "2. Open DevTools → Application → Cookies → datadoghq.com\n"
+                            "3. Find 'dogweb' cookie in the list\n"
+                            "4. Copy the VALUE (the long hex string)\n"
+                            "5. For CSRF: Network tab → make any POST request → Find x-csrf-token header\n\n"
+                            "📁 FILES TO UPDATE:\n"
+                            "  ~/.datadog_cookie (contains: dogweb=<value>)\n"
+                            "  ~/.datadog_csrf   (contains: <csrf-token>)"
                         )
                     elif status == 403:
                         logger.error(
@@ -487,17 +630,20 @@ async def fetch_logs(
                     if status == 401:
                         logger.error(
                             "\n❌ AUTHENTICATION FAILED (401 Unauthorized)\n"
-                            "API key or token is invalid/expired.\n\n"
-                            "API KEY SETUP:\n"
-                            "1. Set environment variables:\n"
-                            "   export DD_API_KEY=<your-api-key>\n"
-                            "   export DD_APP_KEY=<your-app-key>\n\n"
-                            "2. OR set in AWS Secrets Manager:\n"
-                            "   Path: /DEVELOPMENT/datadog/API_KEY\n"
-                            "   Path: /DEVELOPMENT/datadog/APP_KEY\n\n"
-                            "3. OR create in home directory:\n"
-                            "   echo $DD_API_KEY > ~/.datadog_api_key\n"
-                            "   echo $DD_APP_KEY > ~/.datadog_app_key"
+                            "Using token/API key auth. Credentials invalid/expired.\n\n"
+                            "🔑 API KEY SETUP (TOKEN AUTH):\n\n"
+                            "Option 1: Environment Variables\n"
+                            "  export DD_API_KEY=<your-api-key>\n"
+                            "  export DD_APP_KEY=<your-app-key>\n\n"
+                            "Option 2: AWS Secrets Manager\n"
+                            "  Path: /DEVELOPMENT/datadog/API_KEY\n"
+                            "  Path: /DEVELOPMENT/datadog/APP_KEY\n\n"
+                            "Option 3: Home Directory Files\n"
+                            "  echo $DD_API_KEY > ~/.datadog_api_key\n"
+                            "  echo $DD_APP_KEY > ~/.datadog_app_key\n\n"
+                            "⚠️  ALTERNATIVE: If you prefer cookie auth instead:\n"
+                            "  Use ~/.datadog_cookie with 'dogweb=<value>' format\n"
+                            "  Use ~/.datadog_csrf with CSRF token value"
                         )
                     elif status == 403:
                         logger.error(
@@ -695,30 +841,51 @@ async def fetch_teams(
     """Fetch teams from Datadog API with flexible authentication.
 
     Uses different endpoints based on auth mode:
-    - Cookie auth: Internal endpoint /api/v1/team (supports cookies)
+    - Cookie auth: Internal endpoint /api/v1/team (supports cookies), falls back to v2
     - API key auth: Public endpoint /api/v2/team
     """
     cookie = get_cookie()
     headers = get_auth_headers(include_csrf=True if cookie else False)
 
-    if cookie:
-        # Use v1 internal endpoint for cookie auth
-        url = f"{get_api_url()}/api/v1/team"
-        # v1 endpoint uses different parameter format
-        params = {
-            "page[size]": page_size,
-            "page[offset]": page_number * page_size,  # v1 uses offset, not page number
-        }
-    else:
-        # Use v2 public endpoint for API key auth
-        url = f"{get_api_url()}/api/v2/team"
-        # v2 endpoint uses page number
-        params = {
-            "page[size]": page_size,
-            "page[number]": page_number,
-        }
-
     async with httpx.AsyncClient() as client:
+        if cookie:
+            # Try v1 internal endpoint for cookie auth first
+            url = f"{get_api_url()}/api/v1/team"
+            # v1 endpoint uses different parameter format
+            params = {
+                "page[size]": page_size,
+                "page[offset]": page_number * page_size,  # v1 uses offset, not page number
+            }
+            try:
+                response = await client.get(url, headers=headers, params=params)
+                if response.status_code == 404:
+                    logger.warning(f"v1 teams endpoint not found at {url}, falling back to v2")
+                else:
+                    response.raise_for_status()
+                    return response.json()
+            except httpx.HTTPError as e:
+                if hasattr(e, 'response') and e.response.status_code == 404:
+                    logger.warning(f"v1 teams endpoint returned 404, falling back to v2")
+                else:
+                    logger.error(f"HTTP error fetching teams from v1: {e}")
+                    # Fall through to v2 fallback below
+
+            # Fall back to v2 for both token auth and if v1 fails
+            url = f"{get_api_url()}/api/v2/team"
+            params = {
+                "page[size]": page_size,
+                "page[number]": page_number,
+            }
+
+        else:
+            # Use v2 public endpoint for API key auth
+            url = f"{get_api_url()}/api/v2/team"
+            # v2 endpoint uses page number
+            params = {
+                "page[size]": page_size,
+                "page[number]": page_number,
+            }
+
         try:
             response = await client.get(url, headers=headers, params=params)
             response.raise_for_status()
@@ -1060,33 +1227,59 @@ async def fetch_service_definitions(
     """Fetch service definitions from Datadog API with flexible authentication.
 
     Uses different endpoints based on auth mode:
-    - Cookie auth: Internal endpoint /api/v1/services/definitions (supports cookies)
+    - Cookie auth: Internal endpoint /api/v1/services/definitions (supports cookies), falls back to v2
     - API key auth: Public endpoint /api/v2/services/definitions
     """
     cookie = get_cookie()
     headers = get_auth_headers(include_csrf=True if cookie else False)
 
-    if cookie:
-        # Use v1 internal endpoint for cookie auth
-        url = f"{get_api_url()}/api/v1/services/definitions"
-        # v1 uses different parameter format
-        params = {
-            "page[size]": page_size,
-            "page[offset]": page_number * page_size,
-        }
-    else:
-        # Use v2 public endpoint for API key auth
-        url = f"{get_api_url()}/api/v2/services/definitions"
-        # v2 uses page number
-        params = {
-            "page[size]": page_size,
-            "page[number]": page_number,
-        }
-
-    if schema_version:
-        params["filter[schema_version]"] = schema_version
-
     async with httpx.AsyncClient() as client:
+        if cookie:
+            # Try v1 internal endpoint for cookie auth first
+            url = f"{get_api_url()}/api/v1/services/definitions"
+            # v1 uses different parameter format
+            params = {
+                "page[size]": page_size,
+                "page[offset]": page_number * page_size,
+            }
+            if schema_version:
+                params["filter[schema_version]"] = schema_version
+
+            try:
+                response = await client.get(url, headers=headers, params=params)
+                if response.status_code == 404:
+                    logger.warning(f"v1 service definitions endpoint not found at {url}, falling back to v2")
+                else:
+                    response.raise_for_status()
+                    return response.json()
+            except httpx.HTTPError as e:
+                if hasattr(e, 'response') and e.response.status_code == 404:
+                    logger.warning(f"v1 service definitions endpoint returned 404, falling back to v2")
+                else:
+                    logger.error(f"HTTP error fetching service definitions from v1: {e}")
+                    # Fall through to v2 fallback below
+
+            # Fall back to v2 for both token auth and if v1 fails
+            url = f"{get_api_url()}/api/v2/services/definitions"
+            # v2 uses page number
+            params = {
+                "page[size]": page_size,
+                "page[number]": page_number,
+            }
+            if schema_version:
+                params["filter[schema_version]"] = schema_version
+
+        else:
+            # Use v2 public endpoint for API key auth
+            url = f"{get_api_url()}/api/v2/services/definitions"
+            # v2 uses page number
+            params = {
+                "page[size]": page_size,
+                "page[number]": page_number,
+            }
+            if schema_version:
+                params["filter[schema_version]"] = schema_version
+
         try:
             response = await client.get(url, headers=headers, params=params)
             response.raise_for_status()
@@ -1503,3 +1696,705 @@ async def aggregate_traces(
         except Exception as e:
             logger.error(f"Error aggregating traces: {e}", exc_info=True)
             raise
+
+
+async def get_monitor(monitor_id: int) -> Dict[str, Any]:
+    """Get a specific monitor from Datadog API.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        monitor_id: The ID of the monitor to retrieve
+
+    Returns:
+        Dict containing the monitor details
+    """
+    use_cookie, api_url = get_auth_mode()
+    headers = get_auth_headers()
+
+    # Both cookie and token auth use v1 endpoint for monitors
+    url = f"{api_url}/api/v1/monitor/{monitor_id}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error getting monitor {monitor_id}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error getting monitor {monitor_id}: {e}")
+            raise
+
+
+async def create_monitor(
+    name: str,
+    type: str,
+    query: str,
+    message: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+    thresholds: Optional[Dict[str, Any]] = None,
+    **kwargs,
+) -> Dict[str, Any]:
+    """Create a new monitor in Datadog API.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        name: Monitor name
+        type: Monitor type (e.g., 'metric alert', 'log alert')
+        query: Monitor query
+        message: Optional alert message
+        tags: Optional list of tags
+        thresholds: Optional thresholds configuration
+        **kwargs: Additional monitor properties
+
+    Returns:
+        Dict containing the created monitor details
+    """
+    use_cookie, api_url = get_auth_mode()
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    url = f"{api_url}/api/v1/monitor"
+
+    payload = {
+        "name": name,
+        "type": type,
+        "query": query,
+    }
+
+    if message:
+        payload["message"] = message
+    if tags:
+        payload["tags"] = tags
+    if thresholds:
+        payload["thresholds"] = thresholds
+
+    # Add any additional parameters
+    payload.update(kwargs)
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error creating monitor: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error creating monitor: {e}")
+            raise
+
+
+async def update_monitor(
+    monitor_id: int,
+    name: Optional[str] = None,
+    query: Optional[str] = None,
+    message: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+    thresholds: Optional[Dict[str, Any]] = None,
+    **kwargs,
+) -> Dict[str, Any]:
+    """Update an existing monitor in Datadog API.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        monitor_id: The ID of the monitor to update
+        name: Optional new monitor name
+        query: Optional new monitor query
+        message: Optional new alert message
+        tags: Optional new tags
+        thresholds: Optional new thresholds configuration
+        **kwargs: Additional properties to update
+
+    Returns:
+        Dict containing the updated monitor details
+    """
+    use_cookie, api_url = get_auth_mode()
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    url = f"{api_url}/api/v1/monitor/{monitor_id}"
+
+    payload = {}
+
+    if name is not None:
+        payload["name"] = name
+    if query is not None:
+        payload["query"] = query
+    if message is not None:
+        payload["message"] = message
+    if tags is not None:
+        payload["tags"] = tags
+    if thresholds is not None:
+        payload["thresholds"] = thresholds
+
+    # Add any additional parameters
+    payload.update(kwargs)
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.put(url, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error updating monitor {monitor_id}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error updating monitor {monitor_id}: {e}")
+            raise
+
+
+async def delete_monitor(monitor_id: int) -> Dict[str, Any]:
+    """Delete a monitor from Datadog API.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        monitor_id: The ID of the monitor to delete
+
+    Returns:
+        Dict containing the API response
+    """
+    use_cookie, api_url = get_auth_mode()
+    headers = get_auth_headers(include_csrf=True)
+
+    url = f"{api_url}/api/v1/monitor/{monitor_id}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.delete(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error deleting monitor {monitor_id}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error deleting monitor {monitor_id}: {e}")
+            raise
+
+
+async def create_notebook(
+    title: str,
+    description: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+    cells: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    """Create a new Datadog notebook.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        title: Notebook title
+        description: Optional notebook description
+        tags: Optional list of tags
+        cells: Optional list of cell configurations
+
+    Returns:
+        Dict containing the created notebook details
+    """
+    use_cookie, api_url = get_auth_mode()
+    url = f"{api_url}/api/v1/notebooks"
+
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    payload = {
+        "data": {
+            "type": "notebooks",
+            "attributes": {
+                "name": title,
+            }
+        }
+    }
+
+    if description:
+        payload["data"]["attributes"]["description"] = description
+
+    if tags:
+        payload["data"]["attributes"]["tags"] = tags
+
+    if cells:
+        payload["data"]["attributes"]["cells"] = cells
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error creating notebook: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error creating notebook: {e}")
+            raise
+
+
+async def get_notebook(notebook_id: str) -> Dict[str, Any]:
+    """Fetch a specific notebook by ID.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        notebook_id: The ID of the notebook to retrieve
+
+    Returns:
+        Dict containing the notebook details
+    """
+    use_cookie, api_url = get_auth_mode()
+    url = f"{api_url}/api/v1/notebooks/{notebook_id}"
+
+    headers = get_auth_headers()
+    headers["Content-Type"] = "application/json"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching notebook: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching notebook: {e}")
+            raise
+
+
+async def update_notebook(
+    notebook_id: str,
+    title: Optional[str] = None,
+    description: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """Update a notebook's metadata.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        notebook_id: The ID of the notebook to update
+        title: Optional new notebook title
+        description: Optional new description
+        tags: Optional new tags
+
+    Returns:
+        Dict containing the updated notebook details
+    """
+    use_cookie, api_url = get_auth_mode()
+    url = f"{api_url}/api/v1/notebooks/{notebook_id}"
+
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    payload = {
+        "data": {
+            "type": "notebooks",
+            "id": notebook_id,
+            "attributes": {}
+        }
+    }
+
+    if title:
+        payload["data"]["attributes"]["name"] = title
+    if description is not None:
+        payload["data"]["attributes"]["description"] = description
+    if tags is not None:
+        payload["data"]["attributes"]["tags"] = tags
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.put(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error updating notebook: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error updating notebook: {e}")
+            raise
+
+
+async def add_notebook_cell(
+    notebook_id: str,
+    cell_type: str,
+    position: Optional[int] = None,
+    title: Optional[str] = None,
+    query: Optional[str] = None,
+    content: Optional[str] = None,
+    visualization: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Add a cell to a notebook.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        notebook_id: The ID of the notebook
+        cell_type: The type of cell to add
+        position: Optional position in the notebook
+        title: Optional cell title
+        query: Optional metric query
+        content: Optional cell content
+        visualization: Optional visualization type
+
+    Returns:
+        Dict containing the created cell details
+    """
+    use_cookie, api_url = get_auth_mode()
+    url = f"{api_url}/api/v1/notebooks/{notebook_id}/cells"
+
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    cell_attributes = {"type": cell_type}
+
+    if title:
+        cell_attributes["title"] = title
+    if query:
+        cell_attributes["query"] = query
+    if content:
+        cell_attributes["content"] = content
+    if visualization:
+        cell_attributes["visualization"] = visualization
+
+    payload = {
+        "data": {
+            "type": "notebook_cells",
+            "attributes": cell_attributes
+        }
+    }
+
+    if position is not None:
+        payload["data"]["attributes"]["position"] = position
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error adding notebook cell: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error adding notebook cell: {e}")
+            raise
+
+
+async def update_notebook_cell(
+    notebook_id: str,
+    cell_id: str,
+    title: Optional[str] = None,
+    query: Optional[str] = None,
+    content: Optional[str] = None,
+    visualization: Optional[str] = None,
+    position: Optional[int] = None,
+) -> Dict[str, Any]:
+    """Update a cell in a notebook.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        notebook_id: The ID of the notebook
+        cell_id: The ID of the cell to update
+        title: Optional new cell title
+        query: Optional new metric query
+        content: Optional new cell content
+        visualization: Optional new visualization type
+        position: Optional new position
+
+    Returns:
+        Dict containing the updated cell details
+    """
+    use_cookie, api_url = get_auth_mode()
+    url = f"{api_url}/api/v1/notebooks/{notebook_id}/cells/{cell_id}"
+
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    attributes = {}
+
+    if title is not None:
+        attributes["title"] = title
+    if query is not None:
+        attributes["query"] = query
+    if content is not None:
+        attributes["content"] = content
+    if visualization is not None:
+        attributes["visualization"] = visualization
+    if position is not None:
+        attributes["position"] = position
+
+    payload = {
+        "data": {
+            "type": "notebook_cells",
+            "id": cell_id,
+            "attributes": attributes
+        }
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.put(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error updating notebook cell: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error updating notebook cell: {e}")
+            raise
+
+
+async def delete_notebook_cell(
+    notebook_id: str,
+    cell_id: str,
+) -> Dict[str, Any]:
+    """Delete a cell from a notebook.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        notebook_id: The ID of the notebook
+        cell_id: The ID of the cell to delete
+
+    Returns:
+        Dict containing the deletion status
+    """
+    use_cookie, api_url = get_auth_mode()
+    url = f"{api_url}/api/v1/notebooks/{notebook_id}/cells/{cell_id}"
+
+    headers = get_auth_headers(include_csrf=True)
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.delete(url, headers=headers)
+            response.raise_for_status()
+            return {"status": "deleted", "cell_id": cell_id}
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error deleting notebook cell: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error deleting notebook cell: {e}")
+            raise
+
+
+async def delete_notebook(notebook_id: str) -> Dict[str, Any]:
+    """Delete a notebook.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        notebook_id: The ID of the notebook to delete
+
+    Returns:
+        Dict containing the deletion status
+    """
+    use_cookie, api_url = get_auth_mode()
+    url = f"{api_url}/api/v1/notebooks/{notebook_id}"
+
+    headers = get_auth_headers(include_csrf=True)
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.delete(url, headers=headers)
+            response.raise_for_status()
+            return {"status": "deleted", "notebook_id": notebook_id}
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error deleting notebook: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error deleting notebook: {e}")
+            raise
+
+
+def get_datadog_configuration() -> Configuration:
+    """Get Datadog API configuration."""
+    configuration = Configuration()
+    configuration.api_key["apiKeyAuth"] = get_api_key()
+    configuration.api_key["appKeyAuth"] = get_app_key()
+    return configuration
+
+
+def get_api_cookies() -> Optional[Dict[str, str]]:
+    """Get cookies for API calls if using cookie auth."""
+    cookie = get_cookie()
+    if cookie:
+        return {"dogweb": cookie}
+    return None
+
+
+async def fetch_metric_formula(
+    formula: str,
+    queries: Dict[str, Dict[str, Any]],
+    time_range: str = "1h",
+    filters: Optional[Dict[str, str]] = None,
+) -> Dict[str, Any]:
+    """Fetch and calculate metrics using a formula with the Datadog V2 API.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        formula: Formula string (e.g., "a / b * 100")
+        queries: Dict of query definitions
+        time_range: Time range to query (default: 1h)
+        filters: Optional filters to apply to all queries
+
+    Returns:
+        Dict containing formula result with timeseries data
+    """
+    import time
+
+    use_cookie, api_url = get_auth_mode()
+    headers = get_auth_headers()
+    headers["Content-Type"] = "application/json"
+
+    # Calculate time range in milliseconds (V2 API uses milliseconds)
+    to_timestamp = int(time.time()) * 1000
+
+    time_deltas_ms = {
+        "1h": 3600 * 1000,
+        "4h": 14400 * 1000,
+        "8h": 28800 * 1000,
+        "1d": 86400 * 1000,
+        "7d": 604800 * 1000,
+        "14d": 1209600 * 1000,
+        "30d": 2592000 * 1000,
+    }
+
+    milliseconds_back = time_deltas_ms.get(time_range, 3600 * 1000)
+    from_timestamp = to_timestamp - milliseconds_back
+
+    # Build queries for the formula
+    formula_queries = {}
+    for var_name, query_def in queries.items():
+        metric_name = query_def.get("metric_name")
+        aggregation = query_def.get("aggregation", "avg")
+
+        if not metric_name:
+            raise ValueError(f"Query '{var_name}' missing 'metric_name'")
+
+        # Build metric query with filters
+        query_parts = [f"{aggregation}:{metric_name}"]
+
+        filter_list = []
+        if filters:
+            for key, value in filters.items():
+                filter_list.append(f"{key}:{value}")
+
+        if filter_list:
+            query_parts.append("{" + ",".join(filter_list) + "}")
+
+        query_string = "".join(query_parts)
+
+        formula_queries[var_name] = {
+            "metric_query": query_string
+        }
+
+    # Build the V2 API request payload
+    payload = {
+        "data": {
+            "type": "timeseries_request",
+            "attributes": {
+                "formulas": [
+                    {
+                        "formula": formula
+                    }
+                ],
+                "queries": formula_queries,
+                "from": int(from_timestamp),
+                "to": int(to_timestamp),
+            }
+        }
+    }
+
+    # Use v2 API for formula queries
+    url = f"{api_url}/api/v2/query/timeseries"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            return await response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching metric formula: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching metric formula: {e}")
+            raise
+
+
+async def check_deployment_status(
+    service_name: str,
+    env: str = "prod",
+    time_range: str = "1h",
+) -> Dict[str, Any]:
+    """Check deployment status by querying related metrics and logs.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        service_name: The service name to check
+        env: The environment (prod, staging, etc.)
+        time_range: Time range to check
+
+    Returns:
+        Dict containing deployment status and related metrics
+    """
+    import time
+
+    use_cookie, api_url = get_auth_mode()
+    headers = get_auth_headers()
+
+    # Fetch recent metrics for the service
+    metric_query = f"avg:trace.web.request{{service:{service_name},env:{env}}}"
+
+    url = f"{api_url}/api/v1/query"
+    params = {
+        "query": metric_query,
+        "from": int((time.time() - 3600)),
+        "to": int(time.time()),
+    }
+
+    result = {
+        "service": service_name,
+        "environment": env,
+        "status": "unknown",
+        "metrics": None,
+        "error": None,
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers, params=params)
+            response.raise_for_status()
+            data = response.json()
+
+            if data.get("status") == "ok":
+                result["status"] = "healthy"
+                result["metrics"] = data.get("series", [])
+            else:
+                result["status"] = "degraded"
+                result["error"] = data.get("error", "Unknown error")
+
+            return result
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error checking deployment status: {e}")
+            result["error"] = str(e)
+            result["status"] = "error"
+            return result
+        except Exception as e:
+            logger.error(f"Error checking deployment status: {e}")
+            result["error"] = str(e)
+            result["status"] = "error"
+            return result

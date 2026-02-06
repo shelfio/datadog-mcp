@@ -10,7 +10,7 @@ from mcp.types import CallToolRequest, CallToolResult, Tool, TextContent
 
 logger = logging.getLogger(__name__)
 
-from ..utils.datadog_client import fetch_monitors
+from ..utils.datadog_client import fetch_monitors, get_cookie, get_auth_mode
 
 
 def get_tool_definition() -> Tool:
@@ -88,15 +88,27 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         has_more = result.get("has_more", False)
         next_page = result.get("next_page")
 
+        # Get auth metadata for debugging/transparency
+        use_cookie, api_url = get_auth_mode()
+        auth_method = "Cookie (internal UI)" if use_cookie else "Token (public API)"
+        api_version = "v1" if use_cookie else "v1"  # Monitors endpoint is v1
+        auth_info = f"\n🔐 Auth: {auth_method} | API: {api_url}/api/{api_version}/monitor"
+
         if not monitors:
             return CallToolResult(
-                content=[TextContent(type="text", text="No monitors found")],
+                content=[TextContent(type="text", text=f"No monitors found{auth_info}")],
                 isError=False,
             )
         
         # Format output
         if format_type == "json":
             content = json.dumps({
+                "authentication": {
+                    "method": auth_method,
+                    "api_url": api_url,
+                    "api_version": api_version,
+                    "endpoint": f"/api/{api_version}/monitor",
+                },
                 "monitors": monitors,
                 "pagination": {
                     "page": page,
@@ -107,7 +119,7 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
                 },
             }, indent=2)
         elif format_type == "summary":
-            content = f"Found {returned} monitors on page {page + 1}"
+            content = f"Found {returned} monitors on page {page + 1}{auth_info}"
             if has_more:
                 content += f" (more available, page_size={page_size})"
             if tags or name or monitor_tags:
@@ -141,7 +153,7 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
                 content += f"\n  {state}: {count}"
             
         else:  # table format
-            content = f"Datadog Monitors - Page {page + 1}"
+            content = f"Datadog Monitors - Page {page + 1}{auth_info}\n"
             filters = []
             if tags:
                 filters.append(f"tags: '{tags}'")
@@ -151,8 +163,8 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
                 filters.append(f"monitor_tags: '{monitor_tags}'")
 
             if filters:
-                content += f" | Filters: {', '.join(filters)}"
-            content += f" | Showing: {returned}/{page_size}"
+                content += f"Filters: {', '.join(filters)} | "
+            content += f"Showing: {returned}/{page_size}"
             if has_more:
                 content += f" | More available"
             content += "\n" + "=" * 80 + "\n\n"
