@@ -578,7 +578,147 @@ def format_metrics_timeseries(metrics: Dict[str, Dict[str, Any]], limit_points: 
                 dt = datetime.datetime.fromtimestamp(timestamp / 1000)
                 time_str = dt.strftime("%H:%M:%S")
                 lines.append(f"  {time_str}: {value:.2f}{unit_str}")
-        
+
         lines.append("")
-    
+
+    return "\n".join(lines)
+
+
+def format_formula_result_summary(result: Dict[str, Any]) -> str:
+    """Format formula calculation result as a summary."""
+    if not result:
+        return "No formula result data"
+
+    try:
+        data = result.get("data", {})
+        attributes = data.get("attributes", {})
+        series = attributes.get("series", [])
+
+        if not series:
+            return "No data points in formula result"
+
+        lines = []
+
+        # Process each series from the formula
+        for idx, series_data in enumerate(series):
+            pointlist = series_data.get("pointlist", [])
+
+            if not pointlist:
+                lines.append(f"Series {idx}: No data points")
+                continue
+
+            # Extract values
+            values = [point[1] for point in pointlist if point[1] is not None]
+
+            if not values:
+                lines.append(f"Series {idx}: No valid values")
+                continue
+
+            avg_value = sum(values) / len(values)
+            min_value = min(values)
+            max_value = max(values)
+            latest_value = values[-1] if values else 0
+
+            lines.append(f"Series {idx}:")
+            lines.append(f"  Latest: {latest_value:.2f}")
+            lines.append(f"  Avg: {avg_value:.2f}")
+            lines.append(f"  Min: {min_value:.2f}")
+            lines.append(f"  Max: {max_value:.2f}")
+            lines.append(f"  Points: {len(pointlist)}")
+
+        return "\n".join(lines) if lines else "No valid series data"
+
+    except Exception as e:
+        return f"Error formatting formula result: {str(e)}"
+
+
+def format_formula_result_timeseries(result: Dict[str, Any], limit_points: int = 10) -> str:
+    """Format formula calculation result showing time series points."""
+    if not result:
+        return "No formula result data"
+
+    try:
+        data = result.get("data", {})
+        attributes = data.get("attributes", {})
+        series = attributes.get("series", [])
+
+        if not series:
+            return "No data points in formula result"
+
+        lines = []
+
+        for idx, series_data in enumerate(series):
+            pointlist = series_data.get("pointlist", [])
+
+            if not pointlist:
+                lines.append(f"Series {idx}: No data points")
+                continue
+
+            lines.append(f"\n📊 Series {idx}")
+            lines.append("-" * 20)
+
+            # Show recent points
+            recent_points = pointlist[-limit_points:] if len(pointlist) > limit_points else pointlist
+            lines.append(f"Recent {len(recent_points)} points:")
+
+            import datetime
+
+            for timestamp, value in recent_points:
+                if value is not None:
+                    dt = datetime.datetime.fromtimestamp(timestamp / 1000)
+                    time_str = dt.strftime("%H:%M:%S")
+                    lines.append(f"  {time_str}: {value:.2f}")
+
+        return "\n".join(lines) if lines else "No valid series data"
+
+    except Exception as e:
+        return f"Error formatting formula result: {str(e)}"
+
+
+def format_deployment_status_summary(status: Dict[str, Any]) -> str:
+    """Format deployment status check as a summary."""
+    status_indicator = "✅" if status["status"] == "deployed" else "❌"
+    service = status.get("service", "unknown")
+    version_field = status.get("version_field", "unknown")
+    version_value = status.get("version_value", "unknown")
+    environment = status.get("environment", "all")
+    log_count = status.get("log_count", 0)
+
+    lines = [f"{status_indicator} Deployment Status for {service}"]
+    lines.append(f"Version Field: {version_field}")
+    lines.append(f"Version Value: {version_value}")
+    lines.append(f"Environment: {environment}")
+
+    if status["status"] == "deployed":
+        first_seen = status.get("first_seen")
+        last_seen = status.get("last_seen")
+        lines.append(f"Logs Found: {log_count}")
+        if first_seen:
+            lines.append(f"First Seen: {first_seen}")
+        if last_seen:
+            lines.append(f"Last Seen: {last_seen}")
+    else:
+        lines.append("Status: NOT FOUND")
+        lines.append("Suggestion: Check if the version_field and version_value are correct, or expand the time_range")
+
+    return "\n".join(lines)
+
+
+def format_deployment_status_detailed(status: Dict[str, Any]) -> str:
+    """Format deployment status check with detailed log information."""
+    lines = [format_deployment_status_summary(status), ""]
+
+    if status["status"] == "deployed" and status.get("logs"):
+        lines.append("Sample Logs:")
+        lines.append("-" * 40)
+
+        for idx, log in enumerate(status["logs"][:5], 1):
+            lines.append(f"\n{idx}. {log.get('timestamp', 'N/A')}")
+            lines.append(f"   Service: {log.get('service', 'N/A')}")
+            if log.get("message"):
+                msg = log["message"]
+                if len(msg) > 80:
+                    msg = msg[:77] + "..."
+                lines.append(f"   Message: {msg}")
+
     return "\n".join(lines)

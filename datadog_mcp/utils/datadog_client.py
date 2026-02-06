@@ -1183,3 +1183,183 @@ async def delete_notebook(notebook_id: str) -> Dict[str, Any]:
         except Exception as e:
             logger.error(f"Error deleting notebook: {e}")
             raise
+
+
+async def fetch_metric_formula(
+    formula: str,
+    queries: Dict[str, Dict[str, Any]],
+    time_range: str = "1h",
+    filters: Optional[Dict[str, str]] = None,
+) -> Dict[str, Any]:
+    """
+    Fetch and calculate metrics using a formula with the Datadog V2 API.
+
+    Args:
+        formula: Formula string (e.g., "a / b * 100")
+        queries: Dict of query definitions, e.g., {"a": {"metric_name": "errors", "aggregation": "sum"}, "b": {"metric_name": "requests", "aggregation": "sum"}}
+        time_range: Time range to query (default: 1h)
+        filters: Optional filters to apply to all queries
+
+    Returns:
+        Dict containing formula result with timeseries data
+    """
+    import time
+
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+        "Content-Type": "application/json",
+    }
+
+    # Calculate time range in milliseconds (V2 API uses milliseconds)
+    to_timestamp = int(time.time()) * 1000
+
+    time_deltas_ms = {
+        "1h": 3600 * 1000,
+        "4h": 14400 * 1000,
+        "8h": 28800 * 1000,
+        "1d": 86400 * 1000,
+        "7d": 604800 * 1000,
+        "14d": 1209600 * 1000,
+        "30d": 2592000 * 1000,
+    }
+
+    milliseconds_back = time_deltas_ms.get(time_range, 3600 * 1000)
+    from_timestamp = to_timestamp - milliseconds_back
+
+    # Build queries for the formula
+    formula_queries = {}
+    for var_name, query_def in queries.items():
+        metric_name = query_def.get("metric_name")
+        aggregation = query_def.get("aggregation", "avg")
+
+        if not metric_name:
+            raise ValueError(f"Query '{var_name}' missing 'metric_name'")
+
+        # Build metric query with filters
+        query_parts = [f"{aggregation}:{metric_name}"]
+
+        filter_list = []
+        if filters:
+            for key, value in filters.items():
+                filter_list.append(f"{key}:{value}")
+
+        if filter_list:
+            query_parts.append("{" + ",".join(filter_list) + "}")
+
+        query_string = "".join(query_parts)
+
+        formula_queries[var_name] = {
+            "metric_query": query_string
+        }
+
+    # Build the V2 API request payload
+    payload = {
+        "data": {
+            "type": "timeseries_request",
+            "attributes": {
+                "formulas": [
+                    {
+                        "formula": formula
+                    }
+                ],
+                "queries": formula_queries,
+                "from": int(from_timestamp),
+                "to": int(to_timestamp),
+            }
+        }
+    }
+
+    url = f"{DATADOG_API_URL}/api/v2/query/timeseries"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            return await response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching metric formula: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching metric formula: {e}")
+            raise
+
+
+async def check_deployment_status(
+    service: str,
+    version_field: str,
+    version_value: str,
+    environment: Optional[str] = None,
+    time_range: str = "1h",
+) -> Dict[str, Any]:
+    """
+    Check if a specific version is deployed to a service by querying logs.
+
+    Args:
+        service: Service name to check
+        version_field: Field name containing the version (e.g., "git.commit.sha", "version", "dd.version")
+        version_value: Version value to search for
+        environment: Optional environment filter (e.g., "prod", "staging")
+        time_range: Time range to search (default: 1h)
+
+    Returns:
+        Dict with deployment status including first_seen, last_seen, log_count
+    """
+
+    # Build filters
+    filters = {"service": service}
+    if environment:
+        filters["env"] = environment
+
+    # Build query to search for version field
+    # Try both @field format and plain field format for compatibility
+    query = f"@{version_field}:{version_value} OR {version_field}:{version_value}"
+
+    try:
+        # Fetch logs using existing log function
+        response = await fetch_logs(
+            time_range=time_range,
+            filters=filters,
+            query=query,
+            limit=100,
+        )
+
+        logs = response.get("data", [])
+
+        if not logs:
+            return {
+                "status": "not_found",
+                "service": service,
+                "version_field": version_field,
+                "version_value": version_value,
+                "environment": environment or "all",
+                "log_count": 0,
+                "first_seen": None,
+                "last_seen": None,
+                "logs": [],
+            }
+
+        # Extract timestamps from logs
+        timestamps = []
+        for log in logs:
+            if "timestamp" in log:
+                try:
+                    timestamps.append(log["timestamp"])
+                except (ValueError, TypeError):
+                    pass
+
+        return {
+            "status": "deployed",
+            "service": service,
+            "version_field": version_field,
+            "version_value": version_value,
+            "environment": environment or "all",
+            "log_count": len(logs),
+            "first_seen": min(timestamps) if timestamps else None,
+            "last_seen": max(timestamps) if timestamps else None,
+            "logs": logs[:10],  # Return first 10 logs for verification
+        }
+
+    except Exception as e:
+        logger.error(f"Error checking deployment status: {e}")
+        raise

@@ -14,7 +14,7 @@ from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, ServerCapabilities, TextContent
 
-from .tools import get_fingerprints, list_pipelines, get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values, get_monitor, create_monitor, update_monitor, delete_monitor, create_notebook, get_notebook, update_notebook, add_notebook_cell, update_notebook_cell, delete_notebook_cell, delete_notebook
+from .tools import get_fingerprints, list_pipelines, get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values, get_monitor, create_monitor, update_monitor, delete_monitor, create_notebook, get_notebook, update_notebook, add_notebook_cell, update_notebook_cell, delete_notebook_cell, delete_notebook, query_metric_formula, check_deployment
 
 # Configure logging
 logging.basicConfig(
@@ -124,6 +124,14 @@ TOOLS = {
     "delete_notebook": {
         "definition": delete_notebook.get_tool_definition,
         "handler": delete_notebook.handle_call,
+    },
+    "query_metric_formula": {
+        "definition": query_metric_formula.get_tool_definition,
+        "handler": query_metric_formula.handle_call,
+    },
+    "check_deployment": {
+        "definition": check_deployment.get_tool_definition,
+        "handler": check_deployment.handle_call,
     },
 }
 
