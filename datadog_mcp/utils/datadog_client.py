@@ -127,10 +127,6 @@ async def fetch_ci_pipelines(
     url = f"{DATADOG_API_URL}/api/v2/ci/pipelines/events/search"
 
     headers, cookies = await get_auth_credentials()
-    headers.update({
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    })
 
     # Build query filter
     query_parts = []
@@ -206,7 +202,6 @@ async def fetch_logs(
 
         # Use raw HTTP with proper fallback authentication
         headers, cookies = await get_auth_credentials()
-        headers.update({"Content-Type": "application/json"})
 
         # Build payload for logs list API
         payload = {
@@ -221,9 +216,7 @@ async def fetch_logs(
             "page": {
                 "limit": limit,
             },
-            "sort": {
-                "timestamp": "desc"
-            }
+            "sort": "-timestamp"  # Simplified sort format (descending timestamp)
         }
 
         if cursor:
@@ -279,7 +272,6 @@ async def fetch_logs_filter_values(
 
         # Use raw HTTP for aggregation with proper fallback authentication
         headers, cookies = await get_auth_credentials()
-        headers.update({"Content-Type": "application/json"})
 
         # Build payload for logs aggregation API
         payload = {
