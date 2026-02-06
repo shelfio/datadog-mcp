@@ -110,21 +110,6 @@ async def get_auth_credentials(include_csrf: bool = False) -> tuple[Dict[str, st
     return headers, None
 
 
-async def get_auth_headers(include_csrf: bool = False) -> Dict[str, str]:
-    """Get headers for API calls. Deprecated: use get_auth_credentials instead for proper fallback handling.
-
-    This function maintained for backward compatibility.
-    Priority: AWS Secrets Manager > Cookies > Environment Variables
-    """
-    headers, _ = await get_auth_credentials(include_csrf=include_csrf)
-    return headers
-
-
-def get_api_cookies() -> Optional[Dict[str, str]]:
-    """Get cookies for API calls if using cookie auth."""
-    if USE_COOKIES and DATADOG_COOKIE:
-        return {"dogweb": DATADOG_COOKIE}
-    return None
 
 
 async def fetch_ci_pipelines(
@@ -386,7 +371,7 @@ async def fetch_teams(
     """Fetch teams from Datadog API."""
     url = f"{DATADOG_API_URL}/api/v2/team"
 
-    headers = await get_auth_headers()
+    headers, _ = await get_auth_credentials()
     headers.update({"Content-Type": "application/json"})
 
     # Add pagination parameters
@@ -412,7 +397,7 @@ async def fetch_team_memberships(team_id: str) -> List[Dict[str, Any]]:
     """Fetch team memberships from Datadog API."""
     url = f"{DATADOG_API_URL}/api/v2/team/{team_id}/memberships"
 
-    headers = await get_auth_headers()
+    headers, _ = await get_auth_credentials()
     headers.update({"Content-Type": "application/json"})
 
     async with httpx.AsyncClient() as client:
@@ -437,7 +422,7 @@ async def fetch_metrics(
 ) -> Dict[str, Any]:
     """Fetch metrics from Datadog API with flexible filtering."""
 
-    headers = await get_auth_headers()
+    headers, _ = await get_auth_credentials()
     
     # Build metric query
     query_parts = [f"{aggregation}:{metric_name}"]
@@ -511,7 +496,7 @@ async def fetch_metrics_list(
 ) -> Dict[str, Any]:
     """Fetch list of all available metrics from Datadog API."""
 
-    headers = await get_auth_headers()
+    headers, _ = await get_auth_credentials()
     
     # Use the v2 metrics endpoint to list all metrics
     url = f"{DATADOG_API_URL}/api/v2/metrics"
@@ -547,7 +532,7 @@ async def fetch_metric_available_fields(
 ) -> List[str]:
     """Fetch available fields/tags for a metric from Datadog API."""
 
-    headers = await get_auth_headers()
+    headers, _ = await get_auth_credentials()
     
     # Use the proper Datadog API endpoint to get all tags for a metric
     url = f"{DATADOG_API_URL}/api/v2/metrics/{metric_name}/all-tags"
@@ -592,7 +577,7 @@ async def fetch_metric_field_values(
 ) -> List[str]:
     """Fetch all possible values for a specific field of a metric from Datadog API."""
 
-    headers = await get_auth_headers()
+    headers, _ = await get_auth_credentials()
     
     # Use the same endpoint as get_metric_fields but extract values for specific field
     url = f"{DATADOG_API_URL}/api/v2/metrics/{metric_name}/all-tags"
@@ -638,7 +623,7 @@ async def fetch_service_definitions(
 ) -> Dict[str, Any]:
     """Fetch service definitions from Datadog API."""
 
-    headers = await get_auth_headers()
+    headers, _ = await get_auth_credentials()
     
     # Use the service definitions endpoint
     url = f"{DATADOG_API_URL}/api/v2/services/definitions"
