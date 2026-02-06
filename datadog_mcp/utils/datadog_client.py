@@ -69,42 +69,55 @@ def get_datadog_configuration() -> Configuration:
     return configuration
 
 
-async def get_auth_headers(include_csrf: bool = False) -> Dict[str, str]:
-    """Get headers for API calls, using cookies if available, then AWS Secrets Manager.
+async def get_auth_credentials(include_csrf: bool = False) -> tuple[Dict[str, str], Optional[Dict[str, str]]]:
+    """Get authentication credentials with fallback priority: AWS Secrets > Cookies > Environment Variables.
 
-    Priority: Cookie (if available) > AWS Secrets Manager
+    Returns:
+        Tuple of (headers_dict, cookies_dict_or_none)
+        - headers_dict contains auth headers or empty headers for cookie auth
+        - cookies_dict_or_none contains cookies if using cookie auth, else None
     """
-    if USE_COOKIES:
-        headers = {
-            "accept": "application/json",
-            "content-type": "application/json",
-        }
-        if include_csrf and DATADOG_CSRF_TOKEN:
-            headers["x-csrf-token"] = DATADOG_CSRF_TOKEN
-        return headers
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+    }
 
-    # Try AWS Secrets Manager
+    # Try AWS Secrets Manager first
     if is_aws_secrets_configured():
         try:
             provider = await get_secret_provider()
             if provider:
                 credentials = await provider.get_credentials()
-                return {
-                    "accept": "application/json",
-                    "content-type": "application/json",
-                    "DD-API-KEY": credentials.api_key,
-                    "DD-APPLICATION-KEY": credentials.app_key,
-                }
+                headers["DD-API-KEY"] = credentials.api_key
+                headers["DD-APPLICATION-KEY"] = credentials.app_key
+                logger.debug("Using AWS Secrets Manager for authentication")
+                return headers, None  # No cookies needed
         except Exception as e:
-            logger.warning(f"Failed to fetch AWS credentials: {e}. Falling back to environment variables.")
+            logger.warning(f"Failed to fetch AWS credentials: {e}. Falling back to cookies or environment variables.")
+
+    # Fall back to cookies if available (when token auth failed or not configured)
+    if DATADOG_COOKIE and DATADOG_CSRF_TOKEN:
+        logger.debug("Using cookie-based authentication (AWS unavailable or not configured)")
+        if include_csrf:
+            headers["x-csrf-token"] = DATADOG_CSRF_TOKEN
+        cookies = {"dogweb": DATADOG_COOKIE}
+        return headers, cookies
 
     # Fall back to environment variables
-    return {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "DD-API-KEY": DATADOG_API_KEY,
-        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
-    }
+    logger.debug("Using environment variable-based authentication")
+    headers["DD-API-KEY"] = DATADOG_API_KEY
+    headers["DD-APPLICATION-KEY"] = DATADOG_APP_KEY
+    return headers, None
+
+
+async def get_auth_headers(include_csrf: bool = False) -> Dict[str, str]:
+    """Get headers for API calls. Deprecated: use get_auth_credentials instead for proper fallback handling.
+
+    This function maintained for backward compatibility.
+    Priority: AWS Secrets Manager > Cookies > Environment Variables
+    """
+    headers, _ = await get_auth_credentials(include_csrf=include_csrf)
+    return headers
 
 
 def get_api_cookies() -> Optional[Dict[str, str]]:
@@ -125,7 +138,7 @@ async def fetch_ci_pipelines(
     # Try the v2 CI Visibility endpoint with proper content-type
     url = f"{DATADOG_API_URL}/api/v2/ci/pipelines/events/search"
 
-    headers = await get_auth_headers()
+    headers, cookies = await get_auth_credentials()
     headers.update({
         "Content-Type": "application/json",
         "Accept": "application/json",
@@ -151,8 +164,6 @@ async def fetch_ci_pipelines(
 
     if cursor:
         payload["page"]["cursor"] = cursor
-
-    cookies = get_api_cookies()
 
     async with httpx.AsyncClient() as client:
         try:
@@ -205,8 +216,8 @@ async def fetch_logs(
 
         combined_query = " AND ".join(query_parts) if query_parts else "*"
 
-        # Use raw HTTP instead of SDK to use AWS credentials
-        headers = await get_auth_headers()
+        # Use raw HTTP with proper fallback authentication
+        headers, cookies = await get_auth_credentials()
         headers.update({"Content-Type": "application/json"})
 
         # Build payload for logs list API
@@ -231,7 +242,6 @@ async def fetch_logs(
             payload["page"]["cursor"] = cursor
 
         url = f"{DATADOG_API_URL}/api/v2/logs/events/search"
-        cookies = get_api_cookies()
 
         async with httpx.AsyncClient() as client:
             try:
@@ -279,8 +289,8 @@ async def fetch_logs_filter_values(
         # Build base query
         base_query = query if query else "*"
 
-        # Use raw HTTP for aggregation instead of SDK to use AWS credentials
-        headers = await get_auth_headers()
+        # Use raw HTTP for aggregation with proper fallback authentication
+        headers, cookies = await get_auth_credentials()
         headers.update({"Content-Type": "application/json"})
 
         # Build payload for logs aggregation API
@@ -305,7 +315,6 @@ async def fetch_logs_filter_values(
         }
 
         url = f"{DATADOG_API_URL}/api/v2/logs/events/aggregate"
-        cookies = get_api_cookies()
 
         async with httpx.AsyncClient() as client:
             try:
