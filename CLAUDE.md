@@ -167,6 +167,18 @@ if aggregation_by and aggregation_by != ["service"]:
 - `DD_API_KEY` - Datadog API authentication key
 - `DD_APP_KEY` - Datadog application key for authorization
 
+### Cookie-Based Authentication (Optional)
+For httpx-based API calls, cookie authentication is supported as an alternative to API keys:
+- `DD_COOKIE_FILE` - Path to file containing Datadog session cookie
+- `DD_CSRF_FILE` - Path to file containing CSRF token
+
+**IMPORTANT**: When implementing new httpx-based API functions (e.g., `fetch_metric_formula`):
+1. Always call `cookies = get_api_cookies()` to get cookies if available
+2. Pass `cookies=cookies` parameter to all `client.post()` and `client.get()` calls
+3. This ensures consistency across all tools that support cookie-based auth
+
+Functions using the official Datadog SDK (e.g., `fetch_logs`) automatically handle cookie auth through `get_datadog_configuration()`.
+
 ### Python Requirements
 - Python 3.13+ (specified in pyproject.toml)
 - UV package manager for dependency management
