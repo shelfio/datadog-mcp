@@ -21,8 +21,6 @@ from datadog_api_client.v2.model.logs_compute_type import LogsComputeType
 from datadog_api_client.v2.model.logs_group_by import LogsGroupBy
 from datadog_api_client.v2.model.logs_aggregate_sort import LogsAggregateSort
 
-from .secrets_provider import get_secret_provider, is_aws_secrets_configured
-
 logger = logging.getLogger(__name__)
 
 # Datadog API configuration
@@ -63,78 +61,37 @@ if not USE_COOKIES and (not DATADOG_API_KEY or not DATADOG_APP_KEY):
 
 
 def get_datadog_configuration() -> Configuration:
-    """Get Datadog API configuration using environment variables."""
+    """Get Datadog API configuration."""
     configuration = Configuration()
     configuration.api_key["apiKeyAuth"] = DATADOG_API_KEY
     configuration.api_key["appKeyAuth"] = DATADOG_APP_KEY
     return configuration
 
 
-async def get_datadog_configuration_with_auth() -> tuple[Configuration, Optional[Dict[str, str]]]:
-    """Get Datadog API configuration with flexible authentication (tokens, cookies, AWS).
-
-    Returns:
-        Tuple of (Configuration, cookies_dict_or_none)
-        - Configuration is set up with API key headers if using token-based auth
-        - cookies_dict_or_none contains cookies if using cookie-based auth
-    """
-    headers, cookies = await get_auth_credentials()
-
-    # For SDK configuration, we need to set API key headers
-    # The SDK will pass these to the REST client
-    configuration = Configuration()
-
-    # Set auth headers via SDK's api_key mechanism if using token auth
-    if headers.get("DD-API-KEY") and headers.get("DD-APPLICATION-KEY"):
-        configuration.api_key["apiKeyAuth"] = headers["DD-API-KEY"]
-        configuration.api_key["appKeyAuth"] = headers["DD-APPLICATION-KEY"]
-
-    return configuration, cookies
-
-
-async def get_auth_credentials(include_csrf: bool = False) -> tuple[Dict[str, str], Optional[Dict[str, str]]]:
-    """Get authentication credentials with priority: Cookies (if available) > AWS Secrets > Environment Variables.
-
-    Cookies are prioritized because they represent browser authentication with full user permissions.
-
-    Returns:
-        Tuple of (headers_dict, cookies_dict_or_none)
-        - headers_dict contains auth headers or empty headers for cookie auth
-        - cookies_dict_or_none contains cookies if using cookie auth, else None
-    """
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-    }
-
-    # Try cookies first - browser auth has full permissions
-    if DATADOG_COOKIE and DATADOG_CSRF_TOKEN:
-        logger.debug("Using cookie-based authentication (highest priority)")
-        if include_csrf:
+def get_auth_headers(include_csrf: bool = False) -> Dict[str, str]:
+    """Get headers for API calls, using cookies if available."""
+    if USE_COOKIES:
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+        }
+        if include_csrf and DATADOG_CSRF_TOKEN:
             headers["x-csrf-token"] = DATADOG_CSRF_TOKEN
-        cookies = {"dogweb": DATADOG_COOKIE}
-        return headers, cookies
-
-    # Fall back to AWS Secrets Manager
-    if is_aws_secrets_configured():
-        try:
-            provider = await get_secret_provider()
-            if provider:
-                credentials = await provider.get_credentials()
-                headers["DD-API-KEY"] = credentials.api_key
-                headers["DD-APPLICATION-KEY"] = credentials.app_key
-                logger.debug("Using AWS Secrets Manager for authentication")
-                return headers, None  # No cookies needed
-        except Exception as e:
-            logger.warning(f"Failed to fetch AWS credentials: {e}. Falling back to environment variables.")
-
-    # Fall back to environment variables
-    logger.debug("Using environment variable-based authentication")
-    headers["DD-API-KEY"] = DATADOG_API_KEY
-    headers["DD-APPLICATION-KEY"] = DATADOG_APP_KEY
-    return headers, None
+        return headers
+    else:
+        return {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "DD-API-KEY": DATADOG_API_KEY,
+            "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+        }
 
 
+def get_api_cookies() -> Optional[Dict[str, str]]:
+    """Get cookies for API calls if using cookie auth."""
+    if USE_COOKIES and DATADOG_COOKIE:
+        return {"dogweb": DATADOG_COOKIE}
+    return None
 
 
 async def fetch_ci_pipelines(
@@ -145,20 +102,23 @@ async def fetch_ci_pipelines(
     cursor: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Fetch CI pipelines from Datadog API."""
-    # Try the v2 CI Visibility endpoint with proper content-type
     url = f"{DATADOG_API_URL}/api/v2/ci/pipelines/events/search"
-
-    headers, cookies = await get_auth_credentials()
-
+    
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+    
     # Build query filter
     query_parts = []
     if repository:
         query_parts.append(f'@git.repository.name:"{repository}"')
     if pipeline_name:
         query_parts.append(f'@ci.pipeline.name:"{pipeline_name}"')
-
+    
     query = " AND ".join(query_parts) if query_parts else "*"
-
+    
     payload = {
         "filter": {
             "query": query,
@@ -167,31 +127,16 @@ async def fetch_ci_pipelines(
         },
         "page": {"limit": limit},
     }
-
+    
     if cursor:
         payload["page"]["cursor"] = cursor
-
+    
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(url, headers=headers, json=payload, cookies=cookies)
+            response = await client.post(url, headers=headers, json=payload)
             response.raise_for_status()
             return response.json()
         except httpx.HTTPError as e:
-            # Try alternative endpoint if v2 fails
-            if e.response.status_code == 415:
-                logger.info(f"CI Pipelines v2 endpoint returned 415, trying v1 endpoint")
-                # Fallback to list endpoint if available
-                alt_url = f"{DATADOG_API_URL}/api/v2/ci/pipelines"
-                try:
-                    params = {"page[size]": limit}
-                    if cursor:
-                        params["page[cursor]"] = cursor
-                    response = await client.get(alt_url, headers=headers, params=params, cookies=cookies)
-                    response.raise_for_status()
-                    return response.json()
-                except Exception as alt_e:
-                    logger.error(f"Both CI pipeline endpoints failed: {alt_e}")
-                    raise e
             logger.error(f"HTTP error fetching pipelines: {e}")
             raise
         except Exception as e:
@@ -206,84 +151,53 @@ async def fetch_logs(
     limit: int = 50,
     cursor: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Fetch logs from Datadog API with flexible filtering.
-
-    Supports multiple authentication methods: cookies (highest priority), AWS Secrets Manager, environment variables.
-    Uses raw HTTP for cookie support, SDK for token-based auth.
-    """
+    """Fetch logs from Datadog API with flexible filtering using SDK."""
     try:
         # Build query filter
         query_parts = []
+        
+        # Add filters from the filters dictionary
         if filters:
             for key, value in filters.items():
                 query_parts.append(f"{key}:{value}")
+        
+        # Add free-text query
         if query:
             query_parts.append(query)
-
+        
         combined_query = " AND ".join(query_parts) if query_parts else "*"
-
-        # Get authentication credentials
-        headers, cookies = await get_auth_credentials()
-
-        # REST API doesn't accept browser cookies—it only accepts API key headers
-        # If only cookies available (no token headers), fall through to token-based auth
-        has_tokens = headers.get("DD-API-KEY") and headers.get("DD-APPLICATION-KEY")
-
-        # Use raw HTTP with token headers for compatibility
-        # (SDK has better error handling but httpx gives more control)
-        if has_tokens:
-            url = f"{DATADOG_API_URL}/api/v2/logs/events/search"
-            payload = {
-                "filter": {
-                    "query": combined_query,
-                    "from": f"now-{time_range}",
-                    "to": "now",
-                },
-                "options": {
-                    "timezone": "GMT",
-                },
-                "page": {
-                    "limit": limit,
-                },
-                "sort": "-timestamp",  # String format for REST API
-            }
-            if cursor:
-                payload["page"]["cursor"] = cursor
-
-            async with httpx.AsyncClient() as client:
-                response = await client.post(url, headers=headers, json=payload)
-                response.raise_for_status()
-                data = response.json()
-                return {
-                    "data": data.get("data", []),
-                    "meta": data.get("meta", {}),
-                }
-
-        # Use SDK as fallback (usually won't reach here since tokens are usually available)
+        
+        # Create request body
         body = LogsListRequest(
             filter=LogsQueryFilter(
                 query=combined_query,
                 _from=f"now-{time_range}",
                 to="now",
             ),
-            options=LogsQueryOptions(timezone="GMT"),
-            page=LogsListRequestPage(limit=limit, cursor=cursor),
-            sort=LogsSort.TIMESTAMP_DESCENDING,
+            options=LogsQueryOptions(
+                timezone="GMT",
+            ),
+            page=LogsListRequestPage(
+                limit=limit,
+                cursor=cursor,
+            ),
+            sort=LogsSort.TIMESTAMP_DESCENDING,  # Most recent first
         )
-
-        configuration = Configuration()
-        if headers.get("DD-API-KEY") and headers.get("DD-APPLICATION-KEY"):
-            configuration.api_key["apiKeyAuth"] = headers["DD-API-KEY"]
-            configuration.api_key["appKeyAuth"] = headers["DD-APPLICATION-KEY"]
-
+        
+        configuration = get_datadog_configuration()
         with ApiClient(configuration) as api_client:
             api_instance = LogsApi(api_client)
             response = api_instance.list_logs(body=body)
-            return {
+            
+            # Convert to dict format for backward compatibility
+            result = {
                 "data": [log.to_dict() for log in response.data] if response.data else [],
                 "meta": response.meta.to_dict() if response.meta else {},
+                #"links": response.links.to_dict() if response.links else {},
             }
-
+            
+            return result
+    
     except Exception as e:
         logger.error(f"Error fetching logs: {e}")
         raise
@@ -297,77 +211,66 @@ async def fetch_logs_filter_values(
 ) -> Dict[str, Any]:
     """
     Fetch possible values for a specific log field to understand filtering options.
-
+    
     Args:
         field_name: The field to get possible values for (e.g., 'service', 'env', 'status', 'host')
         time_range: Time range to look back (default: 1h)
         query: Optional query to filter logs before aggregation
         limit: Maximum number of values to return
-
+        
     Returns:
         Dict containing the field values and their counts
     """
     try:
         # Build base query
         base_query = query if query else "*"
-
-        # Use raw HTTP for aggregation with proper fallback authentication
-        headers, cookies = await get_auth_credentials()
-
-        # Build payload for logs aggregation API
-        payload = {
-            "compute": [
-                {
-                    "aggregation": "count",
-                    "type": "total",
-                }
+        
+        # Create aggregation request to group by the specified field
+        body = LogsAggregateRequest(
+            compute=[
+                LogsCompute(
+                    aggregation=LogsAggregationFunction.COUNT,
+                    type=LogsComputeType.TOTAL,
+                ),
             ],
-            "filter": {
-                "query": base_query,
-                "from": f"now-{time_range}",
-                "to": "now",
-            },
-            "group_by": [
-                {
-                    "facet": field_name,
-                    "limit": limit,
-                }
+            filter=LogsQueryFilter(
+                query=base_query,
+                _from=f"now-{time_range}",
+                to="now",
+            ),
+            group_by=[
+                LogsGroupBy(
+                    facet=field_name,
+                    limit=limit,
+                ),
             ],
-        }
-
-        url = f"{DATADOG_API_URL}/api/v2/logs/events/aggregate"
-
-        async with httpx.AsyncClient() as client:
-            try:
-                response = await client.post(url, headers=headers, json=payload, cookies=cookies)
-                response.raise_for_status()
-                data = response.json()
-
-                # Extract field values from buckets
-                field_values = []
-                if "data" in data and data["data"] and "buckets" in data["data"]:
-                    for bucket in data["data"]["buckets"]:
-                        if "by" in bucket and field_name in bucket["by"]:
-                            field_values.append({
-                                "value": bucket["by"][field_name],
-                                "count": bucket.get("computes", {}).get("c0", 0) if bucket.get("computes") else 0
-                            })
-
-                # Sort by count descending
-                field_values.sort(key=lambda x: x["count"], reverse=True)
-
-                return {
-                    "field": field_name,
-                    "time_range": time_range,
-                    "values": field_values,
-                    "total_values": len(field_values),
-                }
-            except httpx.HTTPError as e:
-                logger.error(f"HTTP error fetching filter values for field '{field_name}': {e}")
-                if hasattr(e, "response"):
-                    logger.error(f"Response: {e.response.text}")
-                raise
-
+        )
+        
+        configuration = get_datadog_configuration()
+        with ApiClient(configuration) as api_client:
+            api_instance = LogsApi(api_client)
+            response = api_instance.aggregate_logs(body=body)
+            
+            # Extract field values from buckets
+            field_values = []
+            if response.data and response.data.buckets:
+                for bucket in response.data.buckets:
+                    if bucket.by and field_name in bucket.by:
+                        field_values.append({
+                            "value": bucket.by[field_name],
+                            "count": bucket.computes.get("c0", 0) if bucket.computes else 0
+                        })
+            
+            # Sort by count descending
+            field_values.sort(key=lambda x: x["count"], reverse=True)
+            
+            return {
+                "field": field_name,
+                "time_range": time_range,
+                "values": field_values,
+                "total_values": len(field_values),
+            }
+    
     except Exception as e:
         logger.error(f"Error fetching filter values for field '{field_name}': {e}")
         raise
@@ -406,16 +309,19 @@ async def fetch_teams(
 ) -> Dict[str, Any]:
     """Fetch teams from Datadog API."""
     url = f"{DATADOG_API_URL}/api/v2/team"
-
-    headers, _ = await get_auth_credentials()
-    headers.update({"Content-Type": "application/json"})
-
+    
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+    
     # Add pagination parameters
     params = {
         "page[size]": page_size,
         "page[number]": page_number,
     }
-
+    
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(url, headers=headers, params=params)
@@ -432,10 +338,13 @@ async def fetch_teams(
 async def fetch_team_memberships(team_id: str) -> List[Dict[str, Any]]:
     """Fetch team memberships from Datadog API."""
     url = f"{DATADOG_API_URL}/api/v2/team/{team_id}/memberships"
-
-    headers, _ = await get_auth_credentials()
-    headers.update({"Content-Type": "application/json"})
-
+    
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+    
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(url, headers=headers)
@@ -457,8 +366,11 @@ async def fetch_metrics(
     aggregation_by: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """Fetch metrics from Datadog API with flexible filtering."""
-
-    headers, _ = await get_auth_credentials()
+    
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
     
     # Build metric query
     query_parts = [f"{aggregation}:{metric_name}"]
@@ -531,8 +443,11 @@ async def fetch_metrics_list(
     cursor: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Fetch list of all available metrics from Datadog API."""
-
-    headers, _ = await get_auth_credentials()
+    
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
     
     # Use the v2 metrics endpoint to list all metrics
     url = f"{DATADOG_API_URL}/api/v2/metrics"
@@ -567,8 +482,11 @@ async def fetch_metric_available_fields(
     time_range: str = "1h",
 ) -> List[str]:
     """Fetch available fields/tags for a metric from Datadog API."""
-
-    headers, _ = await get_auth_credentials()
+    
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
     
     # Use the proper Datadog API endpoint to get all tags for a metric
     url = f"{DATADOG_API_URL}/api/v2/metrics/{metric_name}/all-tags"
@@ -612,8 +530,11 @@ async def fetch_metric_field_values(
     field_name: str,
 ) -> List[str]:
     """Fetch all possible values for a specific field of a metric from Datadog API."""
-
-    headers, _ = await get_auth_credentials()
+    
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
     
     # Use the same endpoint as get_metric_fields but extract values for specific field
     url = f"{DATADOG_API_URL}/api/v2/metrics/{metric_name}/all-tags"
@@ -658,8 +579,11 @@ async def fetch_service_definitions(
     schema_version: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Fetch service definitions from Datadog API."""
-
-    headers, _ = await get_auth_credentials()
+    
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
     
     # Use the service definitions endpoint
     url = f"{DATADOG_API_URL}/api/v2/services/definitions"
@@ -692,8 +616,11 @@ async def fetch_service_definition(
     schema_version: str = "v2.2",
 ) -> Dict[str, Any]:
     """Fetch a single service definition from Datadog API."""
-
-    headers = await get_auth_headers()
+    
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
     
     # Use the specific service definition endpoint
     url = f"{DATADOG_API_URL}/api/v2/services/definitions/{service_name}"
@@ -728,7 +655,7 @@ async def fetch_monitors(
 ) -> Dict[str, Any]:
     """Fetch monitors from Datadog API with pagination metadata."""
 
-    headers = await get_auth_headers(include_csrf=False)
+    headers = get_auth_headers(include_csrf=False)
     cookies = get_api_cookies()
 
     # Use the v1 monitors endpoint
@@ -776,7 +703,7 @@ async def get_monitor(monitor_id: int) -> Dict[str, Any]:
     """Get a specific monitor from Datadog API."""
     url = f"{DATADOG_API_URL}/api/v1/monitor/{monitor_id}"
     cookies = get_api_cookies()
-    headers = await get_auth_headers(include_csrf=False)
+    headers = get_auth_headers(include_csrf=False)
 
     async with httpx.AsyncClient() as client:
         try:
@@ -802,7 +729,7 @@ async def create_monitor(
     **kwargs,
 ) -> Dict[str, Any]:
     """Create a new monitor in Datadog API."""
-    headers = await get_auth_headers(include_csrf=True)
+    headers = get_auth_headers(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
     url = f"{DATADOG_API_URL}/api/v1/monitor"
@@ -848,7 +775,7 @@ async def update_monitor(
     **kwargs,
 ) -> Dict[str, Any]:
     """Update an existing monitor in Datadog API."""
-    headers = await get_auth_headers(include_csrf=True)
+    headers = get_auth_headers(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
     url = f"{DATADOG_API_URL}/api/v1/monitor/{monitor_id}"
@@ -886,7 +813,7 @@ async def update_monitor(
 
 async def delete_monitor(monitor_id: int) -> Dict[str, Any]:
     """Delete a monitor from Datadog API."""
-    headers = await get_auth_headers(include_csrf=True)
+    headers = get_auth_headers(include_csrf=True)
     cookies = get_api_cookies()
 
     url = f"{DATADOG_API_URL}/api/v1/monitor/{monitor_id}"
@@ -913,9 +840,12 @@ async def fetch_slos(
 ) -> List[Dict[str, Any]]:
     """Fetch SLOs from Datadog API."""
     url = f"{DATADOG_API_URL}/api/v1/slo"
-
-    headers = await get_auth_headers()
-    headers.update({"Content-Type": "application/json"})
+    
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
     
     params = {
         "limit": limit,
@@ -945,9 +875,12 @@ async def fetch_slos(
 async def fetch_slo_details(slo_id: str) -> Dict[str, Any]:
     """Fetch detailed information for a specific SLO."""
     url = f"{DATADOG_API_URL}/api/v1/slo/{slo_id}"
-
-    headers = await get_auth_headers()
-    headers.update({"Content-Type": "application/json"})
+    
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
     
     async with httpx.AsyncClient() as client:
         try:
@@ -972,9 +905,12 @@ async def fetch_slo_history(
 ) -> Dict[str, Any]:
     """Fetch SLO history data."""
     url = f"{DATADOG_API_URL}/api/v1/slo/{slo_id}/history"
-
-    headers = await get_auth_headers()
-    headers.update({"Content-Type": "application/json"})
+    
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
     
     params = {
         "from_ts": from_ts,
@@ -1010,7 +946,7 @@ async def create_notebook(
     """Create a new Datadog notebook."""
     url = f"{DATADOG_API_URL}/api/v1/notebooks"
 
-    headers = await get_auth_headers(include_csrf=True)
+    headers = get_auth_headers(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
     payload = {
@@ -1051,7 +987,7 @@ async def get_notebook(notebook_id: str) -> Dict[str, Any]:
     """Fetch a specific notebook by ID."""
     url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}"
 
-    headers = await get_auth_headers()
+    headers = get_auth_headers()
     headers["Content-Type"] = "application/json"
 
     async with httpx.AsyncClient() as client:
@@ -1077,7 +1013,7 @@ async def update_notebook(
     """Update a notebook's metadata."""
     url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}"
 
-    headers = await get_auth_headers(include_csrf=True)
+    headers = get_auth_headers(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
     payload = {
@@ -1121,7 +1057,7 @@ async def add_notebook_cell(
     """Add a cell to a notebook."""
     url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}/cells"
 
-    headers = await get_auth_headers(include_csrf=True)
+    headers = get_auth_headers(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
     cell_attributes = {"type": cell_type}
@@ -1171,7 +1107,7 @@ async def update_notebook_cell(
     """Update a cell in a notebook."""
     url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}/cells/{cell_id}"
 
-    headers = await get_auth_headers(include_csrf=True)
+    headers = get_auth_headers(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
     attributes = {}
@@ -1216,7 +1152,7 @@ async def delete_notebook_cell(
     """Delete a cell from a notebook."""
     url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}/cells/{cell_id}"
 
-    headers = await get_auth_headers(include_csrf=True)
+    headers = get_auth_headers(include_csrf=True)
 
     async with httpx.AsyncClient() as client:
         try:
@@ -1235,7 +1171,7 @@ async def delete_notebook(notebook_id: str) -> Dict[str, Any]:
     """Delete a notebook."""
     url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}"
 
-    headers = await get_auth_headers(include_csrf=True)
+    headers = get_auth_headers(include_csrf=True)
 
     async with httpx.AsyncClient() as client:
         try:
@@ -1270,8 +1206,11 @@ async def fetch_metric_formula(
     """
     import time
 
-    headers = await get_auth_headers()
-    headers.update({"Content-Type": "application/json"})
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+        "Content-Type": "application/json",
+    }
 
     # Calculate time range in milliseconds (V2 API uses milliseconds)
     to_timestamp = int(time.time()) * 1000
@@ -1370,7 +1309,7 @@ async def fetch_traces(
     """
     import time
 
-    headers = await get_auth_headers(include_csrf=False)
+    headers = get_auth_headers(include_csrf=False)
     headers["Content-Type"] = "application/json"
     cookies = get_api_cookies()
 
@@ -1454,7 +1393,7 @@ async def aggregate_traces(
     """
     import time
 
-    headers = await get_auth_headers(include_csrf=False)
+    headers = get_auth_headers(include_csrf=False)
     headers["Content-Type"] = "application/json"
     cookies = get_api_cookies()
 
