@@ -1286,6 +1286,175 @@ async def fetch_metric_formula(
             raise
 
 
+async def fetch_traces(
+    query: str = "*",
+    time_range: str = "1h",
+    limit: int = 10,
+    include_children: bool = False,
+    cursor: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Fetch APM traces from Datadog using the spans search API.
+
+    Args:
+        query: Trace query string (e.g., "@duration:>5000000000", "service:web")
+        time_range: Time range to look back (default: 1h)
+        limit: Maximum number of traces to return (default: 10)
+        include_children: Whether to include child spans (not applicable to search, used for filtering)
+        cursor: Pagination cursor from previous response
+
+    Returns:
+        Dict containing traces/spans data and pagination info
+    """
+    import time
+
+    headers = get_auth_headers(include_csrf=False)
+    headers["Content-Type"] = "application/json"
+    cookies = get_api_cookies()
+
+    # Calculate time range
+    to_timestamp = int(time.time())
+
+    time_deltas = {
+        "1h": 3600,
+        "4h": 14400,
+        "8h": 28800,
+        "1d": 86400,
+        "7d": 604800,
+        "14d": 1209600,
+        "30d": 2592000,
+    }
+
+    seconds_back = time_deltas.get(time_range, 3600)
+    from_timestamp = to_timestamp - seconds_back
+
+    # Build payload for spans search API
+    payload = {
+        "filter": {
+            "query": query,
+            "from": from_timestamp * 1000,  # Convert to milliseconds
+            "to": to_timestamp * 1000,
+        },
+        "options": {
+            "timezone": "UTC",
+        },
+        "page": {
+            "limit": limit,
+        },
+    }
+
+    if cursor:
+        payload["page"]["cursor"] = cursor
+
+    url = f"{DATADOG_API_URL}/api/v2/spans/events/search"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, headers=headers, json=payload, cookies=cookies)
+            response.raise_for_status()
+            data = response.json()
+
+            # Normalize response format
+            result = {
+                "data": data.get("data", []),
+                "meta": data.get("meta", {}),
+                "links": data.get("links", {}),
+            }
+
+            return result
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching traces: {e}")
+            if hasattr(e, "response"):
+                logger.error(f"Response: {e.response.text}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching traces: {e}")
+            raise
+
+
+async def aggregate_traces(
+    query: str = "*",
+    group_by: Optional[List[str]] = None,
+    time_range: str = "1h",
+    aggregation: str = "count",
+) -> Dict[str, Any]:
+    """
+    Aggregate APM traces by specified dimensions.
+
+    Args:
+        query: Trace query string
+        group_by: List of fields to group by (e.g., ["resource_name", "status"])
+        time_range: Time range to look back (default: 1h)
+        aggregation: Aggregation function (count, avg, max, min, sum)
+
+    Returns:
+        Dict containing aggregated trace data
+    """
+    import time
+
+    headers = get_auth_headers(include_csrf=False)
+    headers["Content-Type"] = "application/json"
+    cookies = get_api_cookies()
+
+    # Calculate time range
+    to_timestamp = int(time.time())
+
+    time_deltas = {
+        "1h": 3600,
+        "4h": 14400,
+        "8h": 28800,
+        "1d": 86400,
+        "7d": 604800,
+        "14d": 1209600,
+        "30d": 2592000,
+    }
+
+    seconds_back = time_deltas.get(time_range, 3600)
+    from_timestamp = to_timestamp - seconds_back
+
+    # Build payload for spans aggregation API
+    payload = {
+        "filter": {
+            "query": query,
+            "from": from_timestamp * 1000,  # Convert to milliseconds
+            "to": to_timestamp * 1000,
+        },
+        "compute": [
+            {
+                "aggregation": aggregation.upper(),
+                "metric": "@duration",  # Default to duration metric
+            }
+        ],
+    }
+
+    if group_by:
+        payload["group_by"] = [{"facet": field} for field in group_by]
+
+    url = f"{DATADOG_API_URL}/api/v2/spans/events/aggregate"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, headers=headers, json=payload, cookies=cookies)
+            response.raise_for_status()
+            data = response.json()
+
+            # Normalize response format
+            result = {
+                "data": data.get("data", []),
+                "meta": data.get("meta", {}),
+            }
+
+            return result
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error aggregating traces: {e}")
+            if hasattr(e, "response"):
+                logger.error(f"Response: {e.response.text}")
+            raise
+        except Exception as e:
+            logger.error(f"Error aggregating traces: {e}")
+            raise
+
+
 async def check_deployment_status(
     service: str,
     version_field: str,
