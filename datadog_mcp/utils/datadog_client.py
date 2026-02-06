@@ -122,10 +122,14 @@ async def fetch_ci_pipelines(
     cursor: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Fetch CI pipelines from Datadog API."""
+    # Try the v2 CI Visibility endpoint with proper content-type
     url = f"{DATADOG_API_URL}/api/v2/ci/pipelines/events/search"
 
     headers = await get_auth_headers()
-    headers.update({"Content-Type": "application/json"})
+    headers.update({
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    })
 
     # Build query filter
     query_parts = []
@@ -148,12 +152,29 @@ async def fetch_ci_pipelines(
     if cursor:
         payload["page"]["cursor"] = cursor
 
+    cookies = get_api_cookies()
+
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(url, headers=headers, json=payload)
+            response = await client.post(url, headers=headers, json=payload, cookies=cookies)
             response.raise_for_status()
             return response.json()
         except httpx.HTTPError as e:
+            # Try alternative endpoint if v2 fails
+            if e.response.status_code == 415:
+                logger.info(f"CI Pipelines v2 endpoint returned 415, trying v1 endpoint")
+                # Fallback to list endpoint if available
+                alt_url = f"{DATADOG_API_URL}/api/v2/ci/pipelines"
+                try:
+                    params = {"page[size]": limit}
+                    if cursor:
+                        params["page[cursor]"] = cursor
+                    response = await client.get(alt_url, headers=headers, params=params, cookies=cookies)
+                    response.raise_for_status()
+                    return response.json()
+                except Exception as alt_e:
+                    logger.error(f"Both CI pipeline endpoints failed: {alt_e}")
+                    raise e
             logger.error(f"HTTP error fetching pipelines: {e}")
             raise
         except Exception as e:
@@ -168,53 +189,69 @@ async def fetch_logs(
     limit: int = 50,
     cursor: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Fetch logs from Datadog API with flexible filtering using SDK."""
+    """Fetch logs from Datadog API with flexible filtering using raw HTTP."""
     try:
         # Build query filter
         query_parts = []
-        
+
         # Add filters from the filters dictionary
         if filters:
             for key, value in filters.items():
                 query_parts.append(f"{key}:{value}")
-        
+
         # Add free-text query
         if query:
             query_parts.append(query)
-        
+
         combined_query = " AND ".join(query_parts) if query_parts else "*"
-        
-        # Create request body
-        body = LogsListRequest(
-            filter=LogsQueryFilter(
-                query=combined_query,
-                _from=f"now-{time_range}",
-                to="now",
-            ),
-            options=LogsQueryOptions(
-                timezone="GMT",
-            ),
-            page=LogsListRequestPage(
-                limit=limit,
-                cursor=cursor,
-            ),
-            sort=LogsSort.TIMESTAMP_DESCENDING,  # Most recent first
-        )
-        
-        configuration = get_datadog_configuration()
-        with ApiClient(configuration) as api_client:
-            api_instance = LogsApi(api_client)
-            response = api_instance.list_logs(body=body)
-            
-            # Convert to dict format for backward compatibility
-            result = {
-                "data": [log.to_dict() for log in response.data] if response.data else [],
-                "meta": response.meta.to_dict() if response.meta else {},
-                #"links": response.links.to_dict() if response.links else {},
+
+        # Use raw HTTP instead of SDK to use AWS credentials
+        headers = await get_auth_headers()
+        headers.update({"Content-Type": "application/json"})
+
+        # Build payload for logs list API
+        payload = {
+            "filter": {
+                "query": combined_query,
+                "from": f"now-{time_range}",
+                "to": "now",
+            },
+            "options": {
+                "timezone": "GMT",
+            },
+            "page": {
+                "limit": limit,
+            },
+            "sort": {
+                "timestamp": "desc"
             }
-            
-            return result
-    
+        }
+
+        if cursor:
+            payload["page"]["cursor"] = cursor
+
+        url = f"{DATADOG_API_URL}/api/v2/logs/events/search"
+        cookies = get_api_cookies()
+
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(url, headers=headers, json=payload, cookies=cookies)
+                response.raise_for_status()
+                data = response.json()
+
+                # Normalize response format
+                result = {
+                    "data": data.get("data", []),
+                    "meta": data.get("meta", {}),
+                }
+
+                return result
+            except httpx.HTTPError as e:
+                logger.error(f"HTTP error fetching logs: {e}")
+                if hasattr(e, "response"):
+                    logger.error(f"Response: {e.response.text}")
+                raise
+
     except Exception as e:
         logger.error(f"Error fetching logs: {e}")
         raise
@@ -228,66 +265,79 @@ async def fetch_logs_filter_values(
 ) -> Dict[str, Any]:
     """
     Fetch possible values for a specific log field to understand filtering options.
-    
+
     Args:
         field_name: The field to get possible values for (e.g., 'service', 'env', 'status', 'host')
         time_range: Time range to look back (default: 1h)
         query: Optional query to filter logs before aggregation
         limit: Maximum number of values to return
-        
+
     Returns:
         Dict containing the field values and their counts
     """
     try:
         # Build base query
         base_query = query if query else "*"
-        
-        # Create aggregation request to group by the specified field
-        body = LogsAggregateRequest(
-            compute=[
-                LogsCompute(
-                    aggregation=LogsAggregationFunction.COUNT,
-                    type=LogsComputeType.TOTAL,
-                ),
+
+        # Use raw HTTP for aggregation instead of SDK to use AWS credentials
+        headers = await get_auth_headers()
+        headers.update({"Content-Type": "application/json"})
+
+        # Build payload for logs aggregation API
+        payload = {
+            "compute": [
+                {
+                    "aggregation": "count",
+                    "type": "total",
+                }
             ],
-            filter=LogsQueryFilter(
-                query=base_query,
-                _from=f"now-{time_range}",
-                to="now",
-            ),
-            group_by=[
-                LogsGroupBy(
-                    facet=field_name,
-                    limit=limit,
-                ),
+            "filter": {
+                "query": base_query,
+                "from": f"now-{time_range}",
+                "to": "now",
+            },
+            "group_by": [
+                {
+                    "facet": field_name,
+                    "limit": limit,
+                }
             ],
-        )
-        
-        configuration = get_datadog_configuration()
-        with ApiClient(configuration) as api_client:
-            api_instance = LogsApi(api_client)
-            response = api_instance.aggregate_logs(body=body)
-            
-            # Extract field values from buckets
-            field_values = []
-            if response.data and response.data.buckets:
-                for bucket in response.data.buckets:
-                    if bucket.by and field_name in bucket.by:
-                        field_values.append({
-                            "value": bucket.by[field_name],
-                            "count": bucket.computes.get("c0", 0) if bucket.computes else 0
-                        })
-            
-            # Sort by count descending
-            field_values.sort(key=lambda x: x["count"], reverse=True)
-            
-            return {
-                "field": field_name,
-                "time_range": time_range,
-                "values": field_values,
-                "total_values": len(field_values),
-            }
-    
+        }
+
+        url = f"{DATADOG_API_URL}/api/v2/logs/events/aggregate"
+        cookies = get_api_cookies()
+
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(url, headers=headers, json=payload, cookies=cookies)
+                response.raise_for_status()
+                data = response.json()
+
+                # Extract field values from buckets
+                field_values = []
+                if "data" in data and data["data"] and "buckets" in data["data"]:
+                    for bucket in data["data"]["buckets"]:
+                        if "by" in bucket and field_name in bucket["by"]:
+                            field_values.append({
+                                "value": bucket["by"][field_name],
+                                "count": bucket.get("computes", {}).get("c0", 0) if bucket.get("computes") else 0
+                            })
+
+                # Sort by count descending
+                field_values.sort(key=lambda x: x["count"], reverse=True)
+
+                return {
+                    "field": field_name,
+                    "time_range": time_range,
+                    "values": field_values,
+                    "total_values": len(field_values),
+                }
+            except httpx.HTTPError as e:
+                logger.error(f"HTTP error fetching filter values for field '{field_name}': {e}")
+                if hasattr(e, "response"):
+                    logger.error(f"Response: {e.response.text}")
+                raise
+
     except Exception as e:
         logger.error(f"Error fetching filter values for field '{field_name}': {e}")
         raise
