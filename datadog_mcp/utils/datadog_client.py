@@ -27,24 +27,59 @@ DATADOG_APP_KEY = os.getenv("DD_APP_KEY")
 def get_cookie() -> Optional[str]:
     """Get cookie from environment variable or file (read fresh each time).
 
+    Supports formats:
+    - Raw value: c9829ab768105289702a99...
+    - Named format: dogweb=c9829ab768105289702a99...
+    - Netscape jar format: dogweb    c9829ab768105289702a99...
+
     This allows updating the cookie without restarting the server.
     """
     # First check environment variable
     env_cookie = os.getenv("DD_COOKIE")
     if env_cookie:
-        return env_cookie
+        return format_cookie_header(env_cookie)
 
     # Then check cookie file
     if os.path.isfile(COOKIE_FILE_PATH):
         try:
             with open(COOKIE_FILE_PATH, "r") as f:
-                cookie = f.read().strip()
-                if cookie:
-                    return cookie
+                cookie_raw = f.read().strip()
+                if cookie_raw:
+                    return format_cookie_header(cookie_raw)
         except Exception as e:
             logger.warning(f"Failed to read cookie file {COOKIE_FILE_PATH}: {e}")
 
     return None
+
+
+def format_cookie_header(cookie_value: str) -> str:
+    """Format cookie value into proper Cookie header format.
+
+    Handles:
+    - Raw hex/token: c9829ab7... → dogweb=c9829ab7...
+    - Already named: dogweb=c9829ab7... → dogweb=c9829ab7...
+    - Netscape format: dogweb    c9829ab7... → dogweb=c9829ab7...
+    """
+    if not cookie_value:
+        return ""
+
+    cookie_value = cookie_value.strip()
+
+    # Check if it's Netscape format (name whitespace value)
+    if "\t" in cookie_value:
+        parts = cookie_value.split("\t")
+        if len(parts) >= 7:  # Netscape format has 7 fields
+            return f"{parts[5]}={parts[6]}"  # name=value
+        elif len(parts) == 2:
+            return f"{parts[0]}={parts[1]}"
+
+    # Check if it's already in name=value format
+    if "=" in cookie_value:
+        return cookie_value
+
+    # Otherwise, treat as raw token and add dogweb prefix
+    # This handles the case where the file contains just the value
+    return f"dogweb={cookie_value}"
 
 
 def save_cookie(cookie: str) -> str:
@@ -376,10 +411,39 @@ async def fetch_logs(
                     }
                 }
             except httpx.HTTPError as e:
-                logger.error(f"HTTP error fetching logs: {e}")
                 if hasattr(e, 'response') and e.response is not None:
-                    logger.error(f"Response status: {e.response.status_code}")
-                    logger.error(f"Response body: {e.response.text}")
+                    status = e.response.status_code
+                    body = e.response.text
+                    logger.error(f"HTTP error fetching logs: {e}")
+                    logger.error(f"Response status: {status}")
+                    logger.error(f"Response body: {body}")
+
+                    if status == 401:
+                        logger.error(
+                            "\n❌ AUTHENTICATION FAILED (401 Unauthorized)\n"
+                            "Cookies may be invalid or in wrong format.\n\n"
+                            "COOKIE SETUP:\n"
+                            "1. Save cookies to: ~/.datadog_cookie\n"
+                            "2. Save CSRF token to: ~/.datadog_csrf\n\n"
+                            "TO EXTRACT FROM BROWSER:\n"
+                            "1. Go to https://app.datadoghq.com\n"
+                            "2. Open DevTools → Application → Cookies\n"
+                            "3. Export as Netscape format OR\n"
+                            "4. Copy specific cookie value (dd-session, etc.)\n\n"
+                            "CSRF TOKEN:\n"
+                            "1. Make any POST request in DevTools → Network\n"
+                            "2. Find request header: x-csrf-token: <value>\n"
+                            "3. Save that value to ~/.datadog_csrf\n\n"
+                            "Current cookie file: ~/.datadog_cookie\n"
+                            "Current CSRF file: ~/.datadog_csrf"
+                        )
+                    elif status == 403:
+                        logger.error(
+                            "\n⚠️  PERMISSION DENIED (403 Forbidden)\n"
+                            "Cookie/token valid, but API key lacks required permissions.\n"
+                            "For logs: Ensure 'logs_read_data' permission is granted.\n"
+                            "For traces: Ensure 'traces_read_data' permission is granted."
+                        )
                 raise
             except Exception as e:
                 logger.error(f"Error fetching logs: {e}")
@@ -413,10 +477,36 @@ async def fetch_logs(
                 response.raise_for_status()
                 return response.json()
             except httpx.HTTPError as e:
-                logger.error(f"HTTP error fetching logs: {e}")
                 if hasattr(e, 'response') and e.response is not None:
-                    logger.error(f"Response status: {e.response.status_code}")
-                    logger.error(f"Response body: {e.response.text}")
+                    status = e.response.status_code
+                    body = e.response.text
+                    logger.error(f"HTTP error fetching logs: {e}")
+                    logger.error(f"Response status: {status}")
+                    logger.error(f"Response body: {body}")
+
+                    if status == 401:
+                        logger.error(
+                            "\n❌ AUTHENTICATION FAILED (401 Unauthorized)\n"
+                            "API key or token is invalid/expired.\n\n"
+                            "API KEY SETUP:\n"
+                            "1. Set environment variables:\n"
+                            "   export DD_API_KEY=<your-api-key>\n"
+                            "   export DD_APP_KEY=<your-app-key>\n\n"
+                            "2. OR set in AWS Secrets Manager:\n"
+                            "   Path: /DEVELOPMENT/datadog/API_KEY\n"
+                            "   Path: /DEVELOPMENT/datadog/APP_KEY\n\n"
+                            "3. OR create in home directory:\n"
+                            "   echo $DD_API_KEY > ~/.datadog_api_key\n"
+                            "   echo $DD_APP_KEY > ~/.datadog_app_key"
+                        )
+                    elif status == 403:
+                        logger.error(
+                            "\n⚠️  PERMISSION DENIED (403 Forbidden)\n"
+                            "Credentials valid, but API key lacks required scopes.\n"
+                            "For logs: Grant 'logs_read_data' permission\n"
+                            "For traces: Grant 'traces_read_data' permission\n"
+                            "Contact Datadog admin to update API key scopes."
+                        )
                 raise
             except Exception as e:
                 logger.error(f"Error fetching logs: {e}")
