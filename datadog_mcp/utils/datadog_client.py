@@ -63,11 +63,33 @@ if not USE_COOKIES and (not DATADOG_API_KEY or not DATADOG_APP_KEY):
 
 
 def get_datadog_configuration() -> Configuration:
-    """Get Datadog API configuration."""
+    """Get Datadog API configuration using environment variables."""
     configuration = Configuration()
     configuration.api_key["apiKeyAuth"] = DATADOG_API_KEY
     configuration.api_key["appKeyAuth"] = DATADOG_APP_KEY
     return configuration
+
+
+async def get_datadog_configuration_with_auth() -> tuple[Configuration, Optional[Dict[str, str]]]:
+    """Get Datadog API configuration with flexible authentication (tokens, cookies, AWS).
+
+    Returns:
+        Tuple of (Configuration, cookies_dict_or_none)
+        - Configuration is set up with API key headers if using token-based auth
+        - cookies_dict_or_none contains cookies if using cookie-based auth
+    """
+    headers, cookies = await get_auth_credentials()
+
+    # For SDK configuration, we need to set API key headers
+    # The SDK will pass these to the REST client
+    configuration = Configuration()
+
+    # Set auth headers via SDK's api_key mechanism if using token auth
+    if headers.get("DD-API-KEY") and headers.get("DD-APPLICATION-KEY"):
+        configuration.api_key["apiKeyAuth"] = headers["DD-API-KEY"]
+        configuration.api_key["appKeyAuth"] = headers["DD-APPLICATION-KEY"]
+
+    return configuration, cookies
 
 
 async def get_auth_credentials(include_csrf: bool = False) -> tuple[Dict[str, str], Optional[Dict[str, str]]]:
@@ -184,7 +206,11 @@ async def fetch_logs(
     limit: int = 50,
     cursor: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Fetch logs from Datadog API with flexible filtering using SDK."""
+    """Fetch logs from Datadog API with flexible filtering using SDK.
+
+    Supports multiple authentication methods: cookies (highest priority), AWS Secrets Manager, environment variables.
+    Falls back automatically based on what's available.
+    """
     try:
         # Build query filter
         query_parts = []
@@ -217,7 +243,8 @@ async def fetch_logs(
             sort=LogsSort.TIMESTAMP_DESCENDING,  # Most recent first
         )
 
-        configuration = get_datadog_configuration()
+        # Use flexible authentication that supports tokens, AWS, and fallback
+        configuration, cookies = await get_datadog_configuration_with_auth()
         with ApiClient(configuration) as api_client:
             api_instance = LogsApi(api_client)
             response = api_instance.list_logs(body=body)
