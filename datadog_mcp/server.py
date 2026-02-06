@@ -14,7 +14,7 @@ from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, ServerCapabilities, TextContent
 
-from .tools import get_fingerprints, list_pipelines, get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values
+from .tools import get_fingerprints, list_pipelines, get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values, create_notebook, get_notebook, update_notebook, add_notebook_cell, update_notebook_cell, delete_notebook_cell, delete_notebook
 
 # Configure logging
 logging.basicConfig(
@@ -80,6 +80,34 @@ TOOLS = {
     "list_slos": {
         "definition": list_slos.get_tool_definition,
         "handler": list_slos.handle_call,
+    },
+    "create_notebook": {
+        "definition": create_notebook.get_tool_definition,
+        "handler": create_notebook.handle_call,
+    },
+    "get_notebook": {
+        "definition": get_notebook.get_tool_definition,
+        "handler": get_notebook.handle_call,
+    },
+    "update_notebook": {
+        "definition": update_notebook.get_tool_definition,
+        "handler": update_notebook.handle_call,
+    },
+    "add_notebook_cell": {
+        "definition": add_notebook_cell.get_tool_definition,
+        "handler": add_notebook_cell.handle_call,
+    },
+    "update_notebook_cell": {
+        "definition": update_notebook_cell.get_tool_definition,
+        "handler": update_notebook_cell.handle_call,
+    },
+    "delete_notebook_cell": {
+        "definition": delete_notebook_cell.get_tool_definition,
+        "handler": delete_notebook_cell.handle_call,
+    },
+    "delete_notebook": {
+        "definition": delete_notebook.get_tool_definition,
+        "handler": delete_notebook.handle_call,
     },
 }
 

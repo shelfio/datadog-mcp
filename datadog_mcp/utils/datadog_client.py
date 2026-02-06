@@ -741,3 +741,252 @@ async def fetch_slo_history(
         except Exception as e:
             logger.error(f"Error fetching SLO history: {e}")
             raise
+
+
+# Notebook Management Functions
+
+async def create_notebook(
+    title: str,
+    description: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+    cells: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    """Create a new Datadog notebook."""
+    url = f"{DATADOG_API_URL}/api/v1/notebooks"
+
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    payload = {
+        "data": {
+            "type": "notebooks",
+            "attributes": {
+                "name": title,
+            }
+        }
+    }
+
+    if description:
+        payload["data"]["attributes"]["description"] = description
+
+    if tags:
+        payload["data"]["attributes"]["tags"] = tags
+
+    if cells:
+        payload["data"]["attributes"]["cells"] = cells
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error creating notebook: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error creating notebook: {e}")
+            raise
+
+
+async def get_notebook(notebook_id: str) -> Dict[str, Any]:
+    """Fetch a specific notebook by ID."""
+    url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}"
+
+    headers = get_auth_headers()
+    headers["Content-Type"] = "application/json"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching notebook: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching notebook: {e}")
+            raise
+
+
+async def update_notebook(
+    notebook_id: str,
+    title: Optional[str] = None,
+    description: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """Update a notebook's metadata."""
+    url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}"
+
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    payload = {
+        "data": {
+            "type": "notebooks",
+            "id": notebook_id,
+            "attributes": {}
+        }
+    }
+
+    if title:
+        payload["data"]["attributes"]["name"] = title
+    if description is not None:
+        payload["data"]["attributes"]["description"] = description
+    if tags is not None:
+        payload["data"]["attributes"]["tags"] = tags
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.put(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error updating notebook: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error updating notebook: {e}")
+            raise
+
+
+async def add_notebook_cell(
+    notebook_id: str,
+    cell_type: str,
+    position: Optional[int] = None,
+    title: Optional[str] = None,
+    query: Optional[str] = None,
+    content: Optional[str] = None,
+    visualization: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Add a cell to a notebook."""
+    url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}/cells"
+
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    cell_attributes = {"type": cell_type}
+
+    if title:
+        cell_attributes["title"] = title
+    if query:
+        cell_attributes["query"] = query
+    if content:
+        cell_attributes["content"] = content
+    if visualization:
+        cell_attributes["visualization"] = visualization
+
+    payload = {
+        "data": {
+            "type": "notebook_cells",
+            "attributes": cell_attributes
+        }
+    }
+
+    if position is not None:
+        payload["data"]["attributes"]["position"] = position
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error adding notebook cell: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error adding notebook cell: {e}")
+            raise
+
+
+async def update_notebook_cell(
+    notebook_id: str,
+    cell_id: str,
+    title: Optional[str] = None,
+    query: Optional[str] = None,
+    content: Optional[str] = None,
+    visualization: Optional[str] = None,
+    position: Optional[int] = None,
+) -> Dict[str, Any]:
+    """Update a cell in a notebook."""
+    url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}/cells/{cell_id}"
+
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    attributes = {}
+
+    if title is not None:
+        attributes["title"] = title
+    if query is not None:
+        attributes["query"] = query
+    if content is not None:
+        attributes["content"] = content
+    if visualization is not None:
+        attributes["visualization"] = visualization
+    if position is not None:
+        attributes["position"] = position
+
+    payload = {
+        "data": {
+            "type": "notebook_cells",
+            "id": cell_id,
+            "attributes": attributes
+        }
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.put(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {})
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error updating notebook cell: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error updating notebook cell: {e}")
+            raise
+
+
+async def delete_notebook_cell(
+    notebook_id: str,
+    cell_id: str,
+) -> Dict[str, Any]:
+    """Delete a cell from a notebook."""
+    url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}/cells/{cell_id}"
+
+    headers = get_auth_headers(include_csrf=True)
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.delete(url, headers=headers)
+            response.raise_for_status()
+            return {"status": "deleted", "cell_id": cell_id}
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error deleting notebook cell: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error deleting notebook cell: {e}")
+            raise
+
+
+async def delete_notebook(notebook_id: str) -> Dict[str, Any]:
+    """Delete a notebook."""
+    url = f"{DATADOG_API_URL}/api/v1/notebooks/{notebook_id}"
+
+    headers = get_auth_headers(include_csrf=True)
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.delete(url, headers=headers)
+            response.raise_for_status()
+            return {"status": "deleted", "notebook_id": notebook_id}
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error deleting notebook: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error deleting notebook: {e}")
+            raise
