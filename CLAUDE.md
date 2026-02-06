@@ -2,20 +2,40 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Development Commands
+## Development Workflow (CRITICAL)
 
-### Building and Running
+**IMPORTANT**: Always write tests FIRST before implementing code. This is non-negotiable.
+
+### Test-First Development Pattern
+1. **Write test file** for your feature (e.g., `tests/test_create_monitor.py`)
+2. **Run tests** - they will fail (RED)
+3. **Implement tool/client code** to make tests pass (GREEN)
+4. **Run full test suite** before submitting PR
+
+### Branch Management (CRITICAL)
+**NEVER push to `andreidore` branch.** Always push to:
+- `hacctarr` - for feature branches
+- `main` - only after PR review and approval
+
+### Development Commands
+
+#### Building and Running
 - `uv sync` - Install dependencies using UV package manager
 - `uv run datadog_mcp/server.py` - Run the MCP server locally
 - `podman build -t datadog-mcp .` - Build Podman image
 - `podman-compose up` - Run with Podman Compose (requires DD_API_KEY and DD_APP_KEY env vars)
 
-### Testing
+#### Testing (Required before every PR)
 - `uv run pytest tests/test_integration.py` - Test core server functionality (no API required)
-- `uv run pytest tests/test_tools_working.py` - Test tool functionality (no API required) 
-- `uv run pytest tests/` - Run all tests
+- `uv run pytest tests/test_tools_working.py` - Test tool functionality (no API required)
+- `uv run pytest tests/` - Run all tests (REQUIRED before PR submission)
 - Most tests use mocking and don't require real Datadog API credentials
 - For integration tests with real API, set DD_API_KEY and DD_APP_KEY environment variables
+
+#### Syntax Checking
+- `uv run python -m py_compile datadog_mcp/server.py` - Check main server syntax
+- `uv run python -m py_compile datadog_mcp/tools/*.py` - Check all tool implementations
+- `uv run python -m py_compile datadog_mcp/utils/*.py` - Check utility modules
 
 ### Syntax Checking
 - `uv run python -m py_compile datadog_mcp/server.py` - Check main server syntax

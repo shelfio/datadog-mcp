@@ -14,7 +14,7 @@ from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, ServerCapabilities, TextContent
 
-from .tools import get_fingerprints, list_pipelines, get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values, create_notebook, get_notebook, update_notebook, add_notebook_cell, update_notebook_cell, delete_notebook_cell, delete_notebook
+from .tools import get_fingerprints, list_pipelines, get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values, get_monitor, create_monitor, update_monitor, delete_monitor, create_notebook, get_notebook, update_notebook, add_notebook_cell, update_notebook_cell, delete_notebook_cell, delete_notebook
 
 # Configure logging
 logging.basicConfig(
@@ -76,6 +76,22 @@ TOOLS = {
     "list_monitors": {
         "definition": list_monitors.get_tool_definition,
         "handler": list_monitors.handle_call,
+    },
+    "get_monitor": {
+        "definition": get_monitor.get_tool_definition,
+        "handler": get_monitor.handle_call,
+    },
+    "create_monitor": {
+        "definition": create_monitor.get_tool_definition,
+        "handler": create_monitor.handle_call,
+    },
+    "update_monitor": {
+        "definition": update_monitor.get_tool_definition,
+        "handler": update_monitor.handle_call,
+    },
+    "delete_monitor": {
+        "definition": delete_monitor.get_tool_definition,
+        "handler": delete_monitor.handle_call,
     },
     "list_slos": {
         "definition": list_slos.get_tool_definition,
