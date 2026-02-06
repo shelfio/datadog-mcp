@@ -1,6 +1,6 @@
 """Add a cell to a Datadog notebook."""
 
-from mcp.types import Tool, TextContent
+from mcp.types import CallToolRequest, CallToolResult, Tool, TextContent
 from ..utils.datadog_client import add_notebook_cell as client_add_notebook_cell
 
 
@@ -48,7 +48,7 @@ def get_tool_definition() -> Tool:
     )
 
 
-async def handle_call(request):
+async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the tool call."""
     try:
         notebook_id = request.arguments.get("notebook_id")
@@ -81,8 +81,14 @@ async def handle_call(request):
             f"- **URL**: [{notebook_url}]({notebook_url})\n"
         )
 
-        return [TextContent(type="text", text=formatted_result)]
+        return CallToolResult(
+            content=[TextContent(type="text", text=formatted_result)],
+            isError=False,
+        )
 
     except Exception as e:
         error_text = f"Error adding cell to notebook: {str(e)}"
-        return [TextContent(type="text", text=error_text)]
+        return CallToolResult(
+            content=[TextContent(type="text", text=error_text)],
+            isError=True,
+        )

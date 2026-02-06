@@ -357,18 +357,11 @@ async def fetch_ci_pipelines(
 ) -> Dict[str, Any]:
     """Fetch CI pipelines from Datadog API.
 
-    Note: CI Pipelines endpoint only supports API key authentication (no v1 internal endpoint).
-    Cookies are not supported for this endpoint.
+    Supports both API key authentication and cookie-based authentication.
+    API keys are the preferred method for v2 CI Visibility API.
     """
-    cookie = get_cookie()
-    if cookie:
-        logger.warning(
-            "CI Pipelines endpoint does not support cookie authentication. "
-            "Please use API key authentication (DD_API_KEY and DD_APP_KEY) instead."
-        )
-
     url = f"{get_api_url()}/api/v2/ci/pipelines/events/search"
-    headers = get_auth_headers()  # Will use API keys since no cookie endpoint exists
+    headers = get_auth_headers()  # Uses cookie or API keys depending on available credentials
 
     # Build query filter
     query_parts = []
@@ -1340,34 +1333,42 @@ async def fetch_monitors(
     monitor_tags: str = "",
     page_size: int = 50,
     page: int = 0,
-) -> List[Dict[str, Any]]:
+) -> Dict[str, Any]:
     """Fetch monitors from Datadog API."""
-    
+
     headers = get_auth_headers()
-    
+
     # Use the v1 monitors endpoint
     url = f"{get_api_url()}/api/v1/monitor"
-    
+
     # Build query parameters
     params = {}
-    
+
     if tags:
         params["tags"] = tags
     if name:
         params["name"] = name
     if monitor_tags:
         params["monitor_tags"] = monitor_tags
-    
+
     # Add pagination parameters
     params["page_size"] = page_size
     params["page"] = page
-    
+
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(url, headers=headers, params=params)
             response.raise_for_status()
-            return response.json()
-            
+            monitors = response.json()
+
+            # v1 API returns array directly, wrap in dict for compatibility
+            return {
+                "monitors": monitors if isinstance(monitors, list) else [],
+                "returned": len(monitors) if isinstance(monitors, list) else 0,
+                "has_more": False,  # v1 API doesn't provide pagination info
+                "next_page": None,
+            }
+
         except httpx.HTTPError as e:
             logger.error(f"HTTP error fetching monitors: {e}")
             raise

@@ -72,7 +72,6 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         response = await aggregate_traces(
             query=query,
             group_by=group_by if group_by else None,
-            aggregation=aggregation,
             time_range=time_range,
         )
 

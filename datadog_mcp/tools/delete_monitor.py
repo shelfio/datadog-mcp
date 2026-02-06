@@ -20,7 +20,7 @@ def get_tool_definition() -> Tool:
             "type": "object",
             "properties": {
                 "monitor_id": {
-                    "type": "integer",
+                    "type": "string",
                     "description": "The ID of the monitor to delete",
                 },
             },
@@ -39,6 +39,15 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         if not monitor_id:
             return CallToolResult(
                 content=[TextContent(type="text", text="Error: monitor_id is required")],
+                isError=True,
+            )
+
+        # Convert monitor_id to int if it's a string
+        try:
+            monitor_id = int(monitor_id)
+        except (ValueError, TypeError):
+            return CallToolResult(
+                content=[TextContent(type="text", text="Error: monitor_id must be a valid integer")],
                 isError=True,
             )
 

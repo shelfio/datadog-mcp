@@ -40,11 +40,6 @@ def get_tool_definition() -> Tool:
                     "minimum": 1,
                     "maximum": 100,
                 },
-                "include_children": {
-                    "type": "boolean",
-                    "description": "Whether to include child spans (spans within traces)",
-                    "default": False,
-                },
                 "cursor": {
                     "type": "string",
                     "description": "Pagination cursor from previous response (for getting next page)",
@@ -71,7 +66,6 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         query = args.get("query", "*")
         time_range = args.get("time_range", "1h")
         limit = args.get("limit", 10)
-        include_children = args.get("include_children", False)
         cursor = args.get("cursor", "")
         format_type = args.get("format", "table")
 
@@ -80,7 +74,6 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
             query=query,
             time_range=time_range,
             limit=limit,
-            include_children=include_children,
             cursor=cursor if cursor else None,
         )
 

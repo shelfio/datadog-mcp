@@ -10,11 +10,7 @@ from mcp.types import CallToolRequest, CallToolResult, Tool, TextContent
 
 logger = logging.getLogger(__name__)
 
-from ..utils.datadog_client import check_deployment_status
-from ..utils.formatters import (
-    format_deployment_status_summary,
-    format_deployment_status_detailed,
-)
+from ..utils.datadog_client import fetch_logs
 
 
 def get_tool_definition() -> Tool:
@@ -91,30 +87,59 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
             )
 
         # Check deployment status
-        status = await check_deployment_status(
-            service=service,
-            version_field=version_field,
-            version_value=version_value,
-            environment=environment,
+        # Build filters for log query
+        filters = {
+            "service": service,
+            version_field: version_value,
+        }
+
+        if environment:
+            filters["env"] = environment
+
+        # Check deployment by querying logs for the version
+        logs = await fetch_logs(
             time_range=time_range,
+            filters=filters,
         )
+
+        log_entries = logs.get("data", [])
+        found = len(log_entries) > 0
 
         # Format output
         if format_type == "json":
-            content = json.dumps(status, indent=2)
-        elif format_type == "detailed":
-            content = format_deployment_status_detailed(status)
-        else:  # summary
-            content = format_deployment_status_summary(status)
+            result = {
+                "service": service,
+                "version_field": version_field,
+                "version_value": version_value,
+                "environment": environment or "all",
+                "time_range": time_range,
+                "deployed": found,
+                "log_count": len(log_entries),
+                "logs": log_entries[:10],
+            }
+            content = json.dumps(result, indent=2)
+        else:
+            status_text = "✅ DEPLOYED" if found else "❌ NOT FOUND"
+            content = (
+                f"{status_text}\n\n"
+                f"Service: {service}\n"
+                f"Version Field: {version_field}\n"
+                f"Version Value: {version_value}\n"
+                f"Environment: {environment or 'all'}\n"
+                f"Time Range: {time_range}\n"
+                f"Matching Logs: {len(log_entries)}\n"
+            )
 
-        # Add header
-        env_str = f" ({environment})" if environment else ""
-        summary = f"Deployment Check: {service}{env_str} | Field: {version_field}"
-
-        final_content = f"{summary}\n{'=' * len(summary)}\n\n{content}"
+            if found and format_type == "detailed":
+                content += "\nRecent Logs:\n"
+                for i, log in enumerate(log_entries[:5], 1):
+                    attrs = log.get("attributes", {})
+                    msg = attrs.get("message", "N/A")
+                    ts = attrs.get("timestamp", "N/A")
+                    content += f"{i}. [{ts}] {msg}\n"
 
         return CallToolResult(
-            content=[TextContent(type="text", text=final_content)],
+            content=[TextContent(type="text", text=content)],
             isError=False,
         )
 
