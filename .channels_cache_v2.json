@@ -1,0 +1,4852 @@
+[
+  {
+    "id": "C09BPU9C0MN",
+    "name": "mpdm-marc.edward--mason--joe.santini-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @mason @joe.santini",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08K4EXSTRP",
+    "name": "mpdm-steve.skloot--andrew.keating--marc.edward-1",
+    "topic": "",
+    "purpose": "Group messaging with: @steve.skloot @andrew.keating @marc.edward",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08JN5FGM4P",
+    "name": "mpdm-trent.kriete--kodie.artner--keegan.sotebeer--marc.edward--timothy.ohtake-1",
+    "topic": "",
+    "purpose": "Group messaging with: @trent.kriete @kodie.artner @keegan.sotebeer @marc.edward @timothy.ohtake",
+    "memberCount": 5,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C093E9HSJ74",
+    "name": "mpdm-ellie.horita--timothy.ohtake--kodie.artner--marc.edward--trent.kriete-1",
+    "topic": "",
+    "purpose": "Group messaging with: @ellie.horita @timothy.ohtake @kodie.artner @marc.edward @trent.kriete",
+    "memberCount": 5,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C0963DDRK6C",
+    "name": "mpdm-joe.santini--marc.edward--keegan.sotebeer-1",
+    "topic": "",
+    "purpose": "Group messaging with: @joe.santini @marc.edward @keegan.sotebeer",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08S2MX2TT7",
+    "name": "mpdm-cameron.palmer--marc.edward--timothy.ohtake--drew.connelly--keegan.sotebeer-1",
+    "topic": "",
+    "purpose": "Group messaging with: @cameron.palmer @marc.edward @timothy.ohtake @drew.connelly @keegan.sotebeer",
+    "memberCount": 5,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C088TP1M52A",
+    "name": "mpdm-marc.edward--mason--drew.connelly-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @mason @drew.connelly",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C098GCANCSZ",
+    "name": "mpdm-pedro--marc.edward--cathy.lindemann--timothy.ohtake-1",
+    "topic": "",
+    "purpose": "Group messaging with: @pedro @marc.edward @cathy.lindemann @timothy.ohtake",
+    "memberCount": 4,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C0A786RJKUK",
+    "name": "mpdm-marc.edward--timothy.ohtake--drew.connelly-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @timothy.ohtake @drew.connelly",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08JN56EMBR",
+    "name": "mpdm-trent.kriete--kodie.artner--marc.edward--keegan.sotebeer-1",
+    "topic": "",
+    "purpose": "Group messaging with: @trent.kriete @kodie.artner @marc.edward @keegan.sotebeer",
+    "memberCount": 4,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C09801W4NP9",
+    "name": "mpdm-marc.edward--alejandro--pedro--kodie.artner--drew.connelly--trent.kriete-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @alejandro @pedro @kodie.artner @drew.connelly @trent.kriete",
+    "memberCount": 6,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08MT866GP7",
+    "name": "mpdm-chris.powers--mason--kodie.artner--keegan.sotebeer--andrew.keating--marc.edward--trent.kriete-1",
+    "topic": "",
+    "purpose": "Group messaging with: @chris.powers @mason @kodie.artner @keegan.sotebeer @andrew.keating @marc.edward @trent.kriete",
+    "memberCount": 7,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C09SP436G5A",
+    "name": "mpdm-marc.edward--timothy.ohtake--trent.kriete-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @timothy.ohtake @trent.kriete",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08SGQ19JFM",
+    "name": "mpdm-pedro--timothy.ohtake--marc.edward--kodie.artner-1",
+    "topic": "",
+    "purpose": "Group messaging with: @pedro @timothy.ohtake @marc.edward @kodie.artner",
+    "memberCount": 4,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C094RV4P8Q0",
+    "name": "mpdm-kodie.artner--marc.edward--ellie.horita-1",
+    "topic": "",
+    "purpose": "Group messaging with: @kodie.artner @marc.edward @ellie.horita",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08JYC3L8C9",
+    "name": "mpdm-kodie.artner--mason--andrew.keating--steve.skloot--keegan.sotebeer--marc.edward-1",
+    "topic": "",
+    "purpose": "Group messaging with: @kodie.artner @mason @andrew.keating @steve.skloot @keegan.sotebeer @marc.edward",
+    "memberCount": 6,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C090A0D5RTP",
+    "name": "mpdm-kodie.artner--marc.edward--joe.santini-1",
+    "topic": "",
+    "purpose": "Group messaging with: @kodie.artner @marc.edward @joe.santini",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C092ZU4K8BZ",
+    "name": "mpdm-trent.kriete--kodie.artner--marc.edward-1",
+    "topic": "",
+    "purpose": "Group messaging with: @trent.kriete @kodie.artner @marc.edward",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C0863S32C6S",
+    "name": "mpdm-cathy.lindemann--marc.edward--jeff.ventrella-1",
+    "topic": "",
+    "purpose": "Group messaging with: @cathy.lindemann @marc.edward @jeff.ventrella",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C09323V1B0E",
+    "name": "mpdm-timothy.ohtake--allison.gerber--marc.edward-1",
+    "topic": "",
+    "purpose": "Group messaging with: @timothy.ohtake @allison.gerber @marc.edward",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C094C8XDNDV",
+    "name": "mpdm-marc.edward--ellie.horita--timothy.ohtake-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @ellie.horita @timothy.ohtake",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C0922HM6VH9",
+    "name": "mpdm-marc.edward--kodie.artner--keegan.sotebeer-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @kodie.artner @keegan.sotebeer",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C094Y8ZUXEC",
+    "name": "mpdm-kodie.artner--drew.connelly--joe.santini--marc.edward-1",
+    "topic": "",
+    "purpose": "Group messaging with: @kodie.artner @drew.connelly @joe.santini @marc.edward",
+    "memberCount": 4,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "D09Q3R6J7AS",
+    "name": "@U09Q9DD5V8U",
+    "topic": "",
+    "purpose": "DM with U09Q9DD5V8U",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D087WHR9DGB",
+    "name": "@gerly.orquillano",
+    "topic": "",
+    "purpose": "DM with Gerly Orquillano",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D085JUFLY11",
+    "name": "@steve.skloot",
+    "topic": "",
+    "purpose": "DM with ",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0A5SCEBFPF",
+    "name": "@murielle.conrado",
+    "topic": "",
+    "purpose": "DM with Murielle Joy Conrado",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D085345014Z",
+    "name": "@christopher.perez",
+    "topic": "",
+    "purpose": "DM with Chris Perez",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D098S9A7DRS",
+    "name": "@paulyn.yu",
+    "topic": "",
+    "purpose": "DM with Paulyn Yu",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084XUZNTH6",
+    "name": "@marc.edward",
+    "topic": "",
+    "purpose": "DM with Marc Edward",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0849RTG0FM",
+    "name": "@kodie.artner",
+    "topic": "",
+    "purpose": "DM with Kodie Artner",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08F9STPSJY",
+    "name": "@google_calendar",
+    "topic": "",
+    "purpose": "DM with Google Calendar",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084NU9CMKK",
+    "name": "@gregory.kreusser",
+    "topic": "",
+    "purpose": "DM with Greg Kreusser",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08UMEE4U1M",
+    "name": "@joe.santini",
+    "topic": "",
+    "purpose": "DM with Joe Santini",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08J38QL52S",
+    "name": "@monika.lampe",
+    "topic": "",
+    "purpose": "DM with Monika Lampe",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08KLQL3P6H",
+    "name": "@rafael.gutierrez",
+    "topic": "",
+    "purpose": "DM with ",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0883KW0XJ8",
+    "name": "@cameron.palmer",
+    "topic": "",
+    "purpose": "DM with ",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084D157BTN",
+    "name": "@keegan.sotebeer",
+    "topic": "",
+    "purpose": "DM with Keegan Sotebeer",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0875DW2G2H",
+    "name": "@drew.connelly",
+    "topic": "",
+    "purpose": "DM with Drew",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D086AETJNBU",
+    "name": "@jeff.ventrella",
+    "topic": "",
+    "purpose": "DM with Jeff Ventrella",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08D27LQHRQ",
+    "name": "@ken.wolff",
+    "topic": "",
+    "purpose": "DM with Ken Wolff",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0869H5HHDX",
+    "name": "@github2",
+    "topic": "",
+    "purpose": "DM with GitHub",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08533VS7C1",
+    "name": "@cathy.lindemann",
+    "topic": "",
+    "purpose": "DM with Cathy Lindemann",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0A8VUXLZ5E",
+    "name": "@matthew.boratzuk",
+    "topic": "",
+    "purpose": "DM with Matthew Alonso Boratzuk",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0A2DQQ31ST",
+    "name": "@chastina.panaligan",
+    "topic": "",
+    "purpose": "DM with Chastina May Panaligan",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084HQNGN0N",
+    "name": "@alejandro",
+    "topic": "",
+    "purpose": "DM with Alejandro Ramirez",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0A9LN2Q9CY",
+    "name": "@christian.warren",
+    "topic": "",
+    "purpose": "DM with Christian Warren",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08495CLY66",
+    "name": "@slackbot",
+    "topic": "",
+    "purpose": "DM with Slackbot",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D09378XG3R9",
+    "name": "@notion_ai",
+    "topic": "",
+    "purpose": "DM with Notion AI",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D085D7PR9CG",
+    "name": "@tyler.bayne",
+    "topic": "",
+    "purpose": "DM with Tyler Bayne",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D083XT5PZFZ",
+    "name": "@theresa.do",
+    "topic": "",
+    "purpose": "DM with Theresa Do",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D089D3HSFA5",
+    "name": "@tim.zhang",
+    "topic": "",
+    "purpose": "DM with Tim Zhang",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0857RVCA64",
+    "name": "@notion",
+    "topic": "",
+    "purpose": "DM with Notion",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0853H1EY57",
+    "name": "@ria.vanhoef",
+    "topic": "",
+    "purpose": "DM with Ria Van Hoef",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0A1BQ1QHEZ",
+    "name": "@atrazkovich",
+    "topic": "",
+    "purpose": "DM with Traz Trazkotraz",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08SL2N549F",
+    "name": "@deric.abril",
+    "topic": "",
+    "purpose": "DM with Deric Abril",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0877SS1MLG",
+    "name": "@andrew.keating",
+    "topic": "",
+    "purpose": "DM with ",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D09UAFXGSG6",
+    "name": "@WTQTQ95PS",
+    "topic": "",
+    "purpose": "DM with WTQTQ95PS",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D085LR3NWA0",
+    "name": "@trent.kriete",
+    "topic": "",
+    "purpose": "DM with Trent Kriete",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084CP0F7RA",
+    "name": "@googledrive",
+    "topic": "",
+    "purpose": "DM with Google Drive",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084E9UFLR2",
+    "name": "@ellie.horita",
+    "topic": "",
+    "purpose": "DM with Ellie Horita",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D083VMT7TB9",
+    "name": "@workast",
+    "topic": "",
+    "purpose": "DM with ",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0856K6C1BJ",
+    "name": "@timothy.ohtake",
+    "topic": "",
+    "purpose": "DM with Timothy Ohtake",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08CMM966B1",
+    "name": "@pedro",
+    "topic": "",
+    "purpose": "DM with Pedro Augusto de Paula",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D09SS49B16V",
+    "name": "@pagerduty_slack_bot",
+    "topic": "",
+    "purpose": "DM with PagerDuty",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D085F44RUJ0",
+    "name": "@mason",
+    "topic": "",
+    "purpose": "DM with Mel (Mason) Bourgeois",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084G8AGVC2",
+    "name": "@octavia.hexe",
+    "topic": "",
+    "purpose": "DM with Octavia Hexe",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08S57D5LPP",
+    "name": "@chris.powers",
+    "topic": "",
+    "purpose": "DM with Chris Powers",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0903NE1BGS",
+    "name": "@polly",
+    "topic": "",
+    "purpose": "DM with Polly",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084FFP59QA",
+    "name": "@drata",
+    "topic": "",
+    "purpose": "DM with Drata",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08P53QLNHZ",
+    "name": "@allison.gerber",
+    "topic": "",
+    "purpose": "DM with Allison Gerber",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0A1BQ1QHEZ",
+    "name": "@atrazkovich",
+    "topic": "",
+    "purpose": "DM with Traz Trazkotraz",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08SL2N549F",
+    "name": "@deric.abril",
+    "topic": "",
+    "purpose": "DM with Deric Abril",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "CM4QBG9HU",
+    "name": "#geos_nyc_repairs",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C094W7MRJ87",
+    "name": "#sales-leadgen",
+    "topic": "",
+    "purpose": "Each week, revenue team members will write down their lead generation focus and update results the following week to track progress and learnings.",
+    "memberCount": 8,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09JZLHTW4S",
+    "name": "#account-chime-financial-inc",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02BF6B8R29",
+    "name": "#deals-uber",
+    "topic": "",
+    "purpose": "Streamlined communication for all things related to Uber.",
+    "memberCount": 7,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C05QB44QCSE",
+    "name": "#sales-salesintel",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07GQGY0M7Z",
+    "name": "#account-testing-defg",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08JBU6NTDY",
+    "name": "#account-arthur-j_-gallagher-_-co_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08RESRCSMB",
+    "name": "#account-td-bank",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C092N0HT4BZ",
+    "name": "#datadog_sp_inc_160129",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C05AMBQF04U",
+    "name": "#eng-alerts-experiments",
+    "topic": "",
+    "purpose": "Before we take alerts to prime time (actually paging engineers), we can experiment with them here to make sure there are no false positives.",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06UG6GA89J",
+    "name": "#cobalt-dolby-600",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07GD34C1QW",
+    "name": "#deals-pedro_testing_account",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07RAGZMTHA",
+    "name": "#account-palo-alto-networks-inc",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0239TKPTFZ",
+    "name": "#deals-coinbase",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 45,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C029W3THNJD",
+    "name": "#tunes",
+    "topic": "For Cobalt music lovers! Share what you're working to, or just your favorites",
+    "purpose": "For Cobalt music lovers! Share what you're working to, or just your favorites",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06654KC45Q",
+    "name": "#foxpass-accounts-",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 9,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q05GANAH",
+    "name": "#account-university-of-michigan-flint",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C095S0R4GFL",
+    "name": "#the-sync",
+    "topic": "",
+    "purpose": "Async daily check-ins for Marketing, SDR, and RevOps. Share what you accomplished yesterday, your top priority today, and any blockers. Responses are posted automatically each morning to help us stay focused, aligned, and moving fast.",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0960D5KJPQ",
+    "name": "#account-city-of-indianapolis",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0A4DFJS8S1",
+    "name": "#proj-video-monitoring-features",
+    "topic": "",
+    "purpose": "Epic \u003chttps://www.notion.so/Basic-Video-Monitoring-Features-244889f7b4d8802c9a2cf5e25443c764?source=copy_link\u003e",
+    "memberCount": 7,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C012HF44LLU",
+    "name": "#sdrteam",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C05JXFZLQSW",
+    "name": "#amazon-cmi",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 19,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q5GTHQQ4",
+    "name": "#account-safe-skies",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C094S7R8EU8",
+    "name": "#gsoc-blacksky",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 17,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0877SS1MLG",
+    "name": "@andrew.keating",
+    "topic": "",
+    "purpose": "DM with ",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "CMH0XF8Q0",
+    "name": "#geos_milwaukee_repairs",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C01GYTLKSET",
+    "name": "#cobalt-postmates",
+    "topic": "",
+    "purpose": "Coordination/Reporting Channel between Cobalt Robotics and Postmates",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06F15Z4AV9",
+    "name": "#deals-dolby",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 40,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08UE1ACNJJ",
+    "name": "#account-combe-inc",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C096BKE5N9K",
+    "name": "#incd-7172025",
+    "topic": "P-1 Fire - description",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C099KDF8EAZ",
+    "name": "#eng-wiki-verification",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C01P951DF8S",
+    "name": "#eng-sol-eng",
+    "topic": ":solutions-team-logo:",
+    "purpose": "",
+    "memberCount": 43,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C026SQ1UFMK",
+    "name": "#deals-gm",
+    "topic": "",
+    "purpose": "All things relating to the General Motors deal",
+    "memberCount": 6,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07E3RM32P3",
+    "name": "#deals-test_account",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08A9L5VDST",
+    "name": "#account-tech-systems",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0152DJAWUW",
+    "name": "#product-genetec",
+    "topic": "",
+    "purpose": "Cobalt \u0026lt;\u0026gt; Genetec Integrations",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C046MHSGMT3",
+    "name": "#shipping-and-receiving",
+    "topic": "",
+    "purpose": "All things related to incoming and outgoing shipments.",
+    "memberCount": 15,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07HFKE2GMB",
+    "name": "#account-fedex",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q31RM258",
+    "name": "#account-brown-brothers-harriman-_-co_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C085WNT9TU7",
+    "name": "#account-cisco-systems-inc",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C9E42L7D3",
+    "name": "#specialist_testing",
+    "topic": "",
+    "purpose": "A channel for Production, Pilot Ops, and Engineering to coordinate HQ battle-testing needs prior to robot deployment",
+    "memberCount": 6,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "CMH1GE9HN",
+    "name": "#geos_sfba_repairs",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "CNX838NR5",
+    "name": "#geos_kentucky_repairs",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C01P66W6GTA",
+    "name": "#testing",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 10,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06F94V46S2",
+    "name": "#cloud-moments-alerts",
+    "topic": "",
+    "purpose": "Errors from cloud moments service",
+    "memberCount": 6,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07ER28RS5P",
+    "name": "#deals-secure_event_solutions",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C094YJERB4Y",
+    "name": "#gsoc-coinbase-ep",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 15,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C04K1UH6YFJ",
+    "name": "#amazon-slack-integration",
+    "topic": "",
+    "purpose": "Coordination Channel for Amazon - Slack Integration",
+    "memberCount": 6,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0505KKTQFJ",
+    "name": "#reference-requests",
+    "topic": "",
+    "purpose": "Collaborate on reference requests. Reference request form is here: \u003chttps://docs.google.com/spreadsheets/d/1paZGnGHe-pvfo4UnYM7V72AKlpDs8rWQOx7wV0eHtTc/edit#gid=1683952662\u003e",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C05136BAYSX",
+    "name": "#false-negative-door-alerts",
+    "topic": "",
+    "purpose": "Alerts when door automation incorrectly filters out a door check. Use \u003chttps://app.getguru.com/card/TyR565zc/Enabling-Door-Check-Automation\u003e to turn off automation for that door.",
+    "memberCount": 7,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C05JB510UHL",
+    "name": "#cobalt-tunes",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07GQFYFGGP",
+    "name": "#deals-testing_5678",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07LDJS3P0Q",
+    "name": "#account-ucsf-health",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08059SDE3B",
+    "name": "#account-madison-square-garden-entertainment-corp_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C085ZSR6K9N",
+    "name": "#account-mercy-wellness",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D09UAFXGSG6",
+    "name": "@WTQTQ95PS",
+    "topic": "",
+    "purpose": "DM with WTQTQ95PS",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D085LR3NWA0",
+    "name": "@trent.kriete",
+    "topic": "",
+    "purpose": "DM with Trent Kriete",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C51L4MTBJ",
+    "name": "#special_ops",
+    "topic": "@Jared Salzl is Shift Lead from Dayshift (7:15 - 15:15) @Cathy Lindemann is SOM,  @Paul is PM on duty, and @Jacob Rasmussen is GSOC operator.",
+    "purpose": "Real-time conversations with Specialists. Great for troubleshooting and any requests. For announcements, please use \u003c#CC3REFYFL\u003e",
+    "memberCount": 61,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C073KU141B9",
+    "name": "#cobalt-fremont",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 7,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07QRQYE6SC",
+    "name": "#account-strategic-protection-services-ltd",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C081EC62GEP",
+    "name": "#account-newsletter",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08BJ1V8542",
+    "name": "#account-first-security-spa",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09EB32D9SQ",
+    "name": "#account-linkedin-corp",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D084CP0F7RA",
+    "name": "@googledrive",
+    "topic": "",
+    "purpose": "DM with Google Drive",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C07FS2U9NHG",
+    "name": "#account-unitedhealth",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D084E9UFLR2",
+    "name": "@ellie.horita",
+    "topic": "",
+    "purpose": "DM with Ellie Horita",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D083VMT7TB9",
+    "name": "@workast",
+    "topic": "",
+    "purpose": "DM with ",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C04T48JMH7F",
+    "name": "#product-omni",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07F5AVLHGW",
+    "name": "#deals-ventia",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PWB34W8N",
+    "name": "#account-arthrex",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07QRSAPHLY",
+    "name": "#account-bps-direct_-l_l_c_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0A00KJJJSE",
+    "name": "#account-vornado-realty-trust",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "CDD3QNT8R",
+    "name": "#eng-alerts",
+    "topic": "Channel for paging the engineering team for urgent issues",
+    "purpose": "Engineer incidents from PagerDuty.",
+    "memberCount": 48,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "CKZ7XLN02",
+    "name": "#geos-seattle_repairs",
+    "topic": "",
+    "purpose": "Coordinate repair of robots in the Seattle region",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06G86P21EZ",
+    "name": "#isc-west-2024",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07EHECE1BK",
+    "name": "#deals-rialto_towers",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0856K6C1BJ",
+    "name": "@timothy.ohtake",
+    "topic": "",
+    "purpose": "DM with Timothy Ohtake",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C02GB3WJKTR",
+    "name": "#bugsnag_frontend_dev",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02RAHGEC4X",
+    "name": "#robert-daily-plan",
+    "topic": "",
+    "purpose": "daily plans for Robert Morris",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C048JDB7R9S",
+    "name": "#gso-event",
+    "topic": "",
+    "purpose": "GSO Event in Dallas week of Nov 1st, 2022",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C063XSKBL2K",
+    "name": "#shifeng-test",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07GY3QCY73",
+    "name": "#deals-test_pedro",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C088VBXASFJ",
+    "name": "#deals-palo-alto-networks",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 43,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C091G9ARM70",
+    "name": "#account-mccormick",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D08CMM966B1",
+    "name": "@pedro",
+    "topic": "",
+    "purpose": "DM with Pedro Augusto de Paula",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C07FY53FA3C",
+    "name": "#ccc-bobcat-cmi",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 19,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07G3MLGMNE",
+    "name": "#account-lincoln-center",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09C12TKUMP",
+    "name": "#account-chesapeake-energy-corporation",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09K2AAH5D5",
+    "name": "#25df-social-media-tracking",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D09SS49B16V",
+    "name": "@pagerduty_slack_bot",
+    "topic": "",
+    "purpose": "DM with PagerDuty",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D085F44RUJ0",
+    "name": "@mason",
+    "topic": "",
+    "purpose": "DM with Mel (Mason) Bourgeois",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084G8AGVC2",
+    "name": "@octavia.hexe",
+    "topic": "",
+    "purpose": "DM with Octavia Hexe",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "CDCV9JD6U",
+    "name": "#specialist_alerts",
+    "topic": "On-Call Playbook: \u003chttps://docs.google.com/document/d/1SCKtHouS4cEpcSyGJb-db7uq2ZO7pY2ueAFhYSIL390/edit#\u003e",
+    "purpose": "On-Call Playbook: \u003chttps://docs.google.com/document/d/1SCKtHouS4cEpcSyGJb-db7uq2ZO7pY2ueAFhYSIL390/edit#\u003e",
+    "memberCount": 36,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C01EYPMSU2F",
+    "name": "#manufacturing",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 15,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C072KN4ABR9",
+    "name": "#salesforce-requests",
+    "topic": "Hello team! Let’s use this channel for requesting and tracking changes related to our Salesforce CRM.",
+    "purpose": "Hello team! Let’s use this channel for requesting and tracking changes related to our Salesforce CRM.",
+    "memberCount": 14,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q307QA3D",
+    "name": "#account-exact-sciences-corporation",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0P069ZB3",
+    "name": "#general",
+    "topic": "Company-wide announcements and work-based matters",
+    "purpose": "This channel is for team-wide communication and announcements. All team members are in this channel.",
+    "memberCount": 80,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C01EJEMKJLA",
+    "name": "#re_onsite_visits",
+    "topic": "",
+    "purpose": "This channel will be used to post RE visits to customer sites for visibility",
+    "memberCount": 78,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0429QLAM35",
+    "name": "#mid-x-group",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q5J01BT6",
+    "name": "#account-the-church-of-jesus-christ-of-latter-day-saints",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08403GARC3",
+    "name": "#deals-aws",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 15,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C52FNBX9T",
+    "name": "#git",
+    "topic": "",
+    "purpose": "Git commit integration, and repository management discussion.",
+    "memberCount": 5,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C01PRP42WKH",
+    "name": "#ext-idpl-cobalt",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07E79JBWSY",
+    "name": "#deals-hunt-guillot-and-associates",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07S49Y0B89",
+    "name": "#account-jcss_us",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C084YE5B3AT",
+    "name": "#account-spartan-controls-ltd",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D08S57D5LPP",
+    "name": "@chris.powers",
+    "topic": "",
+    "purpose": "DM with Chris Powers",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "CU9K6CCP9",
+    "name": "#monjon_aus_repairs",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C051MMVHGMA",
+    "name": "#facility-fusion-2023",
+    "topic": "",
+    "purpose": "Channel to discuss activities at Facilities Fusion in SF on 4/12-13",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PWBGSRCN",
+    "name": "#account-walden-security",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C094YJ22DH6",
+    "name": "#call-logs-gsoc",
+    "topic": "",
+    "purpose": "Call logs for all inbound/outbound calls to/from GSOCAAS Clients",
+    "memberCount": 13,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09KRP93T6X",
+    "name": "#account-ngroup",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0903NE1BGS",
+    "name": "@polly",
+    "topic": "",
+    "purpose": "DM with Polly",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C050JV20550",
+    "name": "#deals-salesforce",
+    "topic": "",
+    "purpose": "Creating this channel for internal communication for any special operations that involves salesforce. \n\nMain Points of Interest \n\n- Deployments \n- Demos \n- Remote support \n- Qs and As ",
+    "memberCount": 51,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C05EW8W9Y3G",
+    "name": "#deal",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07RXQGG2F3",
+    "name": "#account-philip-morris-international-management-sa",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09MJ7GM05V",
+    "name": "#account-analog-devices-inc_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09MWJ7MYTF",
+    "name": "#account-paladin-technologies",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D084FFP59QA",
+    "name": "@drata",
+    "topic": "",
+    "purpose": "DM with Drata",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C02GNMZ7S7P",
+    "name": "#bugsnag-backend-dev",
+    "topic": "",
+    "purpose": "Local and development environment bugs",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07HBNDF67Q",
+    "name": "#account-citigroup",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C083YDU8KHT",
+    "name": "#account-solidigm",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C05N29659C0",
+    "name": "#slack_for_p_inc_82125",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07DJM6NW0J",
+    "name": "#deals-cobalt",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D08P53QLNHZ",
+    "name": "@allison.gerber",
+    "topic": "",
+    "purpose": "DM with Allison Gerber",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C02UK9ETSP8",
+    "name": "#helpful-links",
+    "topic": "",
+    "purpose": "The List of Links I Wish Had Been Given to Me",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C04UATRHFRC",
+    "name": "#coballt-madness",
+    "topic": "",
+    "purpose": "NCAA Tournament Brackets Channel\n:basketball: Past Champions :basketball:\n2022: Otto Betz\n2023: Greg Kreusser\n2024: Alex Anastasia\n2025: Tyler Bayne",
+    "memberCount": 10,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PNFP4CAK",
+    "name": "#account-city-of-toronto",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PWEP6GCW",
+    "name": "#account-crva",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08TQM4DHCG",
+    "name": "#account-american-water-works-company",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0963ULMUQ3",
+    "name": "#account-sightwatch",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C3E49UQNT",
+    "name": "#operations",
+    "topic": "https://cobalt16.atlassian.net/wiki/display/MAN/Manufacturing+Home",
+    "purpose": "Value Stream, Ordering, Manufacturing, Deployment, and Servicing for robots, and all associated drama",
+    "memberCount": 34,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0308BS8FRT",
+    "name": "#telehouse-demo",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03NN3RT6TF",
+    "name": "#alerts-backend-test",
+    "topic": "",
+    "purpose": "Alerts for test environments",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07EJE6E15Z",
+    "name": "#deals-lvmh",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0856FZE5TQ",
+    "name": "#account-kla-corporation",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C098U18BJN9",
+    "name": "#g-2025sx",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C01P65VB6CR",
+    "name": "#saturday-homies",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02BWKENTD4",
+    "name": "#call-logs",
+    "topic": "",
+    "purpose": "Logs of Incoming/Outgoing calls with customers",
+    "memberCount": 60,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02L4KYKC8M",
+    "name": "#new-facility1",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02NERDLJ6M",
+    "name": "#kudos",
+    "topic": "",
+    "purpose": "This is the place to recognize great work across Cobalt. Please use it to recognize each other and the work we do.",
+    "memberCount": 70,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03PKSXDGH0",
+    "name": "#ccc-support",
+    "topic": "",
+    "purpose": "Whenever a scheduler update is made, please post information in its own dedicated thread for visibility and accountability purposes",
+    "memberCount": 45,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06DMKKEZ32",
+    "name": "#deals-woven",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 37,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07H74L6Z4G",
+    "name": "#account-city-of-new-york",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08V92LR472",
+    "name": "#request-for-coverage",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 33,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C920UJH6F",
+    "name": "#specialist_new_faces",
+    "topic": "",
+    "purpose": "Only new faces and an occasional conversation about the new faces. Nothing else!",
+    "memberCount": 8,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C01M6H7L7DG",
+    "name": "#sales-hp",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02NVJWDXM4",
+    "name": "#operations-mastertracker",
+    "topic": "",
+    "purpose": "Changes to the tracker and new methods of logging information",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C04L36TFHEV",
+    "name": "#funny-robots",
+    "topic": "",
+    "purpose": "Humorous posts about robots",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C05SR2DSYG5",
+    "name": "#customer_stories",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 7,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07ERLZ757S",
+    "name": "#deals-chipotle",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C095DD63D7U",
+    "name": "#account-massachusetts-port-authority",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C099HC6J69W",
+    "name": "#account-fedex-supply-chain",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C05A33R8YC8",
+    "name": "#wifibox-sd-card-swaps",
+    "topic": "",
+    "purpose": "A channel for coordinating activities around Ubuntu 22 wifi box SD cards, so we don’t step on any toes or run into snags during migrations",
+    "memberCount": 7,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PNGFF695",
+    "name": "#account-niwc-atlantic",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09FKQ894V6",
+    "name": "#social-boost",
+    "topic": "Cobalt AI's Linkedin's posts",
+    "purpose": "This channel shows all Linkedin messages that are posted by Cobalt AI. The goal is to have everyone of the company be more aware about our activities and invite all to engage with it as soon as possible. More engagement means a broader reach .",
+    "memberCount": 64,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09N8G9UH54",
+    "name": "#account-deloitte-touche-tohmatsu-limited",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0A7JHW229K",
+    "name": "#account-wells-fargo-_-company",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D09Q3R6J7AS",
+    "name": "@U09Q9DD5V8U",
+    "topic": "",
+    "purpose": "DM with U09Q9DD5V8U",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "CMQRRJT9V",
+    "name": "#eng-robotics",
+    "topic": "Current On-call:",
+    "purpose": "Robotics specific engineering discussions",
+    "memberCount": 22,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C035FFM10Q4",
+    "name": "#electrolux-demo",
+    "topic": "Demo",
+    "purpose": "Electrolux Demo 12:00-13:00 PST Thursday 3 March 2022 at the Assembly Plant 101 Masters Blvd, Anderson, SC 29626",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06V68NB66N",
+    "name": "#deals-bobcat",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 34,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07G8T81459",
+    "name": "#account-trident-services",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07GCHG77SA",
+    "name": "#account-expedia-group",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08036C75BK",
+    "name": "#sf-office-door",
+    "topic": "",
+    "purpose": "This is the channel for notifications for the front door call box. The call will go to the CCC who can notifiy us or open the door to have a package delivered in the hall way.",
+    "memberCount": 24,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0905MFRUMD",
+    "name": "#account-pure-storage-inc",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D087WHR9DGB",
+    "name": "@gerly.orquillano",
+    "topic": "",
+    "purpose": "DM with Gerly Orquillano",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D085JUFLY11",
+    "name": "@steve.skloot",
+    "topic": "",
+    "purpose": "DM with ",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C0WQPFVCH",
+    "name": "#eng-hardware",
+    "topic": "",
+    "purpose": "Compelling Robot Designs",
+    "memberCount": 27,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02HA3ZAK5J",
+    "name": "#alerts-backend",
+    "topic": "Useful channel to be aware of alerts that might not trigger a page directly, but do provide good contextual awareness for issues.",
+    "purpose": "Alerts about noteworthy things that might not necessarily require an on-call page",
+    "memberCount": 12,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07VBUTTFQW",
+    "name": "#deals-crane",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 25,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08T3HDFA4Q",
+    "name": "#account-ross-stores-inc",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C093XEWCE94",
+    "name": "#deals-een-operations",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 43,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09DUALQGHG",
+    "name": "#account-coborn_s-inc_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0A5SCEBFPF",
+    "name": "@murielle.conrado",
+    "topic": "",
+    "purpose": "DM with Murielle Joy Conrado",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C07AG631Z7X",
+    "name": "#eng-edge-processing",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 16,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07HHP4H82D",
+    "name": "#deals-testing_abc",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q067PG3F",
+    "name": "#account-kroll",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q2T3HALB",
+    "name": "#account-pan-american-energy",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q30S8V8A",
+    "name": "#account-ingenero",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q32U6J2W",
+    "name": "#account-safran",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02CQCJRDF1",
+    "name": "#deals-fedex",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 49,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02L6D5DFSP",
+    "name": "#deals-ally-financial",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 34,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0303TU8WDT",
+    "name": "#hardware-engineering",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03SKMVLTNU",
+    "name": "#workflow_test_channel",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C078HDQ206S",
+    "name": "#deals-een",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 7,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07FR2ELEG7",
+    "name": "#account-trs",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D085345014Z",
+    "name": "@christopher.perez",
+    "topic": "",
+    "purpose": "DM with Chris Perez",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "CJ2RL2ERM",
+    "name": "#datadog",
+    "topic": "",
+    "purpose": "Test datadog integration.",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0301BF1LRE",
+    "name": "#omnomnom",
+    "topic": "Food",
+    "purpose": "Everything food! :drooling_face:",
+    "memberCount": 30,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06FX7ZT371",
+    "name": "#manila_office",
+    "topic": "",
+    "purpose": "Public channel for all of the employees and staff members in the Philippines! Feel free to ask questions.",
+    "memberCount": 30,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q32NFWEN",
+    "name": "#account-team-1st-technologies",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07SZ0YGEAV",
+    "name": "#account-walmart_-inc_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C080PUTG2H3",
+    "name": "#eng-frontend",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 27,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0816EPNW8Y",
+    "name": "#deals-ucsf",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 34,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D098S9A7DRS",
+    "name": "@paulyn.yu",
+    "topic": "",
+    "purpose": "DM with Paulyn Yu",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084XUZNTH6",
+    "name": "@marc.edward",
+    "topic": "",
+    "purpose": "DM with Marc Edward",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C029HKN3J10",
+    "name": "#vmware_media_shoot",
+    "topic": "",
+    "purpose": "Discuss upcoming media shoot at VMWare for their cultural adoption campaign of the Robot. ",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02Q4DU9ZLP",
+    "name": "#deals-impossible-foods",
+    "topic": "",
+    "purpose": "Comms for all things impossible foods",
+    "memberCount": 6,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0878RCU9DE",
+    "name": "#account-united-protection-agency_-inc_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08KUN9B8MB",
+    "name": "#engineers_inc_157010",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08L63G10M8",
+    "name": "#account-gravenstein-116-llc",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09HXKS4DLG",
+    "name": "#mock-call-training",
+    "topic": "Practice space for running mock customer calls and event escalations. Specialists will be assigned events, call a designated number, and deliver information as if it’s a real scenario.",
+    "purpose": "",
+    "memberCount": 34,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0849RTG0FM",
+    "name": "@kodie.artner",
+    "topic": "",
+    "purpose": "DM with Kodie Artner",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C01DJUA5GPM",
+    "name": "#deals-amazon",
+    "topic": "STAGE: NATIONAL DEPLOYMENT ROLLOUT",
+    "purpose": "Track and discuss sales and expansion opportunities at Amazon ACS.",
+    "memberCount": 25,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C01GJF54XTN",
+    "name": "#ext-cobalt-zendesk",
+    "topic": "",
+    "purpose": "A channel for Zendesk and Cobalt teams to communicate",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C030Y6CA5MX",
+    "name": "#shoutouts",
+    "topic": "",
+    "purpose": "Did a Cobalt team member go out of their way to help you kick ass on a task or project?   Demonstrate your appreciation for their efforts here!",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03P9BF734J",
+    "name": "#mobo-failures",
+    "topic": "",
+    "purpose": "temporary channel for investigating the rising trend of mobo failures",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07EBTNJRB8",
+    "name": "#deals-bailsafe",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C083YSPLPA8",
+    "name": "#eng-k8s-alerts",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 8,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09JW7E9DRT",
+    "name": "#account-abbvie",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07BPLBBACS",
+    "name": "#test-centro-sales",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PNFQAPV5",
+    "name": "#account-securitas",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D08F9STPSJY",
+    "name": "@google_calendar",
+    "topic": "",
+    "purpose": "DM with Google Calendar",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084NU9CMKK",
+    "name": "@gregory.kreusser",
+    "topic": "",
+    "purpose": "DM with Greg Kreusser",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C02JVCPTHFW",
+    "name": "#environment-usage",
+    "topic": "See usage here: \u003chttps://cobalt16.slack.com/docs/T0P001KT6/F06JMMXN8AJ\u003e",
+    "purpose": "",
+    "memberCount": 13,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07GD9P6DMJ",
+    "name": "#customer-success",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 17,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07QRRL2S1E",
+    "name": "#account-crane-currency",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08QUFK6S3X",
+    "name": "#account-paypal",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09NEQ5DM08",
+    "name": "#deals-paladin-cmi",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 8,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07EJFWM5SN",
+    "name": "#deals-telus_corp_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C086QLVUW04",
+    "name": "#account-testing",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C092TCYDAT1",
+    "name": "#account-rockland-trust",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09NU2JM3PS",
+    "name": "#account-cdc-data-centres",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0A2UPL2X2N",
+    "name": "#datadog_sp_inc_163697",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D08UMEE4U1M",
+    "name": "@joe.santini",
+    "topic": "",
+    "purpose": "DM with Joe Santini",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08J38QL52S",
+    "name": "@monika.lampe",
+    "topic": "",
+    "purpose": "DM with Monika Lampe",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C07ABTLJQDN",
+    "name": "#salesforce-escalations-test",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q30UKDMG",
+    "name": "#account-department-of-homeland-security",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09RY31NCKT",
+    "name": "#account-altria-group_-inc_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09TLRFQS11",
+    "name": "#salesloft-leads-assigned-to-george",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02B2STQBU3",
+    "name": "#deals-sutter",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 28,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02C4FDF3QW",
+    "name": "#x-team-weekday",
+    "topic": "",
+    "purpose": "Group X Google Meet link:\n\u003chttps://meet.google.com/sqq-ekjj-maz\u003e",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09QN8CN7G8",
+    "name": "#account-bobcat-company",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0A14CGBNEA",
+    "name": "#eng-gemini-alerts",
+    "topic": "",
+    "purpose": "Channel for alert notifications from GCP - See \u003chttps://console.cloud.google.com/monitoring/alerting/notifications?project=gen-lang-client-0788785598\u003e for setup",
+    "memberCount": 5,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0A1Q5V1H6U",
+    "name": "#eng-validation",
+    "topic": "",
+    "purpose": "Channel for CDS validation strategy, dataset collection, and defining testing requirements before releases.",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D08KLQL3P6H",
+    "name": "@rafael.gutierrez",
+    "topic": "",
+    "purpose": "DM with ",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D0883KW0XJ8",
+    "name": "@cameron.palmer",
+    "topic": "",
+    "purpose": "DM with ",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C07E6S23MEY",
+    "name": "#deals-humana",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PWDKF2EA",
+    "name": "#account-united-states-department-of-state",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C095H255Q5V",
+    "name": "#salesforce-cobalt-demo",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 16,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D084D157BTN",
+    "name": "@keegan.sotebeer",
+    "topic": "",
+    "purpose": "DM with Keegan Sotebeer",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "CG56VSWKW",
+    "name": "#autodeploy",
+    "topic": "Dashboard: \u003chttps://app.datadoghq.com/dashboard/vk7-yzc-xxx/software-release-status?from_ts=1643736355235\u0026amp;to_ts=1643750755235\u0026amp;live=true\u003e",
+    "purpose": "",
+    "memberCount": 16,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02ERFA5VU7",
+    "name": "#bugsnag-js",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C04HUKRDP6X",
+    "name": "#industry-news",
+    "topic": "",
+    "purpose": "A place to share news stories about the security and robotics industries, both good and bad, that affect the world we live in.",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q5HMND28",
+    "name": "#account-tryall-golf-club",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09MXLZ8ZHC",
+    "name": "#account-roku",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "CMCFLLRGD",
+    "name": "#geos_chicago_repairs",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C01DJS329H8",
+    "name": "#sales-jll",
+    "topic": "STAGE: PRE-LAUNCH (POC)",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02G91AG48Y",
+    "name": "#eng-infrastructure",
+    "topic": "The infrastructure channel. Yes, it is. Most certainly.",
+    "purpose": "Discussions on Site Reliability and DevOps",
+    "memberCount": 20,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07USNM3WES",
+    "name": "#account-aegis-defense",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08DKUNBW1H",
+    "name": "#account-grit-marketing",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09151N104D",
+    "name": "#cobalt-analytics",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 34,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C091QA7NA76",
+    "name": "#account-lockheed-martin-corporation",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0875DW2G2H",
+    "name": "@drew.connelly",
+    "topic": "",
+    "purpose": "DM with Drew",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D086AETJNBU",
+    "name": "@jeff.ventrella",
+    "topic": "",
+    "purpose": "DM with Jeff Ventrella",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "CD48EUJ4D",
+    "name": "#cobalt_photo_album",
+    "topic": "",
+    "purpose": "Memories upon memories, TAG YOUR PHOTOS with *@*, OR ELSE",
+    "memberCount": 54,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "CP8TUDGUB",
+    "name": "#eng-random",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 23,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02MB95REP9",
+    "name": "#va-beach-expo",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03A7S5NABV",
+    "name": "#hupspot-testing",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03R6T7JPUG",
+    "name": "#demos",
+    "topic": "",
+    "purpose": "For threads used to coordinate demos",
+    "memberCount": 39,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08TW0C4T5J",
+    "name": "#account-facility-solutions-group",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q077LUMT",
+    "name": "#account-yazaki-north-america",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07QBKZ5AJD",
+    "name": "#account-lucid-motors",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08DNH0RBS8",
+    "name": "#account-the-village-dallas",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08N2SZNH8U",
+    "name": "#datadog_sp_inc_157557",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08S4UMEQNQ",
+    "name": "#account-munich-re",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C098X5TE6MQ",
+    "name": "#technical-specialist",
+    "topic": "",
+    "purpose": "Channel to track technical specialist program rollout",
+    "memberCount": 25,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09PG4P7LRG",
+    "name": "#inbound-leads",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D08D27LQHRQ",
+    "name": "@ken.wolff",
+    "topic": "",
+    "purpose": "DM with Ken Wolff",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C02FYGW2UTZ",
+    "name": "#deals-apple",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 14,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C098TCKA1EZ",
+    "name": "#account-autodesk_-inc_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C099V3G940J",
+    "name": "#account-apple-inc_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09F11VQFEH",
+    "name": "#pedro-testing",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 5,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09NAJ3L8KU",
+    "name": "#account-related-lp",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06AN3CS4BX",
+    "name": "#envoy-cobalt",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07QRRRGN00",
+    "name": "#account-dbtss",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C097NPWJ4JF",
+    "name": "#account-opentext",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0869H5HHDX",
+    "name": "@github2",
+    "topic": "",
+    "purpose": "DM with GitHub",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C01M5DHUQ3H",
+    "name": "#sales-sutter",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03R6SNR9T2",
+    "name": "#deployments",
+    "topic": "",
+    "purpose": "For threads related to deployment coordination",
+    "memberCount": 31,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08PJAK2U73",
+    "name": "#account-young-_-rubicam",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C096XQDBDRD",
+    "name": "#account-pollard",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D08533VS7C1",
+    "name": "@cathy.lindemann",
+    "topic": "",
+    "purpose": "DM with Cathy Lindemann",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C02EL1E1A5R",
+    "name": "#pets",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 60,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C031N5VLHDG",
+    "name": "#triage-bug-inbox",
+    "topic": "Please tag the on-call engineer or \u003c!subteam^S01QSSWRU1K\u003e in any reports generated in this channel, and if OPS-related, please tag the relevant FOM :laptop-parrot:",
+    "purpose": "A channel to sort and prioritize reports on any bugs to go into the Robot Bug Inbox",
+    "memberCount": 69,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03SYT5TK89",
+    "name": "#fit-check",
+    "topic": "",
+    "purpose": "Drop your daily shoe/fit pics",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06FMFRTS3T",
+    "name": "#deals-service-now",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07GX3DE1EF",
+    "name": "#account-benchmark-corp",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q04T918D",
+    "name": "#account-verintegra",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08LGRJDWPJ",
+    "name": "#account-redwood-empire-schools_-insurance-group",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "CN1PGP3L4",
+    "name": "#geos_kansascity_repairs",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C056PHHF92R",
+    "name": "#day-shift-demo",
+    "topic": "",
+    "purpose": "A place to sync about demo's",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C076DDK8718",
+    "name": "#deals-google",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 21,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07DJHXCARL",
+    "name": "#deals-cobaltai_com",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07K59NNG1Y",
+    "name": "#deals-blacksky",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 44,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PNG7DKEK",
+    "name": "#account-meridian-security-solutions-inc",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08STPMGL9Y",
+    "name": "#account-certis-group",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09NE54MK6G",
+    "name": "#account-deutsche-bank-ag",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0A8VUXLZ5E",
+    "name": "@matthew.boratzuk",
+    "topic": "",
+    "purpose": "DM with Matthew Alonso Boratzuk",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C01A9AY41GQ",
+    "name": "#eng-questions",
+    "topic": "A channel for discussion between engineers and specialists looking for technical details and sharing feature request ideas.",
+    "purpose": "Questions for the engineering team about how the robots or specific features work.",
+    "memberCount": 40,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0296JX50AV",
+    "name": "#gsoc-cobalt-uber",
+    "topic": "",
+    "purpose": "Coordination/Reporting Channel between the CCC and Uber GSOC",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02EL9KM459",
+    "name": "#bugsnag-backend",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C04JWH35T7W",
+    "name": "#ifma-nfmt-2023",
+    "topic": "",
+    "purpose": "SP has a speaking engagement for the event at International Facilities Manager Association on 3/21/23 in Baltimore MD - looking to get some approvals and feedback regarding what equipment and support we can allocate for this event.",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07F7BSUMU0",
+    "name": "#deals-northeast-medical",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08D5HD36KF",
+    "name": "#account-national-core",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09HANCFH45",
+    "name": "#account-entrata",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0A2DQQ31ST",
+    "name": "@chastina.panaligan",
+    "topic": "",
+    "purpose": "DM with Chastina May Panaligan",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D084HQNGN0N",
+    "name": "@alejandro",
+    "topic": "",
+    "purpose": "DM with Alejandro Ramirez",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C02DFPRPZ61",
+    "name": "#deals-prometheus",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 34,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C041K8VLNNB",
+    "name": "#gsx-2022",
+    "topic": "",
+    "purpose": "Channel for GSX 2022",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0761CLM2KV",
+    "name": "#scheduled-patrols",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 5,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07GHHPA20Z",
+    "name": "#account-nexus-amr",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C029HMSNSEP",
+    "name": "#expanxion",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C02LBFCAJ85",
+    "name": "#michigan-re",
+    "topic": "",
+    "purpose": "Michigan Reserve Engineers",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03K1H823KM",
+    "name": "#tsr",
+    "topic": "",
+    "purpose": "Technical Shift Report - The CCC will post an updated TSR once a day here for increased awareness about robots that are persistently on cellular \u0026amp; any downed robots (with the link that explains why it is not operational)",
+    "memberCount": 27,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07H4UUR0D9",
+    "name": "#deals-testing_1234",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PNG4BTNK",
+    "name": "#account-bartech",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07QRRT9B6U",
+    "name": "#account-sroa-capital",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C085Q4N8MB3",
+    "name": "#account-radial",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08NS0AQUES",
+    "name": "#account-secom-llc",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0A9LN2Q9CY",
+    "name": "@christian.warren",
+    "topic": "",
+    "purpose": "DM with Christian Warren",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D08495CLY66",
+    "name": "@slackbot",
+    "topic": "",
+    "purpose": "DM with Slackbot",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C1XK189SQ",
+    "name": "#eng-software",
+    "topic": "",
+    "purpose": "Making all the things",
+    "memberCount": 37,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03J3214JKV",
+    "name": "#hardware-fte",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0614UFM3UN",
+    "name": "#revenue-team",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 17,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07EM1Y6ZCL",
+    "name": "#deals-gxo_logistics",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07H475V74J",
+    "name": "#account-blacksky",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PNA8EP4P",
+    "name": "#cobalt-travel",
+    "topic": "",
+    "purpose": "A space for sharing your favorite travel photos, videos, and stories from around the world",
+    "memberCount": 66,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D09378XG3R9",
+    "name": "@notion_ai",
+    "topic": "",
+    "purpose": "DM with Notion AI",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "D085D7PR9CG",
+    "name": "@tyler.bayne",
+    "topic": "",
+    "purpose": "DM with Tyler Bayne",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C08QGABRWPR",
+    "name": "#account-foundever",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08S1K55M5W",
+    "name": "#account-carvana",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C098FLZH2SK",
+    "name": "#gsx-2025",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 12,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0A8H2F60LF",
+    "name": "#cobaltai-sweep",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 5,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D083XT5PZFZ",
+    "name": "@theresa.do",
+    "topic": "",
+    "purpose": "DM with Theresa Do",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C01MSCXPD6U",
+    "name": "#sales-fedex",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07E4LDTWCB",
+    "name": "#deals-380_la_trobe_st_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07EY6CHSQ6",
+    "name": "#deals-younghusband",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PWESDALE",
+    "name": "#account-l3harris",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08B8LH9PA5",
+    "name": "#cobalt-gsoc",
+    "topic": "\u003c@U09GLQPMHA8\u003e is the GSOC operator for Day-Shift \u003c@U02D9QXNYTU\u003e is SOM.",
+    "purpose": "Admin channel for GSOCAAS shift reports, scheduling, projects and other non-operational matters. \n\nSpecific account comms will be located in the corresponding GSOC channels",
+    "memberCount": 26,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09MXLP97JA",
+    "name": "#account-nvidia",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0A11G9BHS9",
+    "name": "#external-cobalt-characterquilt",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 7,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "CFS2XQZ0Q",
+    "name": "#cyber",
+    "topic": "",
+    "purpose": "Discussing network and software security",
+    "memberCount": 37,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PNF1G2B1",
+    "name": "#account-wise-group",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C090E0S8ED8",
+    "name": "#eng-ai-tools",
+    "topic": "For discussion around AI tools",
+    "purpose": "",
+    "memberCount": 15,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D089D3HSFA5",
+    "name": "@tim.zhang",
+    "topic": "",
+    "purpose": "DM with Tim Zhang",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C02GF4M6Z2T",
+    "name": "#travel-marriott-san-mateo",
+    "topic": "",
+    "purpose": "Carpooling and other Marriott San Mateo San Francisco topics",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C035TDZFBGE",
+    "name": "#ext-its-cobalt",
+    "topic": "",
+    "purpose": "For communications between Codec/ITS and Cobalt",
+    "memberCount": 25,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06PYAQM8H2",
+    "name": "#slack_for__inc_117329",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07JKQS5F0T",
+    "name": "#account-asurion-llc",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07PWDCJ4KG",
+    "name": "#account-phillips-66",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0820JYD4KH",
+    "name": "#account-testerinator",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08U6EYUE23",
+    "name": "#account-bristol-myers-squibb-co",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03NUU9T20P",
+    "name": "#ext-paladin-security",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 13,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C05TDH28A8N",
+    "name": "#amz-san17-deploy",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06U73FLXGE",
+    "name": "#cameron-palmer-cameron-palmer-997",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08C0L23KKN",
+    "name": "#notion-development",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 15,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0915318C4D",
+    "name": "#internal-agent-force-integration",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 25,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0857RVCA64",
+    "name": "@notion",
+    "topic": "",
+    "purpose": "DM with Notion",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "CN0AR8E93",
+    "name": "#deals-svb",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 5,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03QA2PPWV6",
+    "name": "#eng-integrations",
+    "topic": "",
+    "purpose": "Talk about customer integrations",
+    "memberCount": 27,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C04UNQYRS80",
+    "name": "#citi_cyber",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09764G2D4G",
+    "name": "#account-voltera",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 4,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "CNS5532Q6",
+    "name": "#gsoc-cobalt-slack",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 6,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "CAGPTTZ7A",
+    "name": "#product",
+    "topic": "Product Feature Request Form: \u003chttps://www.notion.so/1d0889f7b4d880428fbbfbd9d330fe88?pvs=106\u003e",
+    "purpose": "",
+    "memberCount": 29,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C060Z2GRVBM",
+    "name": "#slack_for_p_inc_91672",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C06TVSNB4TY",
+    "name": "#pedro-test",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 13,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08L702F7RS",
+    "name": "#account-the-living-room",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C08R963CGDN",
+    "name": "#eng-cobalt-detection-stack",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 18,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C0P069ZBK",
+    "name": "#random",
+    "topic": "Non-work banter and water cooler conversation",
+    "purpose": "A place for non-work-related flimflam, faffing, hodge-podge or jibber-jabber you'd prefer to keep out of more focused work-related channels.",
+    "memberCount": 78,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C03D8RRKAE6",
+    "name": "#deals-its",
+    "topic": "",
+    "purpose": "Internal Channel for all things related to ITS/CODEC",
+    "memberCount": 11,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07QRQ7REQ0",
+    "name": "#account-adani-enterprises-ltd_",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C082RHLQG9H",
+    "name": "#account-first-citizens-bank",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09Q70HSL57",
+    "name": "#account-toyota-ventures",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "D0853H1EY57",
+    "name": "@ria.vanhoef",
+    "topic": "",
+    "purpose": "DM with Ria Van Hoef",
+    "memberCount": 2,
+    "mpim": false,
+    "im": true,
+    "private": false
+  },
+  {
+    "id": "C06SVPXF3F1",
+    "name": "#learn-workast",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07F7B4GRLY",
+    "name": "#deals-ryder",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07Q313UQ10",
+    "name": "#account-fortis-security",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C089X60AUN8",
+    "name": "#account-eastern-bank",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "CC4HEFW7L",
+    "name": "#robot-usage",
+    "topic": "Use this channel to discuss in-house robot usage. Run `usage` on the robot for notation. Scheduling downtime: \u003chttp://tiny.cc/robot-downtime\u003e",
+    "purpose": "Let’s use this channel to let each other know when we’re using or restarting a robot.",
+    "memberCount": 7,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C01FFQA0VJ9",
+    "name": "#goc-doordash-test",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 2,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C042NJVPUDT",
+    "name": "#clerk-sms",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 1,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C04Q342M1G8",
+    "name": "#activate_this_sim_please",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 6,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C07METUHLFR",
+    "name": "#gsx-2024",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 3,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C09KF4YGR6J",
+    "name": "#2025-cloud-security-summit",
+    "topic": "",
+    "purpose": "Channel to have conversations around our activity at 2025 CSS to align and increase visibility",
+    "memberCount": 8,
+    "mpim": false,
+    "im": false,
+    "private": false
+  },
+  {
+    "id": "C092ZU4K8BZ",
+    "name": "mpdm-trent.kriete--kodie.artner--marc.edward-1",
+    "topic": "",
+    "purpose": "Group messaging with: @trent.kriete @kodie.artner @marc.edward",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C07UG5PG2UQ",
+    "name": "#eng-software-team",
+    "topic": "",
+    "purpose": "For topics only the software team needs to see. Please post general software discussions in the eng-software channel.",
+    "memberCount": 18,
+    "mpim": false,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C0863S32C6S",
+    "name": "mpdm-cathy.lindemann--marc.edward--jeff.ventrella-1",
+    "topic": "",
+    "purpose": "Group messaging with: @cathy.lindemann @marc.edward @jeff.ventrella",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C09323V1B0E",
+    "name": "mpdm-timothy.ohtake--allison.gerber--marc.edward-1",
+    "topic": "",
+    "purpose": "Group messaging with: @timothy.ohtake @allison.gerber @marc.edward",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C094C8XDNDV",
+    "name": "mpdm-marc.edward--ellie.horita--timothy.ohtake-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @ellie.horita @timothy.ohtake",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C0922HM6VH9",
+    "name": "mpdm-marc.edward--kodie.artner--keegan.sotebeer-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @kodie.artner @keegan.sotebeer",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C094Y8ZUXEC",
+    "name": "mpdm-kodie.artner--drew.connelly--joe.santini--marc.edward-1",
+    "topic": "",
+    "purpose": "Group messaging with: @kodie.artner @drew.connelly @joe.santini @marc.edward",
+    "memberCount": 4,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C09BPU9C0MN",
+    "name": "mpdm-marc.edward--mason--joe.santini-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @mason @joe.santini",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08K4EXSTRP",
+    "name": "mpdm-steve.skloot--andrew.keating--marc.edward-1",
+    "topic": "",
+    "purpose": "Group messaging with: @steve.skloot @andrew.keating @marc.edward",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08JN5FGM4P",
+    "name": "mpdm-trent.kriete--kodie.artner--keegan.sotebeer--marc.edward--timothy.ohtake-1",
+    "topic": "",
+    "purpose": "Group messaging with: @trent.kriete @kodie.artner @keegan.sotebeer @marc.edward @timothy.ohtake",
+    "memberCount": 5,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C093E9HSJ74",
+    "name": "mpdm-ellie.horita--timothy.ohtake--kodie.artner--marc.edward--trent.kriete-1",
+    "topic": "",
+    "purpose": "Group messaging with: @ellie.horita @timothy.ohtake @kodie.artner @marc.edward @trent.kriete",
+    "memberCount": 5,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C0963DDRK6C",
+    "name": "mpdm-joe.santini--marc.edward--keegan.sotebeer-1",
+    "topic": "",
+    "purpose": "Group messaging with: @joe.santini @marc.edward @keegan.sotebeer",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08S2MX2TT7",
+    "name": "mpdm-cameron.palmer--marc.edward--timothy.ohtake--drew.connelly--keegan.sotebeer-1",
+    "topic": "",
+    "purpose": "Group messaging with: @cameron.palmer @marc.edward @timothy.ohtake @drew.connelly @keegan.sotebeer",
+    "memberCount": 5,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C088TP1M52A",
+    "name": "mpdm-marc.edward--mason--drew.connelly-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @mason @drew.connelly",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C098GCANCSZ",
+    "name": "mpdm-pedro--marc.edward--cathy.lindemann--timothy.ohtake-1",
+    "topic": "",
+    "purpose": "Group messaging with: @pedro @marc.edward @cathy.lindemann @timothy.ohtake",
+    "memberCount": 4,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C0A786RJKUK",
+    "name": "mpdm-marc.edward--timothy.ohtake--drew.connelly-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @timothy.ohtake @drew.connelly",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08JN56EMBR",
+    "name": "mpdm-trent.kriete--kodie.artner--marc.edward--keegan.sotebeer-1",
+    "topic": "",
+    "purpose": "Group messaging with: @trent.kriete @kodie.artner @marc.edward @keegan.sotebeer",
+    "memberCount": 4,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C09801W4NP9",
+    "name": "mpdm-marc.edward--alejandro--pedro--kodie.artner--drew.connelly--trent.kriete-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @alejandro @pedro @kodie.artner @drew.connelly @trent.kriete",
+    "memberCount": 6,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C09HZEH696J",
+    "name": "#infrastructure-eng-hire",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 12,
+    "mpim": false,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08MT866GP7",
+    "name": "mpdm-chris.powers--mason--kodie.artner--keegan.sotebeer--andrew.keating--marc.edward--trent.kriete-1",
+    "topic": "",
+    "purpose": "Group messaging with: @chris.powers @mason @kodie.artner @keegan.sotebeer @andrew.keating @marc.edward @trent.kriete",
+    "memberCount": 7,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C09D3TN8NBX",
+    "name": "#ext-paloaltonetworks",
+    "topic": "",
+    "purpose": "",
+    "memberCount": 19,
+    "mpim": false,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C09SP436G5A",
+    "name": "mpdm-marc.edward--timothy.ohtake--trent.kriete-1",
+    "topic": "",
+    "purpose": "Group messaging with: @marc.edward @timothy.ohtake @trent.kriete",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08SGQ19JFM",
+    "name": "mpdm-pedro--timothy.ohtake--marc.edward--kodie.artner-1",
+    "topic": "",
+    "purpose": "Group messaging with: @pedro @timothy.ohtake @marc.edward @kodie.artner",
+    "memberCount": 4,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C094RV4P8Q0",
+    "name": "mpdm-kodie.artner--marc.edward--ellie.horita-1",
+    "topic": "",
+    "purpose": "Group messaging with: @kodie.artner @marc.edward @ellie.horita",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C08JYC3L8C9",
+    "name": "mpdm-kodie.artner--mason--andrew.keating--steve.skloot--keegan.sotebeer--marc.edward-1",
+    "topic": "",
+    "purpose": "Group messaging with: @kodie.artner @mason @andrew.keating @steve.skloot @keegan.sotebeer @marc.edward",
+    "memberCount": 6,
+    "mpim": true,
+    "im": false,
+    "private": true
+  },
+  {
+    "id": "C090A0D5RTP",
+    "name": "mpdm-kodie.artner--marc.edward--joe.santini-1",
+    "topic": "",
+    "purpose": "Group messaging with: @kodie.artner @marc.edward @joe.santini",
+    "memberCount": 3,
+    "mpim": true,
+    "im": false,
+    "private": true
+  }
+]

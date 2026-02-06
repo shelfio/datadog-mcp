@@ -640,6 +640,139 @@ async def fetch_monitors(
             raise
 
 
+async def get_monitor(monitor_id: int) -> Dict[str, Any]:
+    """Get a specific monitor from Datadog API."""
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    url = f"{DATADOG_API_URL}/api/v1/monitor/{monitor_id}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error getting monitor {monitor_id}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error getting monitor {monitor_id}: {e}")
+            raise
+
+
+async def create_monitor(
+    name: str,
+    type: str,
+    query: str,
+    message: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+    thresholds: Optional[Dict[str, Any]] = None,
+    **kwargs,
+) -> Dict[str, Any]:
+    """Create a new monitor in Datadog API."""
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    url = f"{DATADOG_API_URL}/api/v1/monitor"
+
+    payload = {
+        "name": name,
+        "type": type,
+        "query": query,
+    }
+
+    if message:
+        payload["message"] = message
+    if tags:
+        payload["tags"] = tags
+    if thresholds:
+        payload["thresholds"] = thresholds
+
+    # Add any additional parameters
+    payload.update(kwargs)
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error creating monitor: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error creating monitor: {e}")
+            raise
+
+
+async def update_monitor(
+    monitor_id: int,
+    name: Optional[str] = None,
+    query: Optional[str] = None,
+    message: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+    thresholds: Optional[Dict[str, Any]] = None,
+    **kwargs,
+) -> Dict[str, Any]:
+    """Update an existing monitor in Datadog API."""
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+
+    url = f"{DATADOG_API_URL}/api/v1/monitor/{monitor_id}"
+
+    payload = {}
+
+    if name is not None:
+        payload["name"] = name
+    if query is not None:
+        payload["query"] = query
+    if message is not None:
+        payload["message"] = message
+    if tags is not None:
+        payload["tags"] = tags
+    if thresholds is not None:
+        payload["thresholds"] = thresholds
+
+    # Add any additional parameters
+    payload.update(kwargs)
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.put(url, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error updating monitor {monitor_id}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error updating monitor {monitor_id}: {e}")
+            raise
+
+
+async def delete_monitor(monitor_id: int) -> Dict[str, Any]:
+    """Delete a monitor from Datadog API."""
+    headers = get_auth_headers(include_csrf=True)
+
+    url = f"{DATADOG_API_URL}/api/v1/monitor/{monitor_id}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.delete(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error deleting monitor {monitor_id}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error deleting monitor {monitor_id}: {e}")
+            raise
+
+
 async def fetch_slos(
     tags: Optional[str] = None,
     query: Optional[str] = None,
