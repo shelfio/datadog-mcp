@@ -80,13 +80,16 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         notebook_id = result.get("id")
         notebook_url = f"https://app.datadoghq.com/notebook/{notebook_id}" if notebook_id else ""
 
+        attrs = result.get('attributes', {})
+        tags = attrs.get('tags') or []
+
         formatted_result = (
             f"**Notebook Created**\n\n"
             f"- **ID**: {notebook_id}\n"
-            f"- **Title**: {result.get('attributes', {}).get('name', 'N/A')}\n"
-            f"- **Description**: {result.get('attributes', {}).get('description', 'N/A')}\n"
-            f"- **Tags**: {', '.join(result.get('attributes', {}).get('tags', []))}\n"
-            f"- **Cells**: {len(result.get('attributes', {}).get('cells', []))}\n"
+            f"- **Title**: {attrs.get('name', 'N/A')}\n"
+            f"- **Description**: {attrs.get('description', 'N/A')}\n"
+            f"- **Tags**: {', '.join(tags) if tags else 'None'}\n"
+            f"- **Cells**: {len(attrs.get('cells', []))}\n"
             f"- **URL**: [{notebook_url}]({notebook_url})\n"
         )
 

@@ -1971,8 +1971,8 @@ async def create_notebook(
     headers["Content-Type"] = "application/json"
     logger.info("Using cookie auth for create_notebook")
 
-    # Cells is REQUIRED by Datadog API, time is REQUIRED
-    # Default to empty array of cells if not provided
+    # Only name, cells, and time are supported for CREATE
+    # Description and tags can only be set via UPDATE
     cells_to_send = cells if cells else []
 
     payload = {
@@ -1981,23 +1981,19 @@ async def create_notebook(
             "attributes": {
                 "name": title,
                 "cells": cells_to_send,
-                "time": int(time_module.time()),
+                "time": {
+                    "live_span": "1h"  # Relative time - required by API
+                }
             }
         }
     }
-
-    # Add optional fields only if provided
-    if description:
-        payload["data"]["attributes"]["description"] = description
-    if tags:
-        payload["data"]["attributes"]["tags"] = tags
 
     logger.info(f"create_notebook payload: {json.dumps(payload, indent=2)}")
 
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(url, headers=headers, json=payload)
-            if response.status_code != 201:
+            if response.status_code not in (200, 201):
                 try:
                     error_detail = response.json()
                     logger.error(f"Notebook creation failed: Status {response.status_code} | Response: {error_detail}")
