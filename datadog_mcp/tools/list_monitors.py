@@ -83,10 +83,17 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
             page=page
         )
 
-        monitors = result.get("monitors", [])
-        returned = result.get("returned", 0)
-        has_more = result.get("has_more", False)
-        next_page = result.get("next_page")
+        # Handle both dict and list returns for compatibility
+        if isinstance(result, list):
+            monitors = result
+            returned = len(monitors)
+            has_more = False
+            next_page = None
+        else:
+            monitors = result.get("monitors", [])
+            returned = result.get("returned", 0)
+            has_more = result.get("has_more", False)
+            next_page = result.get("next_page")
 
         # Get auth metadata for debugging/transparency
         use_cookie, api_url = get_auth_mode()
