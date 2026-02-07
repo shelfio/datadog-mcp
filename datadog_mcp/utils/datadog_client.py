@@ -402,11 +402,23 @@ async def fetch_ci_pipelines(
 ) -> Dict[str, Any]:
     """Fetch CI pipelines from Datadog API.
 
-    Supports both API key authentication and cookie-based authentication.
-    API keys are the preferred method for v2 CI Visibility API.
+    Note: v2 CI Visibility API requires API key authentication.
+    Cookie authentication is not supported by this endpoint.
     """
     url = f"{get_api_url()}/api/v2/ci/pipelines/events/search"
-    headers = get_auth_headers(include_csrf=True)  # v2 endpoints require CSRF for cookie auth
+
+    # v2 endpoints REQUIRE token auth, not cookie auth
+    api_key = get_api_key()
+    app_key = get_app_key()
+    if not api_key or not app_key:
+        logger.error("v2 CI Visibility API requires API key authentication")
+        raise ValueError("CI Visibility endpoint requires DD_API_KEY and DD_APP_KEY")
+
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": api_key,
+        "DD-APPLICATION-KEY": app_key,
+    }
 
     # Build query filter
     query_parts = []
