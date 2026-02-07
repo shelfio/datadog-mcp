@@ -33,7 +33,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the delete_monitor tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
         monitor_id = args.get("monitor_id")
 
         if not monitor_id:

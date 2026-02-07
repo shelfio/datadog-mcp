@@ -361,7 +361,7 @@ async def fetch_ci_pipelines(
     API keys are the preferred method for v2 CI Visibility API.
     """
     url = f"{get_api_url()}/api/v2/ci/pipelines/events/search"
-    headers = get_auth_headers()  # Uses cookie or API keys depending on available credentials
+    headers = get_auth_headers(include_csrf=True)  # v2 endpoints require CSRF for cookie auth
 
     # Build query filter
     query_parts = []

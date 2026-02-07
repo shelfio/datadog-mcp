@@ -41,7 +41,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the get_monitor tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
         monitor_id = args.get("monitor_id")
         format_type = args.get("format", "formatted")
 
