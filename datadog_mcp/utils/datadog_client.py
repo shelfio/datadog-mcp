@@ -2315,9 +2315,19 @@ async def fetch_metric_formula(
     """
     import time
 
-    use_cookie, api_url = get_auth_mode()
-    headers = get_auth_headers()
-    headers["Content-Type"] = "application/json"
+    api_url = get_api_url()
+
+    # V2 API only supports token auth, never cookie auth
+    api_key = get_api_key()
+    app_key = get_app_key()
+    if not api_key or not app_key:
+        raise ValueError("query_metric_formula requires DD_API_KEY and DD_APP_KEY (token auth)")
+
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": api_key,
+        "DD-APPLICATION-KEY": app_key,
+    }
 
     # Calculate time range in milliseconds (V2 API uses milliseconds)
     to_timestamp = int(time.time()) * 1000
@@ -2378,7 +2388,7 @@ async def fetch_metric_formula(
         }
     }
 
-    # Use v2 API for formula queries
+    # Use v2 API for formula queries (requires token auth)
     url = f"{api_url}/api/v2/query/timeseries"
 
     async with httpx.AsyncClient() as client:
