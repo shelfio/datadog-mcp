@@ -60,7 +60,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the list_slos tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
         
         tags = args.get("tags", "")
         query = args.get("query", "")

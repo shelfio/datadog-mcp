@@ -25,7 +25,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the tool call."""
     try:
-        notebook_id = request.arguments.get("notebook_id")
+        notebook_id = request.params.arguments.get("notebook_id")
 
         result = await client_get_notebook(notebook_id)
 

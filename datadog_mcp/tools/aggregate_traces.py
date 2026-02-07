@@ -60,7 +60,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the aggregate_traces tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
 
         query = args.get("query", "*")
         group_by = args.get("group_by", [])

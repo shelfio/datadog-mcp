@@ -58,11 +58,11 @@ async def handle_call(request: types.CallToolRequest) -> CallToolResult:
     """Handle the get_logs_field_values tool call."""
     try:
         # Extract parameters
-        field_name = request.arguments.get("field_name")
-        time_range = request.arguments.get("time_range", "1h")
-        query = request.arguments.get("query")
-        limit = request.arguments.get("limit", 100)
-        format_type = request.arguments.get("format", "table")
+        field_name = request.params.arguments.get("field_name")
+        time_range = request.params.arguments.get("time_range", "1h")
+        query = request.params.arguments.get("query")
+        limit = request.params.arguments.get("limit", 100)
+        format_type = request.params.arguments.get("format", "table")
         
         # Validate required parameters
         if not field_name:

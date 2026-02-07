@@ -61,7 +61,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the list_ci_pipelines tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
         
         repository = args.get("repository")
         pipeline_name = args.get("pipeline_name")

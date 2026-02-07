@@ -45,7 +45,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the get_metric_field_values tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
         
         metric_name = args.get("metric_name")
         field_name = args.get("field_name")

@@ -61,7 +61,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the get_teams tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
         
         team_name = args.get("team_name")
         include_members = args.get("include_members", True)

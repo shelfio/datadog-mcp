@@ -65,10 +65,10 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the tool call."""
     try:
-        title = request.arguments.get("title")
-        description = request.arguments.get("description")
-        tags = request.arguments.get("tags")
-        cells = request.arguments.get("cells")
+        title = request.params.arguments.get("title")
+        description = request.params.arguments.get("description")
+        tags = request.params.arguments.get("tags")
+        cells = request.params.arguments.get("cells")
 
         result = await client_create_notebook(
             title=title,

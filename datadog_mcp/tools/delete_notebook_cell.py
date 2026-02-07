@@ -29,8 +29,8 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the tool call."""
     try:
-        notebook_id = request.arguments.get("notebook_id")
-        cell_id = request.arguments.get("cell_id")
+        notebook_id = request.params.arguments.get("notebook_id")
+        cell_id = request.params.arguments.get("cell_id")
 
         result = await client_delete_notebook_cell(
             notebook_id=notebook_id,

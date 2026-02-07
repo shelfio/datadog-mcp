@@ -54,7 +54,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the list_service_definitions tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
         
         page_size = args.get("page_size", 10)
         page_number = args.get("page_number", 0)

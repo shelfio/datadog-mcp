@@ -47,7 +47,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the get_service_definition tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
         
         service_name = args.get("service_name")
         if not service_name:

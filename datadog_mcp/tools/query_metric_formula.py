@@ -77,7 +77,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the query_metric_formula tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
 
         formula = args.get("formula")
         queries = args.get("queries", {})

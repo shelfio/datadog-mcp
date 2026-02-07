@@ -50,13 +50,13 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the tool call."""
     try:
-        notebook_id = request.arguments.get("notebook_id")
-        cell_id = request.arguments.get("cell_id")
-        title = request.arguments.get("title")
-        query = request.arguments.get("query")
-        content = request.arguments.get("content")
-        visualization = request.arguments.get("visualization")
-        position = request.arguments.get("position")
+        notebook_id = request.params.arguments.get("notebook_id")
+        cell_id = request.params.arguments.get("cell_id")
+        title = request.params.arguments.get("title")
+        query = request.params.arguments.get("query")
+        content = request.params.arguments.get("content")
+        visualization = request.params.arguments.get("visualization")
+        position = request.params.arguments.get("position")
 
         result = await client_update_notebook_cell(
             notebook_id=notebook_id,

@@ -66,7 +66,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the get_logs tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
         
         time_range = args.get("time_range", "1h")
         filters = args.get("filters", {})

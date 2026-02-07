@@ -59,7 +59,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the check_deployment tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
 
         service = args.get("service")
         version_field = args.get("version_field")

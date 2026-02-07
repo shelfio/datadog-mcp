@@ -70,7 +70,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the get_metrics tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
         
         metric_name = args.get("metric_name")
         time_range = args.get("time_range", "1h")
