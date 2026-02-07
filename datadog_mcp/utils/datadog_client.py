@@ -402,23 +402,26 @@ async def fetch_ci_pipelines(
 ) -> Dict[str, Any]:
     """Fetch CI pipelines from Datadog API.
 
-    Note: v2 CI Visibility API requires API key authentication.
-    Cookie authentication is not supported by this endpoint.
+    Tries cookie auth first (internal UI), falls back to token auth (v2 API).
     """
-    url = f"{get_api_url()}/api/v2/ci/pipelines/events/search"
-
-    # v2 endpoints REQUIRE token auth, not cookie auth
-    api_key = get_api_key()
-    app_key = get_app_key()
-    if not api_key or not app_key:
-        logger.error("v2 CI Visibility API requires API key authentication")
-        raise ValueError("CI Visibility endpoint requires DD_API_KEY and DD_APP_KEY")
-
-    headers = {
-        "Content-Type": "application/json",
-        "DD-API-KEY": api_key,
-        "DD-APPLICATION-KEY": app_key,
-    }
+    # Try internal UI endpoint with cookie auth first
+    cookie = get_cookie()
+    if cookie:
+        url = f"{get_api_url()}/api/v1/ci/pipelines/events/search"
+        headers = get_auth_headers(include_csrf=True)
+    else:
+        # Fall back to v2 API with token auth
+        url = f"{get_api_url()}/api/v2/ci/pipelines/events/search"
+        api_key = get_api_key()
+        app_key = get_app_key()
+        if not api_key or not app_key:
+            logger.error("No authentication available for CI Visibility")
+            raise ValueError("CI Visibility requires either DD_COOKIE or DD_API_KEY/DD_APP_KEY")
+        headers = {
+            "Content-Type": "application/json",
+            "DD-API-KEY": api_key,
+            "DD-APPLICATION-KEY": app_key,
+        }
 
     # Build query filter
     query_parts = []
