@@ -1961,6 +1961,8 @@ async def create_notebook(
     Returns:
         Dict containing the created notebook details
     """
+    import time as time_module
+
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks"
 
@@ -1972,6 +1974,8 @@ async def create_notebook(
             "type": "notebooks",
             "attributes": {
                 "name": title,
+                "time": int(time_module.time()),
+                "cells": cells if cells else [],  # Default to empty cells array if not provided
             }
         }
     }
@@ -1981,9 +1985,6 @@ async def create_notebook(
 
     if tags:
         payload["data"]["attributes"]["tags"] = tags
-
-    if cells:
-        payload["data"]["attributes"]["cells"] = cells
 
     async with httpx.AsyncClient() as client:
         try:
