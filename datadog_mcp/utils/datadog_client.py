@@ -147,6 +147,51 @@ def save_csrf_token(csrf_token: str) -> str:
     return CSRF_FILE_PATH
 
 
+async def renew_csrf_token() -> Optional[str]:
+    """Renew CSRF token from Datadog API response headers.
+
+    Makes an authenticated request to a public Datadog endpoint and extracts
+    the x-csrf-token from the response headers, then saves it for future use.
+
+    Returns:
+        The new CSRF token, or None if renewal failed
+    """
+    try:
+        cookie = get_cookie()
+        if not cookie:
+            logger.warning("Cannot renew CSRF token: no cookie available")
+            return None
+
+        # Use a lightweight GET endpoint to obtain fresh CSRF token
+        url = f"{get_api_url()}/api/v1/org"
+        headers = {
+            "Content-Type": "application/json",
+            "Cookie": cookie,
+        }
+
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=headers, follow_redirects=True)
+
+            # Extract CSRF token from response headers (case-insensitive)
+            csrf_token = None
+            for header_name, header_value in response.headers.items():
+                if header_name.lower() == "x-csrf-token":
+                    csrf_token = header_value
+                    break
+
+            if csrf_token:
+                save_csrf_token(csrf_token)
+                logger.info(f"CSRF token renewed successfully")
+                return csrf_token
+            else:
+                logger.warning("No x-csrf-token found in response headers")
+                return None
+
+    except Exception as e:
+        logger.error(f"Failed to renew CSRF token: {e}")
+        return None
+
+
 def get_api_key() -> Optional[str]:
     """Get API key from environment variable or file (read fresh each time).
 

@@ -18,6 +18,7 @@ from ..utils.datadog_client import (
     get_csrf_token,
     get_api_key,
     get_app_key,
+    renew_csrf_token,
     COOKIE_FILE_PATH,
     CSRF_FILE_PATH,
     API_KEY_FILE_PATH,
@@ -65,7 +66,7 @@ def get_tool_definition() -> Tool:
 async def handle_call(request: CallToolRequest) -> CallToolResult:
     """Handle the setup_auth tool call."""
     try:
-        args = request.arguments or {}
+        args = request.params.arguments or {}
         action = args.get("action", "detect")
 
         if action == "detect":
@@ -231,7 +232,7 @@ async def handle_status() -> CallToolResult:
 
 
 async def handle_configure_cookie(args: Dict[str, Any]) -> CallToolResult:
-    """Configure cookie-based authentication."""
+    """Configure cookie-based authentication, with automatic CSRF token renewal."""
     cookie_value = args.get("cookie_value")
     csrf_token = args.get("csrf_token")
 
@@ -240,27 +241,33 @@ async def handle_configure_cookie(args: Dict[str, Any]) -> CallToolResult:
             content=[
                 TextContent(
                     type="text",
-                    text="❌ Error: cookie_value is required\n\nUsage:\n  setup_auth action=configure_cookie cookie_value=<value> csrf_token=<value>",
-                )
-            ],
-            isError=True,
-        )
-
-    if not csrf_token:
-        return CallToolResult(
-            content=[
-                TextContent(
-                    type="text",
-                    text="❌ Error: csrf_token is required\n\nUsage:\n  setup_auth action=configure_cookie cookie_value=<value> csrf_token=<value>",
+                    text="❌ Error: cookie_value is required\n\nUsage:\n  setup_auth action=configure_cookie cookie_value=<value> [csrf_token=<value>]",
                 )
             ],
             isError=True,
         )
 
     try:
-        # Save both
+        # Save cookie first
         cookie_path = save_cookie(cookie_value)
-        csrf_path = save_csrf_token(csrf_token)
+
+        # If no CSRF token provided, try to renew it automatically
+        if not csrf_token:
+            logger.info("CSRF token not provided, attempting automatic renewal...")
+            csrf_token = await renew_csrf_token()
+
+            if csrf_token:
+                renewal_msg = "✅ CSRF token automatically renewed from API"
+            else:
+                renewal_msg = "⚠️  CSRF token renewal failed. Some POST requests may fail. You can provide one manually."
+        else:
+            # Save provided CSRF token
+            save_csrf_token(csrf_token)
+            renewal_msg = "✅ CSRF token provided and saved"
+
+        csrf_path = CSRF_FILE_PATH if csrf_token else "N/A"
+
+        csrf_display = f"{csrf_token[:30]}... (hidden)" if csrf_token else "N/A"
 
         return CallToolResult(
             content=[
@@ -274,7 +281,9 @@ async def handle_configure_cookie(args: Dict[str, Any]) -> CallToolResult:
 
 🔐 Configuration:
   Cookie: {cookie_value[:30]}... (hidden)
-  CSRF: {csrf_token[:30]}... (hidden)
+  CSRF: {csrf_display}
+
+{renewal_msg}
 
 🧪 Next steps:
   1. Test with: setup_auth action=verify
