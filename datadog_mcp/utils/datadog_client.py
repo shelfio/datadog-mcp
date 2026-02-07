@@ -1966,31 +1966,31 @@ async def create_notebook(
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks"
 
-    # Try token auth first for v1 API (more reliable)
-    api_key = get_api_key()
-    app_key = get_app_key()
+    # Use cookie auth for notebooks (token auth lacks permissions)
+    headers = get_auth_headers(include_csrf=True)
+    headers["Content-Type"] = "application/json"
+    logger.info("Using cookie auth for create_notebook")
 
-    if api_key and app_key:
-        headers = {
-            "Content-Type": "application/json",
-            "DD-API-KEY": api_key,
-            "DD-APPLICATION-KEY": app_key,
-        }
-        logger.info("Using token auth for create_notebook")
-    else:
-        headers = get_auth_headers(include_csrf=True)
-        headers["Content-Type"] = "application/json"
-        logger.info("Using cookie auth for create_notebook")
+    # Cells is REQUIRED by Datadog API, time is REQUIRED
+    # Default to empty array of cells if not provided
+    cells_to_send = cells if cells else []
 
-    # Minimal payload - just name, per Datadog API requirements
     payload = {
         "data": {
             "type": "notebooks",
             "attributes": {
                 "name": title,
+                "cells": cells_to_send,
+                "time": int(time_module.time()),
             }
         }
     }
+
+    # Add optional fields only if provided
+    if description:
+        payload["data"]["attributes"]["description"] = description
+    if tags:
+        payload["data"]["attributes"]["tags"] = tags
 
     logger.info(f"create_notebook payload: {json.dumps(payload, indent=2)}")
 
