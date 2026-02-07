@@ -1988,16 +1988,18 @@ async def create_notebook(
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(url, headers=headers, json=payload)
-            response.raise_for_status()
+            if response.status_code != 201:
+                try:
+                    error_detail = response.json()
+                    logger.error(f"Notebook creation failed: Status {response.status_code} | Response: {error_detail}")
+                    raise ValueError(f"Datadog API error: {error_detail}")
+                except ValueError:
+                    raise
+                except:
+                    logger.error(f"Notebook creation failed: Status {response.status_code} | Body: {response.text}")
+                    raise ValueError(f"Datadog API error (status {response.status_code}): {response.text}")
             data = response.json()
             return data.get("data", {})
-        except httpx.HTTPError as e:
-            try:
-                error_detail = response.json()
-                logger.error(f"HTTP error creating notebook: {e} | Response: {error_detail}")
-            except:
-                logger.error(f"HTTP error creating notebook: {e} | Status: {response.status_code} | Body: {response.text}")
-            raise
         except Exception as e:
             logger.error(f"Error creating notebook: {e}")
             raise
