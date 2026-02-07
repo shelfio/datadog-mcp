@@ -77,6 +77,13 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
             cursor=cursor if cursor else None,
         )
 
+        # Defensive check for None response
+        if response is None:
+            return CallToolResult(
+                content=[TextContent(type="text", text="Error: No response from Datadog API")],
+                isError=True,
+            )
+
         traces = response.get("data", [])
 
         # Get pagination info
