@@ -86,10 +86,10 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
 
         traces = response.get("data", [])
 
-        # Get pagination info
-        meta = response.get("meta", {})
-        page = meta.get("page", {})
-        next_cursor = page.get("after")
+        # Get pagination info (defensive for null values from API)
+        meta = response.get("meta") or {}
+        page = meta.get("page") or {}
+        next_cursor = page.get("after") if page else None
 
         # Check if we got zero results
         if len(traces) == 0:
