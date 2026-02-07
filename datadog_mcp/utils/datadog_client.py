@@ -1966,8 +1966,21 @@ async def create_notebook(
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks"
 
-    headers = get_auth_headers(include_csrf=True)
-    headers["Content-Type"] = "application/json"
+    # Try token auth first for v1 API (more reliable)
+    api_key = get_api_key()
+    app_key = get_app_key()
+
+    if api_key and app_key:
+        headers = {
+            "Content-Type": "application/json",
+            "DD-API-KEY": api_key,
+            "DD-APPLICATION-KEY": app_key,
+        }
+        logger.info("Using token auth for create_notebook")
+    else:
+        headers = get_auth_headers(include_csrf=True)
+        headers["Content-Type"] = "application/json"
+        logger.info("Using cookie auth for create_notebook")
 
     # Minimal payload - just name, per Datadog API requirements
     payload = {
