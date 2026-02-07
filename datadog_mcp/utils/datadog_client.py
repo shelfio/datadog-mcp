@@ -2010,6 +2010,53 @@ async def create_notebook(
             raise
 
 
+async def list_notebooks(
+    limit: int = 20,
+    offset: int = 0,
+) -> Dict[str, Any]:
+    """List all notebooks.
+
+    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+
+    Args:
+        limit: Maximum number of notebooks to return (default: 20, max: 100)
+        offset: Offset for pagination (default: 0)
+
+    Returns:
+        Dict containing list of notebooks and pagination info
+    """
+    use_cookie, api_url = get_auth_mode()
+    url = f"{api_url}/api/v1/notebooks"
+
+    headers = get_auth_headers()
+    headers["Content-Type"] = "application/json"
+
+    params = {
+        "limit": min(limit, 100),  # Cap at 100
+        "offset": offset,
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers, params=params)
+            response.raise_for_status()
+            data = response.json()
+            notebooks = data.get("data", [])
+            meta = data.get("meta", {})
+            return {
+                "notebooks": notebooks,
+                "page_count": meta.get("page", {}).get("total_count", 0),
+                "limit": limit,
+                "offset": offset,
+            }
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching notebooks: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching notebooks: {e}")
+            raise
+
+
 async def get_notebook(notebook_id: str) -> Dict[str, Any]:
     """Fetch a specific notebook by ID.
 

@@ -14,7 +14,7 @@ from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, ServerCapabilities, TextContent, CallToolRequest
 
-from .tools import get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values, get_monitor, create_monitor, update_monitor, delete_monitor, create_notebook, get_notebook, update_notebook, add_notebook_cell, update_notebook_cell, delete_notebook_cell, delete_notebook, query_metric_formula, check_deployment, get_traces, aggregate_traces, setup_auth
+from .tools import get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values, get_monitor, create_monitor, update_monitor, delete_monitor, create_notebook, list_notebooks, get_notebook, update_notebook, add_notebook_cell, update_notebook_cell, delete_notebook_cell, delete_notebook, query_metric_formula, check_deployment, get_traces, aggregate_traces, setup_auth
 from .utils.secrets_provider import get_secret_provider, close_secret_provider, is_aws_secrets_configured
 
 # Configure logging
@@ -93,6 +93,10 @@ TOOLS = {
     "create_notebook": {
         "definition": create_notebook.get_tool_definition,
         "handler": create_notebook.handle_call,
+    },
+    "list_notebooks": {
+        "definition": list_notebooks.get_tool_definition,
+        "handler": list_notebooks.handle_call,
     },
     "get_notebook": {
         "definition": get_notebook.get_tool_definition,
