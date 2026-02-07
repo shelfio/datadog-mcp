@@ -1969,23 +1969,13 @@ async def create_notebook(
     headers = get_auth_headers(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
-    attributes = {
-        "name": title,
-        "time": int(time_module.time()),
-    }
-
-    # Only include optional fields if provided and non-empty
-    if cells:
-        attributes["cells"] = cells
-    if tags:
-        attributes["tags"] = tags
-    if description:
-        attributes["description"] = description
-
+    # Minimal payload - just name, per Datadog API requirements
     payload = {
         "data": {
             "type": "notebooks",
-            "attributes": attributes
+            "attributes": {
+                "name": title,
+            }
         }
     }
 
