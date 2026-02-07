@@ -1975,16 +1975,14 @@ async def create_notebook(
             "attributes": {
                 "name": title,
                 "time": int(time_module.time()),
-                "cells": cells if cells else [],  # Default to empty cells array if not provided
+                "cells": cells if cells else [],
+                "description": description or "",
+                "tags": tags or [],
             }
         }
     }
 
-    if description:
-        payload["data"]["attributes"]["description"] = description
-
-    if tags:
-        payload["data"]["attributes"]["tags"] = tags
+    logger.info(f"create_notebook payload: {json.dumps(payload, indent=2)}")
 
     async with httpx.AsyncClient() as client:
         try:
