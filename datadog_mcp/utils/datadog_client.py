@@ -1992,7 +1992,11 @@ async def create_notebook(
             data = response.json()
             return data.get("data", {})
         except httpx.HTTPError as e:
-            logger.error(f"HTTP error creating notebook: {e}")
+            try:
+                error_detail = response.json()
+                logger.error(f"HTTP error creating notebook: {e} | Response: {error_detail}")
+            except:
+                logger.error(f"HTTP error creating notebook: {e} | Status: {response.status_code} | Body: {response.text}")
             raise
         except Exception as e:
             logger.error(f"Error creating notebook: {e}")

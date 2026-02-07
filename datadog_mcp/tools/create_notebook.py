@@ -96,7 +96,8 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         )
 
     except Exception as e:
-        error_text = f"Error creating notebook: {str(e)}"
+        import traceback
+        error_text = f"Error creating notebook: {str(e)}\n\nTraceback:\n{traceback.format_exc()}"
         return CallToolResult(
             content=[TextContent(type="text", text=error_text)],
             isError=True,
