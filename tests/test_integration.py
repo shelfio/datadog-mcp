@@ -15,18 +15,36 @@ class TestBasicIntegration:
     def test_all_tools_are_registered(self):
         """Test that all expected tools are in the registry"""
         expected_tools = [
-            "list_ci_pipelines",
-            "get_pipeline_fingerprints",
-            "get_logs", 
+            "get_logs",
+            "get_logs_field_values",
             "get_teams",
             "get_metrics",
             "get_metric_fields",
             "get_metric_field_values",
             "list_metrics",
             "list_service_definitions",
-            "get_service_definition"
+            "get_service_definition",
+            "list_monitors",
+            "get_monitor",
+            "create_monitor",
+            "update_monitor",
+            "delete_monitor",
+            "list_slos",
+            "create_notebook",
+            "list_notebooks",
+            "get_notebook",
+            "update_notebook",
+            "add_notebook_cell",
+            "update_notebook_cell",
+            "delete_notebook_cell",
+            "delete_notebook",
+            "query_metric_formula",
+            "check_deployment",
+            "get_traces",
+            "aggregate_traces",
+            "setup_auth"
         ]
-        
+
         for tool_name in expected_tools:
             assert tool_name in TOOLS, f"Tool {tool_name} not registered"
             assert "definition" in TOOLS[tool_name]
@@ -75,19 +93,19 @@ class TestToolHandling:
     @pytest.mark.asyncio
     async def test_handle_tool_with_empty_arguments(self):
         """Test handling tools with empty arguments"""
-        # Pick any tool and try with empty args
-        tool_name = "list_ci_pipelines"
-        
+        # Pick any tool that accepts empty args
+        tool_name = "list_teams"
+
         with patch.dict(os.environ, {"DD_API_KEY": "test", "DD_APP_KEY": "test"}):
             with patch('datadog_mcp.utils.datadog_client.httpx.AsyncClient') as mock_client:
                 # Mock successful response
                 mock_response = MagicMock()
-                mock_response.json.return_value = {"data": []}
+                mock_response.json.return_value = {"teams": []}
                 mock_response.raise_for_status.return_value = None
-                mock_client.return_value.__aenter__.return_value.post.return_value = mock_response
-                
+                mock_client.return_value.__aenter__.return_value.get.return_value = mock_response
+
                 result = await handle_call_tool(tool_name, {})
-                
+
                 assert isinstance(result, list)
                 assert len(result) >= 1
                 assert isinstance(result[0], TextContent)
@@ -95,27 +113,25 @@ class TestToolHandling:
 
 class TestEnvironmentHandling:
     """Test environment configuration handling"""
-    
-    def test_missing_credentials_handling(self):
-        """Test that missing credentials are properly handled"""
-        # Clear environment
+
+    def test_missing_credentials_returns_none(self):
+        """Test that missing credentials return None gracefully"""
+        # Clear environment and mock file existence
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError, match="Datadog API credentials not configured"):
-                # Re-import to trigger credential check
-                import importlib
-                from datadog_mcp.utils import datadog_client
-                importlib.reload(datadog_client)
-    
+            with patch('os.path.isfile', return_value=False):
+                from datadog_mcp.utils.datadog_client import get_api_key, get_app_key
+
+                # With empty environment and no files, these should return None
+                assert get_api_key() is None
+                assert get_app_key() is None
+
     def test_valid_credentials_accepted(self):
         """Test that valid credentials work"""
         with patch.dict(os.environ, {"DD_API_KEY": "test_key", "DD_APP_KEY": "test_app"}):
-            # Should not raise
-            import importlib
-            from datadog_mcp.utils import datadog_client
-            importlib.reload(datadog_client)
-            
-            assert datadog_client.DATADOG_API_KEY == "test_key"
-            assert datadog_client.DATADOG_APP_KEY == "test_app"
+            from datadog_mcp.utils.datadog_client import get_api_key, get_app_key
+
+            assert get_api_key() == "test_key"
+            assert get_app_key() == "test_app"
 
 
 class TestToolParameters:
@@ -188,15 +204,15 @@ class TestModuleStructure:
         # Test core modules
         from datadog_mcp import server
         from datadog_mcp.utils import datadog_client, formatters
-        
+
         # Test tool modules
         from datadog_mcp.tools import (
             get_logs, get_teams, get_metrics,
             list_metrics, get_metric_fields, get_metric_field_values,
-            list_pipelines, get_fingerprints,
-            list_service_definitions, get_service_definition
+            list_service_definitions, get_service_definition,
+            list_monitors, create_monitor, update_monitor, delete_monitor
         )
-        
+
         # All imports should succeed
         assert server is not None
         assert datadog_client is not None
@@ -207,13 +223,13 @@ class TestModuleStructure:
         tool_modules = [
             "get_logs", "get_teams", "get_metrics", "list_metrics",
             "get_metric_fields", "get_metric_field_values",
-            "list_pipelines", "get_fingerprints", 
-            "list_service_definitions", "get_service_definition"
+            "list_service_definitions", "get_service_definition",
+            "list_monitors", "create_monitor", "update_monitor", "delete_monitor"
         ]
-        
+
         for module_name in tool_modules:
             module = __import__(f"datadog_mcp.tools.{module_name}", fromlist=[module_name])
-            
+
             # Each tool module should have these functions
             assert hasattr(module, "get_tool_definition"), f"{module_name} missing get_tool_definition"
             assert hasattr(module, "handle_call"), f"{module_name} missing handle_call"
