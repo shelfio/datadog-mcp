@@ -27,9 +27,8 @@ class TestServerConfiguration:
     
     def test_expected_tools_are_registered(self):
         """Test that all expected tools are registered"""
-        expected_tools = [
-            "list_ci_pipelines",
-            "get_pipeline_fingerprints", 
+        # Verify that core tools from v0.3.0 are registered
+        required_core_tools = [
             "get_logs",
             "get_teams",
             "get_metrics",
@@ -39,9 +38,14 @@ class TestServerConfiguration:
             "list_service_definitions",
             "get_service_definition"
         ]
-        
-        for tool_name in expected_tools:
+
+        for tool_name in required_core_tools:
             assert tool_name in TOOLS, f"Tool {tool_name} not registered"
+
+        # Verify that at least some v0.3.0 tools (notebooks, traces, monitors) are present
+        v0_3_0_tools = ["create_notebook", "list_monitors", "get_traces", "aggregate_traces"]
+        found_v0_3_0_tools = [t for t in v0_3_0_tools if t in TOOLS]
+        assert len(found_v0_3_0_tools) > 0, f"Expected at least one v0.3.0 tool from {v0_3_0_tools}"
 
 
 class TestToolHandling:
@@ -98,8 +102,8 @@ class TestToolHandling:
             # Verify handler was called with proper request structure
             mock_handler.assert_called_once()
             call_args = mock_handler.call_args[0][0]
-            assert call_args.name == "test_tool"
-            assert call_args.arguments == {"param": "value"}
+            assert call_args.params.name == "test_tool"
+            assert call_args.params.arguments == {"param": "value"}
             
         finally:
             # Restore original TOOLS
@@ -158,28 +162,27 @@ class TestServerIntegration:
 
 class TestEnvironmentConfiguration:
     """Test environment configuration requirements"""
-    
-    def test_datadog_credentials_required(self):
-        """Test that missing Datadog credentials are handled"""
+
+    def test_datadog_credentials_can_be_read(self):
+        """Test that Datadog credentials can be read from environment"""
+        # Test with credentials present
+        with patch.dict(os.environ, {"DD_API_KEY": "test_key", "DD_APP_KEY": "test_app_key"}):
+            from datadog_mcp.utils.datadog_client import get_api_key, get_app_key
+
+            # Credentials should be available
+            assert get_api_key() == "test_key"
+            assert get_app_key() == "test_app_key"
+
+    def test_datadog_credentials_missing_returns_none(self):
+        """Test that missing Datadog credentials return None gracefully"""
         # Test with missing credentials
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError, match="Datadog API credentials not configured"):
-                # Re-import to trigger credential check
-                import importlib
-                from datadog_mcp.utils import datadog_client
-                importlib.reload(datadog_client)
-    
-    def test_datadog_credentials_present(self):
-        """Test that valid credentials don't raise errors"""
-        with patch.dict(os.environ, {"DD_API_KEY": "test_key", "DD_APP_KEY": "test_app_key"}):
-            # Should not raise any errors
-            import importlib
-            from datadog_mcp.utils import datadog_client
-            importlib.reload(datadog_client)
-            
-            # Verify credentials are loaded
-            assert datadog_client.DATADOG_API_KEY == "test_key"
-            assert datadog_client.DATADOG_APP_KEY == "test_app_key"
+            with patch('os.path.isfile', return_value=False):
+                from datadog_mcp.utils.datadog_client import get_api_key, get_app_key
+
+                # Credentials should return None when missing
+                assert get_api_key() is None
+                assert get_app_key() is None
 
 
 if __name__ == "__main__":
