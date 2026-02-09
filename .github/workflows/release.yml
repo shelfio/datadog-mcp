@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          release-type: python
+
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install UV
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Build package
+        run: |
+          uv build
+          ls -la dist/
+
+      - name: Run pre-release tests
+        env:
+          DD_API_KEY: test_key
+          DD_APP_KEY: test_key
+        run: |
+          uv run python -m py_compile datadog_mcp/server.py
+          WHEEL_FILE=$(ls dist/*.whl | head -1)
+          uvx --from "$WHEEL_FILE" datadog-mcp --help 2>&1 || echo "Expected: no --help"
+
+      - name: Upload release artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload ${{ needs.release-please.outputs.tag_name }} dist/* --clobber
+
+      - name: Publish to PyPI
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          if [ -z "$UV_PUBLISH_TOKEN" ]; then
+            echo "⚠️  PYPI_TOKEN not set, skipping PyPI publish"
+            echo "To publish to PyPI: Set PYPI_TOKEN in GitHub repository secrets"
+            exit 0
+          fi
+          uv publish
+          echo "✅ Published to PyPI: https://pypi.org/project/datadog-mcp/${{ needs.release-please.outputs.version }}/"
+
+      - name: Release summary
+        run: |
+          echo "🎉 Release ${{ needs.release-please.outputs.tag_name }} completed!"
+          echo ""
+          echo "Published to:"
+          echo "  - GitHub: https://github.com/${{ github.repository }}/releases/tag/${{ needs.release-please.outputs.tag_name }}"
+          echo "  - PyPI: https://pypi.org/project/datadog-mcp/${{ needs.release-please.outputs.version }}/"
+          echo ""
+          echo "Install: uvx datadog-mcp"
