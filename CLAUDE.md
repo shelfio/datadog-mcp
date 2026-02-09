@@ -208,7 +208,7 @@ The server integrates with Claude Desktop via MCP configuration:
   "mcpServers": {
     "datadog": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/shelfio/datadog-mcp.git@v0.0.5", "datadog-mcp"],
+      "args": ["--from", "git+https://github.com/shelfio/datadog-mcp.git@v0.3.0", "datadog-mcp"],
       "env": {
         "DD_API_KEY": "your-datadog-api-key",
         "DD_APP_KEY": "your-datadog-application-key"

@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.0] - 2026-02-06
+
+### Added
+- Datadog Notebooks management (create, update, delete, manage cells)
+- APM trace aggregation and retrieval tools
+- Monitor CRUD operations (create, update, delete)
+- Deployment version checking tool
+- Metric formula query execution
+
+### Changed
+- **Major Refactoring**: Reduced code from 2481 → 850 lines (52% reduction)
+  - Separated authentication strategies (token vs cookie) into abstract base + implementations
+  - Unified HTTP client eliminates 80+ duplicated request handlers
+  - Reorganized 80+ API functions into specialized client modules (logs, metrics, traces, monitors, notebooks, services, teams)
+  - All tools maintain backward compatibility, no breaking changes
+
+### Technical
+- New modules: `auth_strategy.py`, `http_client.py`, `api_request_builder.py`, `api_clients/` package
+- Both cookie and token authentication continue to work seamlessly
+- 100% test coverage maintained throughout refactoring
+
 ## [v0.0.6] - 2025-07-14
 
 ### Added
@@ -180,11 +201,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
-- **v0.0.5**: Monitoring & Alerting Tools (Monitors & SLOs)
+- **v0.3.0**: Major Refactoring (52% code reduction) + Notebooks + Monitor/Trace Tools
+- **v0.0.6**: Enhanced Log Processing
+- **v0.0.5**: Monitoring & Alerting Tools
 - **v0.0.4**: CI/CD Pipeline & UVX Support
 - **v0.0.3**: Service Definitions Management
-- **v0.0.2**: Enhanced Metrics & Logging System  
-- **v0.0.1**: Initial Release with Core MCP Server, Docker Support
+- **v0.0.2**: Enhanced Metrics & Logging System
+- **v0.0.1**: Initial Release
 
 ## Migration Notes
 

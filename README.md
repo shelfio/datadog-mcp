@@ -31,7 +31,7 @@ export DD_API_KEY="your-datadog-api-key" DD_APP_KEY="your-datadog-application-ke
 uvx --from git+https://github.com/shelfio/datadog-mcp.git datadog-mcp
 
 # Specific version (recommended for production)
-uvx --from git+https://github.com/shelfio/datadog-mcp.git@v0.0.5 datadog-mcp
+uvx --from git+https://github.com/shelfio/datadog-mcp.git@v0.3.0 datadog-mcp
 
 # Specific branch
 uvx --from git+https://github.com/shelfio/datadog-mcp.git@main datadog-mcp
@@ -73,12 +73,12 @@ When using UVX, you can specify exact versions for reproducible deployments:
 
 ### Version Formats
 - **Latest**: `git+https://github.com/shelfio/datadog-mcp.git` (HEAD)
-- **Specific Tag**: `git+https://github.com/shelfio/datadog-mcp.git@v0.0.5`
+- **Specific Tag**: `git+https://github.com/shelfio/datadog-mcp.git@v0.3.0`
 - **Branch**: `git+https://github.com/shelfio/datadog-mcp.git@main`
 - **Commit Hash**: `git+https://github.com/shelfio/datadog-mcp.git@59f0c15`
 
 ### Recommendations
-- **Production**: Use specific tags (e.g., `@v0.0.5`) for stability
+- **Production**: Use specific tags (e.g., `@v0.3.0`) for stability
 - **Development**: Use latest or specific branch for newest features
 - **Testing**: Use commit hashes for exact reproducibility
 
@@ -112,7 +112,7 @@ Add to Claude Desktop configuration:
   "mcpServers": {
     "datadog": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/shelfio/datadog-mcp.git@v0.0.5", "datadog-mcp"],
+      "args": ["--from", "git+https://github.com/shelfio/datadog-mcp.git@v0.3.0", "datadog-mcp"],
       "env": {
         "DD_API_KEY": "your-datadog-api-key",
         "DD_APP_KEY": "your-datadog-application-key"
@@ -161,7 +161,7 @@ export DD_APP_KEY="your-datadog-application-key"
 uvx --from git+https://github.com/shelfio/datadog-mcp.git datadog-mcp
 
 # Specific version (recommended for production)
-uvx --from git+https://github.com/shelfio/datadog-mcp.git@v0.0.5 datadog-mcp
+uvx --from git+https://github.com/shelfio/datadog-mcp.git@v0.3.0 datadog-mcp
 ```
 
 ### Development Installation
@@ -351,4 +351,3 @@ Ask Claude to help you with:
 **Note:** These are two different keys:
 - **API Key**: Used for authentication with Datadog's API
 - **Application Key**: Used for authorization and is tied to a specific user account
-# Dummy change
