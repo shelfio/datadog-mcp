@@ -390,7 +390,7 @@ wheels = [
 
 [[package]]
 name = "datadog-mcp"
-version = "0.0.6"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "aioboto3" },
