@@ -1971,16 +1971,13 @@ async def create_notebook(
     headers["Content-Type"] = "application/json"
     logger.info("Using cookie auth for create_notebook")
 
-    # Only name, cells, and time are supported for CREATE
-    # Description and tags can only be set via UPDATE
-    cells_to_send = cells if cells else []
-
+    # Datadog notebook API doesn't support cells during creation
+    # Cells must be added after notebook is created using add_notebook_cell
     payload = {
         "data": {
             "type": "notebooks",
             "attributes": {
                 "name": title,
-                "cells": cells_to_send,
                 "time": {
                     "live_span": "1h"  # Relative time - required by API
                 }
@@ -1990,7 +1987,7 @@ async def create_notebook(
 
     logger.info(f"create_notebook payload: {json.dumps(payload, indent=2)}")
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=60.0) as client:
         try:
             response = await client.post(url, headers=headers, json=payload)
             if response.status_code not in (200, 201):
@@ -2173,7 +2170,7 @@ async def add_notebook_cell(
     headers = get_auth_headers(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
-    cell_attributes = {"type": cell_type}
+    cell_attributes = {"cell_type": cell_type}
 
     if title:
         cell_attributes["title"] = title
@@ -2194,15 +2191,23 @@ async def add_notebook_cell(
     if position is not None:
         payload["data"]["attributes"]["position"] = position
 
-    async with httpx.AsyncClient() as client:
+    logger.info(f"add_notebook_cell payload: {json.dumps(payload, indent=2)}")
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
         try:
             response = await client.post(url, headers=headers, json=payload)
-            response.raise_for_status()
+            if response.status_code not in (200, 201):
+                try:
+                    error_detail = response.json()
+                    logger.error(f"Cell addition failed: Status {response.status_code} | Response: {error_detail}")
+                    raise ValueError(f"Datadog API error: {error_detail}")
+                except ValueError:
+                    raise
+                except:
+                    logger.error(f"Cell addition failed: Status {response.status_code} | Body: {response.text}")
+                    raise ValueError(f"Datadog API error (status {response.status_code}): {response.text}")
             data = response.json()
             return data.get("data", {})
-        except httpx.HTTPError as e:
-            logger.error(f"HTTP error adding notebook cell: {e}")
-            raise
         except Exception as e:
             logger.error(f"Error adding notebook cell: {e}")
             raise
