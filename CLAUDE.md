@@ -17,6 +17,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `hacctarr` - for feature branches
 - `main` - only after PR review and approval
 
+### Repository Identity (CRITICAL)
+- **Canonical repository**: `hacctarr/datadog-mcp` (origin remote)
+- **Upstream (read-only reference)**: `andreidore/datadog-mcp` - NEVER create PRs here
+- **Internal fork**: `cobalt-robotics/datadog-mcp` (cobalt remote)
+- **All PRs must target**: `hacctarr/datadog-mcp` unless explicitly told otherwise
+- **Before creating any PR**: Run `git remote -v` and confirm the target matches `hacctarr`
+
+### Pre-PR Checklist (Required Before Every PR)
+1. `git remote -v` - Confirm target repository is `hacctarr/datadog-mcp`
+2. `uv run pytest tests/` - All tests pass
+3. `uv run python -m py_compile datadog_mcp/server.py` - No syntax errors
+4. Verify NO manual edits to: `pyproject.toml` version, `.release-please-manifest.json`, `CHANGELOG.md`
+5. Confirm commit messages use conventional commit format: `fix:`, `feat:`, `chore:`, `docs:`, `refactor:`
+
 ### Development Commands
 
 #### Building and Running
@@ -37,10 +51,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `uv run python -m py_compile datadog_mcp/tools/*.py` - Check all tool implementations
 - `uv run python -m py_compile datadog_mcp/utils/*.py` - Check utility modules
 
-### Syntax Checking
-- `uv run python -m py_compile datadog_mcp/server.py` - Check main server syntax
-- `uv run python -m py_compile datadog_mcp/tools/*.py` - Check all tool implementations
-- `uv run python -m py_compile datadog_mcp/utils/*.py` - Check utility modules
+## Release Workflow (CRITICAL - Automated via release-please)
+
+### Files Claude Must NEVER Edit for Release Purposes
+- `pyproject.toml` version field - owned by release-please
+- `.release-please-manifest.json` - owned by release-please
+- `CHANGELOG.md` - owned by release-please
+- Git tags - created automatically by release-please
+
+### How Releases Work (Two-Phase Process)
+
+**Phase 1: Feature Development**
+1. Create feature branch off `main`
+2. Write commits using conventional commit format:
+   - `fix: description` - patch version bump (0.0.x)
+   - `feat: description` - minor version bump (0.x.0)
+   - `feat!: description` or `BREAKING CHANGE:` footer - major bump (x.0.0)
+   - `chore:`, `docs:`, `refactor:` - no version bump, included in changelog
+3. Push branch, create PR to `hacctarr/datadog-mcp` main
+4. Merge PR to main
+
+**Phase 2: Automated Release (DO NOT INTERVENE)**
+5. release-please GitHub Action detects new conventional commits on main
+6. release-please creates/updates a "Release PR" that bumps version in:
+   - `pyproject.toml`
+   - `.release-please-manifest.json`
+   - `CHANGELOG.md`
+7. Merge the Release PR (review to ensure version is correct)
+8. Merge triggers the `publish` job: builds, tests, uploads to GitHub Releases, publishes to PyPI
+9. Done - no manual steps after Release PR merge
+
+### When to Intervene vs Trust Automation
+| Situation | Action |
+|-----------|--------|
+| Want to release new version | Merge feature PRs to main, wait for release-please PR |
+| release-please PR has wrong version | Review release config, don't edit version manually |
+| Need to skip a release | Don't merge the release-please PR |
+| PyPI publish failed | Re-run workflow or use manual dispatch |
+| Version in pyproject.toml is wrong | Let release-please fix it; do NOT edit manually |
 
 ## Architecture Overview
 
