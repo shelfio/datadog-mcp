@@ -43,7 +43,7 @@ def get_tool_definition() -> Tool:
                     "description": "Visualization type for timeseries cells",
                 },
             },
-            "required": ["notebook_id", "cell_type", "position"],
+            "required": ["notebook_id", "cell_type"],
         },
     )
 
@@ -87,7 +87,8 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         )
 
     except Exception as e:
-        error_text = f"Error adding cell to notebook: {str(e)}"
+        import traceback
+        error_text = f"Error adding cell to notebook: {str(e)}\n\nTraceback:\n{traceback.format_exc()}"
         return CallToolResult(
             content=[TextContent(type="text", text=error_text)],
             isError=True,

@@ -305,7 +305,8 @@ class TestQueryMetricFormulaHandler:
     async def test_handle_formula_success(self):
         """Test successful formula query"""
         mock_request = MagicMock()
-        mock_request.arguments = {
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = {
             "formula": "a / b * 100",
             "queries": {
                 "a": {"metric_name": "errors", "aggregation": "sum"},
@@ -347,6 +348,8 @@ class TestQueryMetricFormulaHandler:
         mock_request.arguments = {
             "queries": {"a": {"metric_name": "metric1"}},
         }
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
 
         result = await query_metric_formula.handle_call(mock_request)
 
@@ -366,6 +369,8 @@ class TestQueryMetricFormulaHandler:
                 # Missing 'c'
             },
         }
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
 
         result = await query_metric_formula.handle_call(mock_request)
 
@@ -386,6 +391,8 @@ class TestQueryMetricFormulaHandler:
             "filters": {"service": "web"},
             "format": "timeseries",
         }
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
 
         mock_formula_result = {
             "data": {"attributes": {"series": [{"pointlist": [[1640995200000, 5.5]]}]}}
@@ -411,6 +418,8 @@ class TestQueryMetricFormulaHandler:
             },
             "format": "json",
         }
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
 
         mock_formula_result = {
             "data": {"attributes": {"series": [{"pointlist": [[1640995200000, 5.5]]}]}}
@@ -441,6 +450,8 @@ class TestCheckDeploymentHandler:
             "version_value": "abc123",
             "format": "summary",
         }
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
 
         mock_status = {
             "status": "deployed",
@@ -474,6 +485,8 @@ class TestCheckDeploymentHandler:
             "version_value": "nonexistent",
             "format": "summary",
         }
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
 
         mock_status = {
             "status": "not_found",
@@ -504,6 +517,8 @@ class TestCheckDeploymentHandler:
             "version_field": "git.commit.sha",
             "version_value": "abc123",
         }
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
 
         result = await check_deployment.handle_call(mock_request)
 
@@ -522,6 +537,8 @@ class TestCheckDeploymentHandler:
             "environment": "prod",
             "format": "detailed",
         }
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
 
         mock_status = {
             "status": "deployed",

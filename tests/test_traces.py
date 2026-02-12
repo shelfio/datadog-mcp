@@ -408,6 +408,8 @@ class TestGetTracesTool:
             "format": "json",
             "limit": 3
         }
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
 
         mock_traces = {
             "data": [

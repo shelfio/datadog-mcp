@@ -64,7 +64,7 @@ class TestMetricsRetrieval:
     @pytest.mark.asyncio
     async def test_fetch_metrics_basic(self):
         """Test basic metrics fetching"""
-        mock_response = {
+        mock_response_data = {
             "data": {
                 "attributes": {
                     "series": [
@@ -80,13 +80,22 @@ class TestMetricsRetrieval:
                 }
             }
         }
-        
+
         with patch('datadog_mcp.utils.datadog_client.httpx.AsyncClient') as mock_client:
-            mock_client.return_value.__aenter__.return_value.post.return_value.json.return_value = mock_response
-            mock_client.return_value.__aenter__.return_value.post.return_value.raise_for_status.return_value = None
-            
+            # Create response mock with sync methods
+            mock_response = MagicMock()
+            mock_response.json.return_value = mock_response_data
+            mock_response.raise_for_status.return_value = None
+            mock_response.status_code = 200
+
+            # Make get() and post() return awaitables that resolve to the response
+            async_get = AsyncMock(return_value=mock_response)
+            async_post = AsyncMock(return_value=mock_response)
+            mock_client.return_value.__aenter__.return_value.get = async_get
+            mock_client.return_value.__aenter__.return_value.post = async_post
+
             result = await datadog_client.fetch_metrics("system.cpu.user")
-            
+
             assert isinstance(result, dict)
             assert "data" in result
     
@@ -95,8 +104,8 @@ class TestMetricsRetrieval:
         """Test metrics fetching with aggregation"""
         metric_name = "aws.apigateway.count"
         aggregation_by = ["service", "region"]
-        
-        mock_response = {
+
+        mock_response_data = {
             "data": {
                 "attributes": {
                     "series": [
@@ -109,23 +118,32 @@ class TestMetricsRetrieval:
                 }
             }
         }
-        
+
         with patch('datadog_mcp.utils.datadog_client.httpx.AsyncClient') as mock_client:
-            mock_client.return_value.__aenter__.return_value.post.return_value.json.return_value = mock_response
-            mock_client.return_value.__aenter__.return_value.post.return_value.raise_for_status.return_value = None
-            
+            # Create response mock with sync methods
+            mock_response = MagicMock()
+            mock_response.json.return_value = mock_response_data
+            mock_response.raise_for_status.return_value = None
+            mock_response.status_code = 200
+
+            # Make get() and post() return awaitables that resolve to the response
+            async_get = AsyncMock(return_value=mock_response)
+            async_post = AsyncMock(return_value=mock_response)
+            mock_client.return_value.__aenter__.return_value.get = async_get
+            mock_client.return_value.__aenter__.return_value.post = async_post
+
             result = await datadog_client.fetch_metrics(
-                metric_name, 
+                metric_name,
                 aggregation_by=aggregation_by
             )
-            
+
             assert isinstance(result, dict)
-            mock_client.return_value.__aenter__.return_value.post.assert_called_once()
+            mock_client.return_value.__aenter__.return_value.get.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_list_available_metrics(self):
         """Test listing available metrics"""
-        mock_response = {
+        mock_response_data = {
             "data": [
                 {
                     "id": "system.cpu.user",
@@ -135,7 +153,7 @@ class TestMetricsRetrieval:
                     }
                 },
                 {
-                    "id": "aws.apigateway.count", 
+                    "id": "aws.apigateway.count",
                     "attributes": {
                         "metric": "aws.apigateway.count",
                         "tags": ["service", "region"]
@@ -143,15 +161,24 @@ class TestMetricsRetrieval:
                 }
             ]
         }
-        
+
         with patch('datadog_mcp.utils.datadog_client.httpx.AsyncClient') as mock_client:
-            mock_client.return_value.__aenter__.return_value.get.return_value.json.return_value = mock_response
-            mock_client.return_value.__aenter__.return_value.get.return_value.raise_for_status.return_value = None
-            
-            result = await datadog_client.list_available_metrics()
-            
-            assert isinstance(result, list)
-            assert len(result) >= 0
+            # Create response mock with sync methods
+            mock_response = MagicMock()
+            mock_response.json.return_value = mock_response_data
+            mock_response.raise_for_status.return_value = None
+            mock_response.status_code = 200
+
+            # Make get() and post() return awaitables that resolve to the response
+            async_get = AsyncMock(return_value=mock_response)
+            async_post = AsyncMock(return_value=mock_response)
+            mock_client.return_value.__aenter__.return_value.get = async_get
+            mock_client.return_value.__aenter__.return_value.post = async_post
+
+            result = await datadog_client.fetch_metrics_list()
+
+            assert isinstance(result, dict)
+            assert "data" in result
 
 
 class TestMetricsToolHandlers:
@@ -167,7 +194,9 @@ class TestMetricsToolHandlers:
             "aggregation": "avg",
             "format": "table"
         }
-        
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
+
         mock_metrics_data = {
             "data": {
                 "attributes": {
@@ -181,17 +210,17 @@ class TestMetricsToolHandlers:
                 }
             }
         }
-        
-        with patch('datadog_mcp.utils.datadog_client.fetch_metrics', new_callable=AsyncMock) as mock_fetch:
+
+        with patch('datadog_mcp.tools.get_metrics.fetch_metrics', new_callable=AsyncMock) as mock_fetch:
             mock_fetch.return_value = mock_metrics_data
-            
+
             result = await get_metrics.handle_call(mock_request)
-            
+
             assert isinstance(result, CallToolResult)
             assert result.isError is False
             assert len(result.content) > 0
             assert isinstance(result.content[0], TextContent)
-            
+
             content_text = result.content[0].text
             assert "system.cpu.user" in content_text or "cpu" in content_text.lower()
     
@@ -203,17 +232,21 @@ class TestMetricsToolHandlers:
             "limit": 100,
             "format": "list"
         }
-        
-        mock_metrics_list = [
-            {"metric": "system.cpu.user", "tags": ["host", "env"]},
-            {"metric": "aws.apigateway.count", "tags": ["service"]}
-        ]
-        
-        with patch('datadog_mcp.utils.datadog_client.list_available_metrics', new_callable=AsyncMock) as mock_list:
-            mock_list.return_value = mock_metrics_list
-            
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
+
+        mock_metrics_response = {
+            "data": [
+                {"id": "system.cpu.user", "attributes": {"metric": "system.cpu.user", "tags": ["host", "env"]}},
+                {"id": "aws.apigateway.count", "attributes": {"metric": "aws.apigateway.count", "tags": ["service"]}}
+            ]
+        }
+
+        with patch('datadog_mcp.tools.list_metrics.fetch_metrics_list', new_callable=AsyncMock) as mock_list:
+            mock_list.return_value = mock_metrics_response
+
             result = await list_metrics.handle_call(mock_request)
-            
+
             assert isinstance(result, CallToolResult)
             assert result.isError is False
             assert len(result.content) > 0
@@ -225,18 +258,20 @@ class TestMetricsToolHandlers:
         mock_request.arguments = {
             "metric_name": "aws.apigateway.count"
         }
-        
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
+
         mock_fields = ["service", "region", "account", "environment"]
-        
-        with patch('datadog_mcp.utils.datadog_client.fetch_metric_available_fields', new_callable=AsyncMock) as mock_fetch:
+
+        with patch('datadog_mcp.tools.get_metric_fields.fetch_metric_available_fields', new_callable=AsyncMock) as mock_fetch:
             mock_fetch.return_value = mock_fields
-            
+
             result = await get_metric_fields.handle_call(mock_request)
-            
+
             assert isinstance(result, CallToolResult)
             assert result.isError is False
             assert len(result.content) > 0
-            
+
             content_text = result.content[0].text
             for field in mock_fields[:2]:  # Check first couple fields
                 assert field in content_text
@@ -249,18 +284,20 @@ class TestMetricsToolHandlers:
             "metric_name": "aws.apigateway.count",
             "field_name": "service"
         }
-        
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
+
         mock_values = ["web-api", "mobile-api", "admin-api"]
-        
-        with patch('datadog_mcp.utils.datadog_client.fetch_metric_field_values', new_callable=AsyncMock) as mock_fetch:
+
+        with patch('datadog_mcp.tools.get_metric_field_values.fetch_metric_field_values', new_callable=AsyncMock) as mock_fetch:
             mock_fetch.return_value = mock_values
-            
+
             result = await get_metric_field_values.handle_call(mock_request)
-            
+
             assert isinstance(result, CallToolResult)
             assert result.isError is False
             assert len(result.content) > 0
-            
+
             content_text = result.content[0].text
             for value in mock_values[:2]:  # Check first couple values
                 assert value in content_text
@@ -272,12 +309,14 @@ class TestMetricsToolHandlers:
         mock_request.arguments = {
             "metric_name": "invalid.metric"
         }
-        
-        with patch('datadog_mcp.utils.datadog_client.fetch_metrics', new_callable=AsyncMock) as mock_fetch:
+        mock_request.params = MagicMock()
+        mock_request.params.arguments = mock_request.arguments
+
+        with patch('datadog_mcp.tools.get_metrics.fetch_metrics', new_callable=AsyncMock) as mock_fetch:
             mock_fetch.side_effect = Exception("Metric not found")
-            
+
             result = await get_metrics.handle_call(mock_request)
-            
+
             assert isinstance(result, CallToolResult)
             assert result.isError is True
             assert "error" in result.content[0].text.lower()
@@ -353,9 +392,9 @@ class TestMetricsFiltering:
     async def test_metrics_with_environment_filter(self):
         """Test filtering metrics by environment"""
         filters = {"env": "production"}
-        
+
         with patch('datadog_mcp.utils.datadog_client.httpx.AsyncClient') as mock_client:
-            mock_response = {
+            mock_response_data = {
                 "data": {
                     "attributes": {
                         "series": [
@@ -368,34 +407,52 @@ class TestMetricsFiltering:
                     }
                 }
             }
-            mock_client.return_value.__aenter__.return_value.post.return_value.json.return_value = mock_response
-            mock_client.return_value.__aenter__.return_value.post.return_value.raise_for_status.return_value = None
-            
-            result = await datadog_client.fetch_metrics(
-                "system.cpu.user", 
-                filters=filters
-            )
-            
-            # Verify request was made
-            mock_client.return_value.__aenter__.return_value.post.assert_called_once()
-    
-    @pytest.mark.asyncio
-    async def test_metrics_with_multiple_environments(self):
-        """Test metrics query with multiple environments"""
-        environments = ["prod", "staging"]
-        
-        with patch('datadog_mcp.utils.datadog_client.httpx.AsyncClient') as mock_client:
-            mock_response = {"data": {"attributes": {"series": []}}}
-            mock_client.return_value.__aenter__.return_value.post.return_value.json.return_value = mock_response
-            mock_client.return_value.__aenter__.return_value.post.return_value.raise_for_status.return_value = None
-            
+
+            # Create response mock with sync methods
+            mock_response = MagicMock()
+            mock_response.json.return_value = mock_response_data
+            mock_response.raise_for_status.return_value = None
+            mock_response.status_code = 200
+
+            # Make get() and post() return awaitables that resolve to the response
+            async_get = AsyncMock(return_value=mock_response)
+            async_post = AsyncMock(return_value=mock_response)
+            mock_client.return_value.__aenter__.return_value.get = async_get
+            mock_client.return_value.__aenter__.return_value.post = async_post
+
             result = await datadog_client.fetch_metrics(
                 "system.cpu.user",
-                environment=environments
+                filters=filters
             )
-            
+
+            # Verify request was made (GET for metrics query)
+            mock_client.return_value.__aenter__.return_value.get.assert_called_once()
+    
+    @pytest.mark.asyncio
+    async def test_metrics_with_multiple_filters(self):
+        """Test metrics query with multiple filters"""
+        filters = {"service": "web", "region": "us-east-1"}
+
+        with patch('datadog_mcp.utils.datadog_client.httpx.AsyncClient') as mock_client:
+            # Create response mock with sync methods
+            mock_response = MagicMock()
+            mock_response.json.return_value = {"data": {"attributes": {"series": []}}}
+            mock_response.raise_for_status.return_value = None
+            mock_response.status_code = 200
+
+            # Make get() and post() return awaitables that resolve to the response
+            async_get = AsyncMock(return_value=mock_response)
+            async_post = AsyncMock(return_value=mock_response)
+            mock_client.return_value.__aenter__.return_value.get = async_get
+            mock_client.return_value.__aenter__.return_value.post = async_post
+
+            result = await datadog_client.fetch_metrics(
+                "system.cpu.user",
+                filters=filters
+            )
+
             # Verify request was made
-            mock_client.return_value.__aenter__.return_value.post.assert_called_once()
+            mock_client.return_value.__aenter__.return_value.get.assert_called_once()
 
 
 class TestMetricsValidation:

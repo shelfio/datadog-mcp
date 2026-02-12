@@ -97,10 +97,10 @@ class TestCreateNotebook:
 
             result = await create_notebook.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Notebook Created" in result[0].text
-            assert SAMPLE_NOTEBOOK_ID in result[0].text
-            assert "Test Investigation" in result[0].text  # Mock returns sample data
+            assert len(result.content) > 0
+            assert "Notebook Created" in result.content[0].text
+            assert SAMPLE_NOTEBOOK_ID in result.content[0].text
+            assert "Test Investigation" in result.content[0].text  # Mock returns sample data
 
     @pytest.mark.asyncio
     async def test_create_notebook_error(self, sample_request, mock_env_credentials):
@@ -115,9 +115,9 @@ class TestCreateNotebook:
 
             result = await create_notebook.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Error creating notebook" in result[0].text
-            assert "Invalid token" in result[0].text
+            assert len(result.content) > 0
+            assert "Error creating notebook" in result.content[0].text
+            assert "Invalid token" in result.content[0].text
 
 
 class TestGetNotebook:
@@ -143,13 +143,13 @@ class TestGetNotebook:
 
             result = await get_notebook.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Notebook Details" in result[0].text
-            assert SAMPLE_NOTEBOOK_ID in result[0].text
-            assert "Test Investigation" in result[0].text
-            assert "markdown" in result[0].text
-            assert "timeseries" in result[0].text
-            assert "2" in result[0].text and "Cells" in result[0].text
+            assert len(result.content) > 0
+            assert "Notebook Details" in result.content[0].text
+            assert SAMPLE_NOTEBOOK_ID in result.content[0].text
+            assert "Test Investigation" in result.content[0].text
+            assert "markdown" in result.content[0].text
+            assert "timeseries" in result.content[0].text
+            assert "2" in result.content[0].text and "Cells" in result.content[0].text
 
     @pytest.mark.asyncio
     async def test_get_notebook_empty(self, sample_request, mock_env_credentials):
@@ -163,9 +163,9 @@ class TestGetNotebook:
 
             result = await get_notebook.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Notebook Details" in result[0].text
-            assert "0" in result[0].text and "Cells" in result[0].text
+            assert len(result.content) > 0
+            assert "Notebook Details" in result.content[0].text
+            assert "0" in result.content[0].text and "Cells" in result.content[0].text
 
     @pytest.mark.asyncio
     async def test_get_notebook_not_found(self, sample_request, mock_env_credentials):
@@ -179,8 +179,8 @@ class TestGetNotebook:
 
             result = await get_notebook.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Error fetching notebook" in result[0].text
+            assert len(result.content) > 0
+            assert "Error fetching notebook" in result.content[0].text
 
 
 class TestUpdateNotebook:
@@ -217,10 +217,10 @@ class TestUpdateNotebook:
 
             result = await update_notebook.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Notebook Updated" in result[0].text
-            assert "Updated Investigation Title" in result[0].text
-            assert "New description" in result[0].text
+            assert len(result.content) > 0
+            assert "Notebook Updated" in result.content[0].text
+            assert "Updated Investigation Title" in result.content[0].text
+            assert "New description" in result.content[0].text
 
     @pytest.mark.asyncio
     async def test_update_notebook_partial(self, sample_request, mock_env_credentials):
@@ -238,8 +238,8 @@ class TestUpdateNotebook:
 
             result = await update_notebook.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Notebook Updated" in result[0].text
+            assert len(result.content) > 0
+            assert "Notebook Updated" in result.content[0].text
 
 
 class TestAddNotebookCell:
@@ -256,7 +256,6 @@ class TestAddNotebookCell:
         assert set(tool_def.inputSchema["required"]) == {
             "notebook_id",
             "cell_type",
-            "position",
         }
 
     @pytest.mark.asyncio
@@ -285,10 +284,10 @@ class TestAddNotebookCell:
 
             result = await add_notebook_cell.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Cell Added to Notebook" in result[0].text
-            assert "markdown" in result[0].text
-            assert "position" in result[0].text.lower() and "0" in result[0].text
+            assert len(result.content) > 0
+            assert "Cell Added to Notebook" in result.content[0].text
+            assert "markdown" in result.content[0].text
+            assert "position" in result.content[0].text.lower() and "0" in result.content[0].text
 
     @pytest.mark.asyncio
     async def test_add_timeseries_cell(self, sample_request, mock_env_credentials):
@@ -310,9 +309,9 @@ class TestAddNotebookCell:
 
             result = await add_notebook_cell.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Cell Added to Notebook" in result[0].text
-            assert "timeseries" in result[0].text
+            assert len(result.content) > 0
+            assert "Cell Added to Notebook" in result.content[0].text
+            assert "timeseries" in result.content[0].text
 
     @pytest.mark.asyncio
     async def test_add_cell_error(self, sample_request, mock_env_credentials):
@@ -330,8 +329,8 @@ class TestAddNotebookCell:
 
             result = await add_notebook_cell.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Error adding cell" in result[0].text
+            assert len(result.content) > 0
+            assert "Error adding cell" in result.content[0].text
 
 
 class TestUpdateNotebookCell:
@@ -363,9 +362,9 @@ class TestUpdateNotebookCell:
 
             result = await update_notebook_cell.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Notebook Cell Updated" in result[0].text
-            assert "Updated Title" in result[0].text
+            assert len(result.content) > 0
+            assert "Notebook Cell Updated" in result.content[0].text
+            assert "Updated Title" in result.content[0].text
 
     @pytest.mark.asyncio
     async def test_update_cell_query(self, sample_request, mock_env_credentials):
@@ -385,8 +384,8 @@ class TestUpdateNotebookCell:
 
             result = await update_notebook_cell.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Notebook Cell Updated" in result[0].text
+            assert len(result.content) > 0
+            assert "Notebook Cell Updated" in result.content[0].text
 
 
 class TestDeleteNotebookCell:
@@ -425,10 +424,10 @@ class TestDeleteNotebookCell:
 
             result = await delete_notebook_cell.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Cell Deleted from Notebook" in result[0].text
-            assert "cell-001" in result[0].text
-            assert "Remaining Cells" in result[0].text
+            assert len(result.content) > 0
+            assert "Cell Deleted from Notebook" in result.content[0].text
+            assert "cell-001" in result.content[0].text
+            assert "Remaining Cells" in result.content[0].text
 
     @pytest.mark.asyncio
     async def test_delete_cell_not_found(self, sample_request, mock_env_credentials):
@@ -446,8 +445,8 @@ class TestDeleteNotebookCell:
 
             result = await delete_notebook_cell.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Error deleting notebook cell" in result[0].text
+            assert len(result.content) > 0
+            assert "Error deleting notebook cell" in result.content[0].text
 
 
 class TestDeleteNotebook:
@@ -473,10 +472,10 @@ class TestDeleteNotebook:
 
             result = await delete_notebook.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Notebook Deleted" in result[0].text
-            assert SAMPLE_NOTEBOOK_ID in result[0].text
-            assert "Successfully deleted" in result[0].text
+            assert len(result.content) > 0
+            assert "Notebook Deleted" in result.content[0].text
+            assert SAMPLE_NOTEBOOK_ID in result.content[0].text
+            assert "Successfully deleted" in result.content[0].text
 
     @pytest.mark.asyncio
     async def test_delete_notebook_not_found(self, sample_request, mock_env_credentials):
@@ -490,5 +489,5 @@ class TestDeleteNotebook:
 
             result = await delete_notebook.handle_call(sample_request)
 
-            assert len(result) > 0
-            assert "Error deleting notebook" in result[0].text
+            assert len(result.content) > 0
+            assert "Error deleting notebook" in result.content[0].text
