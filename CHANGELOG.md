@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1](https://github.com/hacctarr/datadog-mcp/compare/v0.3.0...v0.3.1) (2026-02-12)
+
+
+### Bug Fixes
+
+* resolve 400 error in notebook cell addition by using 'cell_type' instead of 'type' ([f7fcdd4](https://github.com/hacctarr/datadog-mcp/commit/f7fcdd4e9d9d670adff865885ce7d9f997c95e21))
+* resolve all test failures by fixing mock patches and API expectations ([9308c94](https://github.com/hacctarr/datadog-mcp/commit/9308c94df33c51f0a5241e53d8be2763d7f46421))
+* resolve notebook API compatibility and timeout issues ([b9f01bc](https://github.com/hacctarr/datadog-mcp/commit/b9f01bc62008207dfbb3e7ab79b85e734cbe777d))
+* resolve notebook API compatibility and timeout issues ([1fc13e0](https://github.com/hacctarr/datadog-mcp/commit/1fc13e0efedb55c4a34741514d02b1838a180554))
+
 ## [v0.3.0] - 2026-02-06
 
 ### Added
