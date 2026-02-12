@@ -2058,8 +2058,8 @@ async def create_notebook(
     headers["Content-Type"] = "application/json"
     logger.info("Using cookie auth for create_notebook")
 
-    # Datadog notebook API doesn't support cells during creation
-    # Cells must be added after notebook is created using add_notebook_cell
+    # Datadog notebook API requires cells field (empty list for new notebooks)
+    # Additional cells can be added after notebook is created using add_notebook_cell
     payload = {
         "data": {
             "type": "notebooks",
@@ -2067,7 +2067,8 @@ async def create_notebook(
                 "name": title,
                 "time": {
                     "live_span": "1h"  # Relative time - required by API
-                }
+                },
+                "cells": []  # Required by API, additional cells added via add_notebook_cell
             }
         }
     }
@@ -2112,15 +2113,15 @@ async def list_notebooks(
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks"
 
-    headers = await get_auth_headers_async()
+    headers = await get_auth_headers_async(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
     params = {
-        "limit": min(limit, 100),  # Cap at 100
-        "offset": offset,
+        "count": min(limit, 100),  # Cap at 100
+        "start": offset,
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=60.0) as client:
         try:
             response = await client.get(url, headers=headers, params=params)
             response.raise_for_status()
