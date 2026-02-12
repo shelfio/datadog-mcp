@@ -2,13 +2,17 @@
 Datadog API client utilities
 """
 
+import asyncio
 import json
 import logging
 import os
+import time
 from typing import Any, Dict, List, Optional
 
 import httpx
 from datadog_api_client import Configuration
+
+from .secrets_provider import get_secret_provider, is_aws_secrets_configured
 
 logger = logging.getLogger(__name__)
 
@@ -274,6 +278,48 @@ def save_app_key(app_key: str) -> str:
     return APP_KEY_FILE_PATH
 
 
+async def async_get_api_key() -> Optional[str]:
+    """Get API key from AWS Secrets Manager (with local fallback).
+
+    Priority: AWS Secrets Manager > Environment variable > File
+    Uses built-in caching (50 minute TTL) to avoid repeated AWS calls.
+    """
+    # Try AWS Secrets Manager first if configured
+    if is_aws_secrets_configured():
+        try:
+            provider = await get_secret_provider()
+            if provider:
+                credentials = await provider.get_credentials()
+                if credentials:
+                    return credentials.api_key
+        except Exception as e:
+            logger.warning(f"Failed to fetch API key from AWS Secrets Manager: {e}. Falling back to local storage.")
+
+    # Fall back to local storage/env vars
+    return get_api_key()
+
+
+async def async_get_app_key() -> Optional[str]:
+    """Get app key from AWS Secrets Manager (with local fallback).
+
+    Priority: AWS Secrets Manager > Environment variable > File
+    Uses built-in caching (50 minute TTL) to avoid repeated AWS calls.
+    """
+    # Try AWS Secrets Manager first if configured
+    if is_aws_secrets_configured():
+        try:
+            provider = await get_secret_provider()
+            if provider:
+                credentials = await provider.get_credentials()
+                if credentials:
+                    return credentials.app_key
+        except Exception as e:
+            logger.warning(f"Failed to fetch app key from AWS Secrets Manager: {e}. Falling back to local storage.")
+
+    # Fall back to local storage/env vars
+    return get_app_key()
+
+
 def get_auth_mode() -> tuple[bool, str]:
     """Determine authentication mode and API URL dynamically.
 
@@ -393,6 +439,49 @@ def get_auth_headers(include_csrf: bool = False) -> Dict[str, str]:
             )
 
 
+async def get_auth_headers_async(include_csrf: bool = False) -> Dict[str, str]:
+    """Get authentication headers with AWS Secrets Manager support (async).
+
+    Priority: Cookie (if available) > AWS Secrets Manager > API keys
+    This allows dynamic credential updates without restart.
+
+    Args:
+        include_csrf: If True and using cookie auth, include x-csrf-token header.
+                     Required for some endpoints like traces/spans.
+    """
+    cookie = get_cookie()
+    if cookie:
+        headers = {
+            "Content-Type": "application/json",
+            "Cookie": cookie,
+        }
+        if include_csrf:
+            csrf_token = get_csrf_token()
+            if csrf_token:
+                headers["x-csrf-token"] = csrf_token
+            else:
+                logger.warning("CSRF token requested but not available. Some endpoints may fail.")
+        return headers
+    else:
+        # Use API keys with AWS Secrets Manager fallback
+        api_key = await async_get_api_key()
+        app_key = await async_get_app_key()
+        if api_key and app_key:
+            return {
+                "Content-Type": "application/json",
+                "DD-API-KEY": api_key,
+                "DD-APPLICATION-KEY": app_key,
+            }
+        else:
+            raise ValueError(
+                "No Datadog credentials available. Set DD_COOKIE env var, "
+                f"create {COOKIE_FILE_PATH}, or set DD_API_KEY/DD_APP_KEY env vars "
+                f"or create {API_KEY_FILE_PATH}/{APP_KEY_FILE_PATH}, "
+                "or configure AWS Secrets Manager. "
+                "Use setup_auth tool to configure authentication."
+            )
+
+
 async def fetch_ci_pipelines(
     repository: Optional[str] = None,
     pipeline_name: Optional[str] = None,
@@ -403,20 +492,21 @@ async def fetch_ci_pipelines(
     """Fetch CI pipelines from Datadog API.
 
     Tries cookie auth first (internal UI), falls back to token auth (v2 API).
+    Supports AWS Secrets Manager for credential retrieval.
     """
     # Try internal UI endpoint with cookie auth first
     cookie = get_cookie()
     if cookie:
         url = f"{get_api_url()}/api/v1/ci/pipelines/events/search"
-        headers = get_auth_headers(include_csrf=True)
+        headers = await get_auth_headers_async(include_csrf=True)
     else:
-        # Fall back to v2 API with token auth
+        # Fall back to v2 API with token auth (with AWS Secrets Manager support)
         url = f"{get_api_url()}/api/v2/ci/pipelines/events/search"
-        api_key = get_api_key()
-        app_key = get_app_key()
+        api_key = await async_get_api_key()
+        app_key = await async_get_app_key()
         if not api_key or not app_key:
             logger.error("No authentication available for CI Visibility")
-            raise ValueError("CI Visibility requires either DD_COOKIE or DD_API_KEY/DD_APP_KEY")
+            raise ValueError("CI Visibility requires either DD_COOKIE or DD_API_KEY/DD_APP_KEY or AWS Secrets Manager")
         headers = {
             "Content-Type": "application/json",
             "DD-API-KEY": api_key,
@@ -470,8 +560,6 @@ async def fetch_logs(
     - Cookie auth: Internal UI endpoint /api/v1/logs-analytics/list (supports cookies)
     - API key auth: Public endpoint /api/v2/logs/events/search
     """
-    import asyncio
-
     cookie = get_cookie()
 
     # Build query filter
@@ -498,7 +586,7 @@ async def fetch_logs(
     if cookie:
         # Use internal UI endpoint for cookie auth
         url = f"{get_api_url()}/api/v1/logs-analytics/list"
-        headers = get_auth_headers(include_csrf=True)
+        headers = await get_auth_headers_async(include_csrf=True)
         # Add origin header required by internal endpoint
         headers["origin"] = "https://app.datadoghq.com"
 
@@ -647,7 +735,7 @@ async def fetch_logs(
     else:
         # Use public API endpoint for API key auth
         url = f"{get_api_url()}/api/v2/logs/events/search"
-        headers = get_auth_headers()
+        headers = await get_auth_headers_async()
 
         payload = {
             "filter": {
@@ -797,7 +885,7 @@ async def fetch_logs_filter_values(
 
     # API key auth: Use the aggregation endpoint
     url = f"{get_api_url()}/api/v2/logs/analytics/aggregate"
-    headers = get_auth_headers()
+    headers = await get_auth_headers_async()
 
     # Build base query
     base_query = query if query else "*"
@@ -898,7 +986,7 @@ async def fetch_teams(
     - API key auth: Public endpoint /api/v2/team
     """
     cookie = get_cookie()
-    headers = get_auth_headers(include_csrf=True if cookie else False)
+    headers = await get_auth_headers_async(include_csrf=True if cookie else False)
 
     async with httpx.AsyncClient() as client:
         if cookie:
@@ -959,7 +1047,7 @@ async def fetch_team_memberships(team_id: str) -> List[Dict[str, Any]]:
     - API key auth: Public endpoint /api/v2/team/{id}/memberships
     """
     cookie = get_cookie()
-    headers = get_auth_headers(include_csrf=True if cookie else False)
+    headers = await get_auth_headers_async(include_csrf=True if cookie else False)
 
     if cookie:
         # Use v1 internal endpoint for cookie auth
@@ -1008,7 +1096,7 @@ async def fetch_metrics(
                   Do NOT use for gauge metrics (e.g., cpu.percent, memory.usage).
     """
     
-    headers = get_auth_headers()
+    headers = await get_auth_headers_async()
     
     # Build metric query
     query_parts = [f"{aggregation}:{metric_name}"]
@@ -1044,7 +1132,6 @@ async def fetch_metrics(
     logger.debug(f"Constructed query: {query}")
     
     # Calculate time range in seconds
-    import time
     to_timestamp = int(time.time())
     
     time_deltas = {
@@ -1097,7 +1184,7 @@ async def fetch_metrics_list(
     - API key auth: Public endpoint /api/v2/metrics
     """
     cookie = get_cookie()
-    headers = get_auth_headers(include_csrf=True if cookie else False)
+    headers = await get_auth_headers_async(include_csrf=True if cookie else False)
 
     # Note: v1 internal endpoint for metrics list may not exist
     # For now, use v2 endpoint which supports both auth methods via headers
@@ -1141,7 +1228,7 @@ async def fetch_metric_available_fields(
     This ensures we find both indexed infrastructure tags AND custom application tags.
     """
 
-    headers = get_auth_headers()
+    headers = await get_auth_headers_async()
 
     available_fields = set()
 
@@ -1167,7 +1254,6 @@ async def fetch_metric_available_fields(
     # These are common custom application tags that often aren't indexed
     common_custom_tags = ["variant", "status", "version", "release", "deployment"]
 
-    import time
     to_timestamp = int(time.time())
     time_deltas = {
         "1h": 3600,
@@ -1221,11 +1307,10 @@ async def fetch_metric_field_values(
     which is more reliable than the metadata endpoint for custom tags.
     """
 
-    headers = get_auth_headers()
+    headers = await get_auth_headers_async()
 
     # Query the actual metric data grouped by the field to get all unique values
     # This is more reliable than /all-tags for custom application tags
-    import time
     to_timestamp = int(time.time())
     from_timestamp = to_timestamp - 604800  # Last 7 days
 
@@ -1284,7 +1369,7 @@ async def fetch_service_definitions(
     - API key auth: Public endpoint /api/v2/services/definitions
     """
     cookie = get_cookie()
-    headers = get_auth_headers(include_csrf=True if cookie else False)
+    headers = await get_auth_headers_async(include_csrf=True if cookie else False)
 
     async with httpx.AsyncClient() as client:
         if cookie:
@@ -1357,7 +1442,7 @@ async def fetch_service_definition(
     - API key auth: Public endpoint /api/v2/services/definitions/{name}
     """
     cookie = get_cookie()
-    headers = get_auth_headers(include_csrf=True if cookie else False)
+    headers = await get_auth_headers_async(include_csrf=True if cookie else False)
 
     if cookie:
         # Use v1 internal endpoint for cookie auth
@@ -1396,7 +1481,7 @@ async def fetch_monitors(
 ) -> Dict[str, Any]:
     """Fetch monitors from Datadog API."""
 
-    headers = get_auth_headers()
+    headers = await get_auth_headers_async()
 
     # Use the v1 monitors endpoint
     url = f"{get_api_url()}/api/v1/monitor"
@@ -1446,7 +1531,7 @@ async def fetch_slos(
     """Fetch SLOs from Datadog API."""
     url = f"{get_api_url()}/api/v1/slo"
     
-    headers = get_auth_headers()
+    headers = await get_auth_headers_async()
     
     params = {
         "limit": limit,
@@ -1477,7 +1562,7 @@ async def fetch_slo_details(slo_id: str) -> Dict[str, Any]:
     """Fetch detailed information for a specific SLO."""
     url = f"{get_api_url()}/api/v1/slo/{slo_id}"
     
-    headers = get_auth_headers()
+    headers = await get_auth_headers_async()
     
     async with httpx.AsyncClient() as client:
         try:
@@ -1503,7 +1588,7 @@ async def fetch_slo_history(
     """Fetch SLO history data."""
     url = f"{get_api_url()}/api/v1/slo/{slo_id}/history"
 
-    headers = get_auth_headers()
+    headers = await get_auth_headers_async()
 
     params = {
         "from_ts": from_ts,
@@ -1534,6 +1619,7 @@ async def fetch_traces(
     query: Optional[str] = None,
     limit: int = 50,
     cursor: Optional[str] = None,
+    include_children: bool = False,
 ) -> Dict[str, Any]:
     """Fetch APM traces (spans) from Datadog API with flexible filtering.
 
@@ -1543,6 +1629,7 @@ async def fetch_traces(
         query: Free-text search query (e.g., 'error', 'status:error', 'service:web AND env:prod')
         limit: Maximum number of spans to return (default: 50, max: 1000)
         cursor: Pagination cursor from previous response
+        include_children: Whether to include child spans in results (default: False)
 
     Returns:
         Dict containing traces data and pagination info
@@ -1551,7 +1638,7 @@ async def fetch_traces(
     Ensure your API key has `traces_read_data` permission.
     """
     cookie = get_cookie()
-    headers = get_auth_headers(include_csrf=True)
+    headers = await get_auth_headers_async(include_csrf=True)
 
     # Traces endpoints are v2 only (no v1 internal equivalent)
     url = f"{get_api_url()}/api/v2/spans/events/search"
@@ -1651,6 +1738,7 @@ async def aggregate_traces(
     filters: Optional[Dict[str, str]] = None,
     query: Optional[str] = None,
     group_by: Optional[List[str]] = None,
+    aggregation: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Aggregate APM traces using Datadog Analytics API.
 
@@ -1659,6 +1747,7 @@ async def aggregate_traces(
         filters: Filters to apply (e.g., {'service': 'web', 'env': 'prod'})
         query: Free-text search query (e.g., '@duration:>8000000000')
         group_by: List of fields to group by (e.g., ['env', 'service'])
+        aggregation: Aggregation function (e.g., 'count', 'avg', 'max', 'min')
 
     Returns:
         Dict containing aggregated trace counts grouped by specified fields
@@ -1667,7 +1756,7 @@ async def aggregate_traces(
     Ensure your API key has `traces_read_data` permission.
     """
     cookie = get_cookie()
-    headers = get_auth_headers(include_csrf=True)
+    headers = await get_auth_headers_async(include_csrf=True)
 
     # Traces endpoints are v2 only (no v1 internal equivalent)
     url = f"{get_api_url()}/api/v2/spans/analytics/aggregate"
@@ -1771,7 +1860,7 @@ async def get_monitor(monitor_id: int) -> Dict[str, Any]:
         Dict containing the monitor details
     """
     use_cookie, api_url = get_auth_mode()
-    headers = get_auth_headers()
+    headers = await get_auth_headers_async()
 
     # Both cookie and token auth use v1 endpoint for monitors
     url = f"{api_url}/api/v1/monitor/{monitor_id}"
@@ -1816,7 +1905,7 @@ async def create_monitor(
         Dict containing the created monitor details
     """
     use_cookie, api_url = get_auth_mode()
-    headers = get_auth_headers(include_csrf=True)
+    headers = await get_auth_headers_async(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
     url = f"{api_url}/api/v1/monitor"
@@ -1877,7 +1966,7 @@ async def update_monitor(
         Dict containing the updated monitor details
     """
     use_cookie, api_url = get_auth_mode()
-    headers = get_auth_headers(include_csrf=True)
+    headers = await get_auth_headers_async(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
     url = f"{api_url}/api/v1/monitor/{monitor_id}"
@@ -1924,7 +2013,7 @@ async def delete_monitor(monitor_id: int) -> Dict[str, Any]:
         Dict containing the API response
     """
     use_cookie, api_url = get_auth_mode()
-    headers = get_auth_headers(include_csrf=True)
+    headers = await get_auth_headers_async(include_csrf=True)
 
     url = f"{api_url}/api/v1/monitor/{monitor_id}"
 
@@ -1961,13 +2050,11 @@ async def create_notebook(
     Returns:
         Dict containing the created notebook details
     """
-    import time as time_module
-
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks"
 
     # Use cookie auth for notebooks (token auth lacks permissions)
-    headers = get_auth_headers(include_csrf=True)
+    headers = await get_auth_headers_async(include_csrf=True)
     headers["Content-Type"] = "application/json"
     logger.info("Using cookie auth for create_notebook")
 
@@ -2025,7 +2112,7 @@ async def list_notebooks(
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks"
 
-    headers = get_auth_headers()
+    headers = await get_auth_headers_async()
     headers["Content-Type"] = "application/json"
 
     params = {
@@ -2068,7 +2155,7 @@ async def get_notebook(notebook_id: str) -> Dict[str, Any]:
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks/{notebook_id}"
 
-    headers = get_auth_headers()
+    headers = await get_auth_headers_async()
     headers["Content-Type"] = "application/json"
 
     async with httpx.AsyncClient() as client:
@@ -2107,7 +2194,7 @@ async def update_notebook(
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks/{notebook_id}"
 
-    headers = get_auth_headers(include_csrf=True)
+    headers = await get_auth_headers_async(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
     payload = {
@@ -2167,29 +2254,88 @@ async def add_notebook_cell(
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks/{notebook_id}/cells"
 
-    headers = get_auth_headers(include_csrf=True)
+    headers = await get_auth_headers_async(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
-    cell_attributes = {"cell_type": cell_type}
+    # Build definition object based on cell type - only include valid fields for that type
+    definition = {
+        "type": cell_type,
+    }
 
-    if title:
-        cell_attributes["title"] = title
-    if query:
-        cell_attributes["query"] = query
-    if content:
-        cell_attributes["content"] = content
-    if visualization:
-        cell_attributes["visualization"] = visualization
+    # Add content/query based on cell type - only include fields that are valid for each type
+    # Based on Datadog SDK models for notebook cells
+    if cell_type == "markdown":
+        # Markdown cells: NotebookMarkdownCellDefinition requires type and text
+        definition["text"] = content or ""
+        if title:
+            definition["title"] = title
+    elif cell_type == "timeseries":
+        # Timeseries cells: TimeseriesWidgetDefinition requires type and requests
+        definition["requests"] = [{}]
+        if query:
+            definition["requests"][0]["q"] = query
+        if title:
+            definition["title"] = title
+    elif cell_type == "log_stream":
+        # Log stream cells: LogStreamWidgetDefinition requires type, optional query
+        if query:
+            definition["query"] = query
+        if title:
+            definition["title"] = title
+    elif cell_type == "toplist":
+        # Toplist cells: ToplistWidgetDefinition requires type and requests
+        definition["requests"] = [{}]
+        if query:
+            definition["requests"][0]["q"] = query
+        if title:
+            definition["title"] = title
+    elif cell_type == "trace_list":
+        # Trace list cells
+        if query:
+            definition["query"] = query
+        if title:
+            definition["title"] = title
+    elif cell_type == "query_value":
+        # Query value cells
+        if query:
+            definition["query"] = query
+        if title:
+            definition["title"] = title
+    elif cell_type == "heatmap":
+        # Heatmap cells: HeatmapWidgetDefinition requires type and requests
+        definition["requests"] = [{}]
+        if query:
+            definition["requests"][0]["q"] = query
+        if title:
+            definition["title"] = title
+    elif cell_type == "distribution":
+        # Distribution cells: DistributionWidgetDefinition requires type and requests
+        definition["requests"] = [{}]
+        if query:
+            definition["requests"][0]["q"] = query
+        if title:
+            definition["title"] = title
+    else:
+        # Generic fallback - include what we can
+        if content:
+            definition["text"] = content
+        if query:
+            definition["query"] = query
+        if title:
+            definition["title"] = title
+
+    # Build attributes with definition wrapper - this is required by the API
+    attributes = {"definition": definition}
+
+    if position is not None:
+        attributes["position"] = position
 
     payload = {
         "data": {
             "type": "notebook_cells",
-            "attributes": cell_attributes
+            "attributes": attributes
         }
     }
-
-    if position is not None:
-        payload["data"]["attributes"]["position"] = position
 
     logger.info(f"add_notebook_cell payload: {json.dumps(payload, indent=2)}")
 
@@ -2241,7 +2387,7 @@ async def update_notebook_cell(
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks/{notebook_id}/cells/{cell_id}"
 
-    headers = get_auth_headers(include_csrf=True)
+    headers = await get_auth_headers_async(include_csrf=True)
     headers["Content-Type"] = "application/json"
 
     attributes = {}
@@ -2297,7 +2443,7 @@ async def delete_notebook_cell(
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks/{notebook_id}/cells/{cell_id}"
 
-    headers = get_auth_headers(include_csrf=True)
+    headers = await get_auth_headers_async(include_csrf=True)
 
     async with httpx.AsyncClient() as client:
         try:
@@ -2326,7 +2472,7 @@ async def delete_notebook(notebook_id: str) -> Dict[str, Any]:
     use_cookie, api_url = get_auth_mode()
     url = f"{api_url}/api/v1/notebooks/{notebook_id}"
 
-    headers = get_auth_headers(include_csrf=True)
+    headers = await get_auth_headers_async(include_csrf=True)
 
     async with httpx.AsyncClient() as client:
         try:
@@ -2376,8 +2522,6 @@ async def fetch_metric_formula(
     Returns:
         Dict containing formula result with timeseries data
     """
-    import time
-
     api_url = get_api_url()
 
     # V2 API only supports token auth, never cookie auth
@@ -2468,67 +2612,70 @@ async def fetch_metric_formula(
 
 
 async def check_deployment_status(
-    service_name: str,
-    env: str = "prod",
+    service: str,
+    version_field: str,
+    version_value: str,
+    environment: str = "prod",
     time_range: str = "1h",
 ) -> Dict[str, Any]:
-    """Check deployment status by querying related metrics and logs.
-
-    Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
+    """Check deployment status by searching logs for a specific version.
 
     Args:
-        service_name: The service name to check
-        env: The environment (prod, staging, etc.)
-        time_range: Time range to check
+        service: The service name to check
+        version_field: The field name to search for (e.g., 'git.commit.sha', 'version')
+        version_value: The version value to search for
+        environment: The environment (prod, staging, etc.)
+        time_range: Time range to search
 
     Returns:
-        Dict containing deployment status and related metrics
+        Dict containing deployment status with keys: status, service, log_count, first_seen, last_seen, environment
     """
-    import time
+    try:
+        # Build log filters
+        filters = {
+            "service": service,
+            "env": environment,
+        }
 
-    use_cookie, api_url = get_auth_mode()
-    headers = get_auth_headers()
+        # Fetch logs matching the version
+        logs_response = await fetch_logs(
+            query=f"{version_field}:{version_value}",
+            filters=filters,
+            time_range=time_range,
+        )
 
-    # Fetch recent metrics for the service
-    metric_query = f"avg:trace.web.request{{service:{service_name},env:{env}}}"
+        logs = logs_response.get("data", [])
 
-    url = f"{api_url}/api/v1/query"
-    params = {
-        "query": metric_query,
-        "from": int((time.time() - 3600)),
-        "to": int(time.time()),
-    }
+        result = {
+            "status": "not_found" if not logs else "deployed",
+            "service": service,
+            "log_count": len(logs),
+            "first_seen": None,
+            "last_seen": None,
+            "environment": environment,
+        }
 
-    result = {
-        "service": service_name,
-        "environment": env,
-        "status": "unknown",
-        "metrics": None,
-        "error": None,
-    }
+        # Extract timestamp from logs if available
+        if logs:
+            timestamps = []
+            for log in logs:
+                # Try both flat structure and nested attributes structure
+                timestamp = None
+                if "timestamp" in log:
+                    timestamp = log["timestamp"]
+                elif "attributes" in log and "timestamp" in log["attributes"]:
+                    timestamp = log["attributes"]["timestamp"]
 
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(url, headers=headers, params=params)
-            response.raise_for_status()
-            data = response.json()
+                if timestamp:
+                    timestamps.append(timestamp)
 
-            if data.get("status") == "ok":
-                result["status"] = "healthy"
-                result["metrics"] = data.get("series", [])
-            else:
-                result["status"] = "degraded"
-                result["error"] = data.get("error", "Unknown error")
+            if timestamps:
+                timestamps.sort()
+                result["first_seen"] = timestamps[0]
+                result["last_seen"] = timestamps[-1]
 
-            return result
+        return result
 
-        except httpx.HTTPError as e:
-            logger.error(f"HTTP error checking deployment status: {e}")
-            result["error"] = str(e)
-            result["status"] = "error"
-            return result
-        except Exception as e:
-            logger.error(f"Error checking deployment status: {e}")
-            result["error"] = str(e)
-            result["status"] = "error"
-            return result
+    except Exception as e:
+        logger.error(f"Error checking deployment status: {e}")
+        raise

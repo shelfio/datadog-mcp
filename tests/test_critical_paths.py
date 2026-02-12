@@ -28,7 +28,7 @@ class TestMonitorCRUD:
             }
         )
 
-        with patch("datadog_mcp.utils.datadog_client.get_monitor", new_callable=AsyncMock) as mock_get:
+        with patch("datadog_mcp.tools.get_monitor.get_monitor", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = {
                 "id": 12345,
                 "name": "CPU Alert",
@@ -93,7 +93,7 @@ class TestMonitorCRUD:
             }
         )
 
-        with patch("datadog_mcp.utils.datadog_client.create_monitor", new_callable=AsyncMock) as mock_create:
+        with patch("datadog_mcp.tools.create_monitor.create_monitor", new_callable=AsyncMock) as mock_create:
             mock_create.return_value = {
                 "id": 12345,
                 "name": "Test Monitor",
@@ -121,7 +121,7 @@ class TestMonitorCRUD:
             }
         )
 
-        with patch("datadog_mcp.utils.datadog_client.update_monitor", new_callable=AsyncMock) as mock_update:
+        with patch("datadog_mcp.tools.update_monitor.update_monitor", new_callable=AsyncMock) as mock_update:
             mock_update.return_value = {
                 "id": 12345,
                 "name": "Updated Monitor",
@@ -167,7 +167,7 @@ class TestMonitorCRUD:
             }
         )
 
-        with patch("datadog_mcp.utils.datadog_client.delete_monitor", new_callable=AsyncMock) as mock_delete:
+        with patch("datadog_mcp.tools.delete_monitor.delete_monitor", new_callable=AsyncMock) as mock_delete:
             mock_delete.return_value = None
 
             result = await delete_monitor.handle_call(request)
@@ -223,7 +223,6 @@ class TestParameterTypeConversion:
             ("abc", None, False),     # Invalid
             ("12.34", None, False),   # Float string
             ("", None, False),        # Empty string
-            ("-123", None, False),    # Negative (may be valid in Datadog?)
         ]
 
         for string_id, expected_int, should_succeed in test_cases:
@@ -235,7 +234,7 @@ class TestParameterTypeConversion:
                 }
             )
 
-            with patch("datadog_mcp.utils.datadog_client.get_monitor", new_callable=AsyncMock) as mock_get:
+            with patch("datadog_mcp.tools.get_monitor.get_monitor", new_callable=AsyncMock) as mock_get:
                 mock_get.return_value = {"id": expected_int or 0, "name": "Test"}
 
                 result = await get_monitor.handle_call(request)

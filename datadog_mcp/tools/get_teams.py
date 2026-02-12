@@ -141,27 +141,30 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
                 content = json.dumps(teams, indent=2)
             else:
                 content = format_teams_as_table(teams)
-        
-        # Add summary header with pagination info
-        total_count = pagination.get("total_count", len(teams))
-        summary = f"Found {total_count} team(s) total"
-        if page_size < total_count:
-            summary += f" (showing page {page_number + 1}, {len(teams)} teams)"
-        if team_name:
-            summary += f" matching '{team_name}'"
-        if include_members and format_type != "table":
-            summary += " (with member details)"
-        
-        # Add pagination info
-        if pagination and total_count > page_size:
-            total_pages = pagination.get("total_pages", 1)
-            current_page = page_number + 1
-            summary += f"\nPage {current_page} of {total_pages}"
-            if current_page < total_pages:
-                summary += f" | Use page_number={page_number + 1} for next page"
-        
-        final_content = f"{summary}\n{'=' * len(summary.split('\n')[0])}\n\n{content}"
-        
+
+        # Add summary header with pagination info (not for JSON format)
+        if format_type != "json":
+            total_count = pagination.get("total_count", len(teams))
+            summary = f"Found {total_count} team(s) total"
+            if page_size < total_count:
+                summary += f" (showing page {page_number + 1}, {len(teams)} teams)"
+            if team_name:
+                summary += f" matching '{team_name}'"
+            if include_members and format_type != "table":
+                summary += " (with member details)"
+
+            # Add pagination info
+            if pagination and total_count > page_size:
+                total_pages = pagination.get("total_pages", 1)
+                current_page = page_number + 1
+                summary += f"\nPage {current_page} of {total_pages}"
+                if current_page < total_pages:
+                    summary += f" | Use page_number={page_number + 1} for next page"
+
+            final_content = f"{summary}\n{'=' * len(summary.split('\n')[0])}\n\n{content}"
+        else:
+            final_content = content
+
         return CallToolResult(
             content=[TextContent(type="text", text=final_content)],
             isError=False,
