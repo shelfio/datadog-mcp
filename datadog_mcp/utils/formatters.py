@@ -216,7 +216,7 @@ def format_logs_as_table(logs: List[Dict[str, str]], max_message_length: int = 8
     
     lines = [header, separator]
     for log in display_logs:
-        timestamp = log.get("timestamp", "")[:timestamp_width]  # Truncate timestamp if needed
+        timestamp = str(log.get("timestamp", ""))[:timestamp_width]  # Convert to string and truncate
         level = log.get("level", "")
         service = log.get("service", "")
         message = log.get("message", "")
