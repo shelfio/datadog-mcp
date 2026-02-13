@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2](https://github.com/hacctarr/datadog-mcp/compare/v0.3.1...v0.3.2) (2026-02-13)
+
+
+### Bug Fixes
+
+* resolve 'int' object is not subscriptable error in log formatting ([1c8c06c](https://github.com/hacctarr/datadog-mcp/commit/1c8c06c6ec8f1311febbf352415040e79dc393ff))
+* resolve timestamp formatting error in log table output ([3c0714c](https://github.com/hacctarr/datadog-mcp/commit/3c0714c0e78073a19cf5deb284c12af1eb769176))
+
+
+### Documentation
+
+* add critical workflow guidance to prevent release mistakes ([76f0722](https://github.com/hacctarr/datadog-mcp/commit/76f0722b26e6e1a413ad47e608c7c5b6bfd1355c))
+
 ## [0.3.1](https://github.com/hacctarr/datadog-mcp/compare/v0.3.0...v0.3.1) (2026-02-12)
 
 
