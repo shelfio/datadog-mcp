@@ -39,37 +39,14 @@ git checkout -b fix/your-feature-name  ← CREATE BRANCH FIRST
 
 **IMPORTANT**: Always write tests FIRST before implementing code. This is non-negotiable.
 
-### Test-First Development Pattern
-1. **Write test file** for your feature (e.g., `tests/test_create_monitor.py`)
-2. **Run tests** - they will fail (RED)
-3. **Implement tool/client code** to make tests pass (GREEN)
-4. **Run full test suite** before submitting PR
-
-### Branch Management (CRITICAL)
-**NEVER push to `andreidore` branch.** Always push to:
-- `hacctarr` - for feature branches
-- `main` - only after PR review and approval
-
-### Repository Identity (CRITICAL)
-- **Canonical repository**: `hacctarr/datadog-mcp` (origin remote) ← **USE THIS FOR ALL PRs**
-- **Upstream (read-only reference)**: `andreidore/datadog-mcp` - **NEVER create PRs here**
-- **Original repository**: `shelfio/datadog-mcp` - **NEVER create PRs here**
-- **Internal fork**: `cobalt-robotics/datadog-mcp` (cobalt remote)
-
-**CRITICAL PR RULE:**
-- ✅ **ONLY create PRs to**: `hacctarr/datadog-mcp` main branch
-- ❌ **NEVER create PRs to**: `andreidore/datadog-mcp` (read-only upstream)
-- ❌ **NEVER create PRs to**: `shelfio/datadog-mcp` (original source)
-
-**Before creating any PR**:
-1. Run `git remote -v` and confirm the target matches `hacctarr`
-2. Check the PR target is set to `hacctarr/datadog-mcp` main, NOT andreidore or shelfio
+**Test-First Development:**
+1. Write test file for your feature (e.g., `tests/test_create_monitor.py`)
+2. Run tests - they will fail (RED)
+3. Implement tool/client code to make tests pass (GREEN)
+4. Run full test suite before submitting PR
 
 ### Pre-PR Checklist (Required Before Every PR)
-1. ⚠️ **CRITICAL**: Verify the PR target is `hacctarr/datadog-mcp` main
-   - Run `git remote -v` and confirm origin is `hacctarr/datadog-mcp`
-   - When creating the PR, double-check the target repository dropdown
-   - **DO NOT create PRs on andreidore or shelfio**
+1. ⚠️ **CRITICAL**: Verify the PR target is `hacctarr/datadog-mcp` main (see Repository Warning above)
 2. `uv run pytest tests/` - All tests pass
 3. `uv run python -m py_compile datadog_mcp/server.py` - No syntax errors
 4. Verify NO manual edits to: `pyproject.toml` version, `.release-please-manifest.json`, `CHANGELOG.md`
@@ -217,22 +194,6 @@ Environment parameters now accept arrays for multi-environment queries:
 - Multiple: `["prod", "staging", "dev"]`
 - Arbitrary environment names supported
 
-### Recently Modified Tools
-The `get_metrics` tool (formerly `get_service_metrics`) now supports:
-- General purpose metric querying for any metric (not just service metrics)
-- Flexible parameter-based query construction
-- User-specified metric names, filters, and aggregation fields
-- Multiple environments via array parameter
-- `aggregation_by` parameter accepting any field name(s) as array
-- Automatic field discovery when aggregation fails
-- User prompting with available fields for invalid aggregations
-- Multiple aggregation fields support (e.g., `["service", "environment"]`)
-- Backward compatibility with single environment and aggregation_by strings
-
-The `list_metrics` tool has been added to discover available metrics using the `/api/v2/metrics` endpoint.
-
-The `get_log_fields` tool has been removed as it was based on non-existent API endpoints.
-
 ## Key Implementation Patterns
 
 ### Async API Client Pattern
@@ -316,15 +277,15 @@ Tests are organized by feature area and require real Datadog API access:
 
 ## Claude Desktop Integration
 
-The server integrates with Claude Desktop via MCP configuration:
+The server integrates with Claude Desktop via MCP configuration. Add to your Claude Desktop config (usually `~/.claude/claude_desktop_config.json`):
 
-### Default UVX Integration (Recommended)
+### Using UVX (Recommended)
 ```json
 {
   "mcpServers": {
     "datadog": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/shelfio/datadog-mcp.git@v0.3.0", "datadog-mcp"],
+      "args": ["--from", "git+https://github.com/hacctarr/datadog-mcp.git@LATEST_VERSION", "datadog-mcp"],
       "env": {
         "DD_API_KEY": "your-datadog-api-key",
         "DD_APP_KEY": "your-datadog-application-key"
@@ -334,13 +295,20 @@ The server integrates with Claude Desktop via MCP configuration:
 }
 ```
 
-### Alternative Podman Integration
+Replace `LATEST_VERSION` with the version from [GitHub releases](https://github.com/hacctarr/datadog-mcp/releases) (e.g., `v0.3.4`).
+
+### Using Local Development Setup
 ```json
 {
   "mcpServers": {
     "datadog": {
-      "command": "podman",
-      "args": ["run", "-i", "-e", "DD_API_KEY=${DD_API_KEY}", "-e", "DD_APP_KEY=${DD_APP_KEY}", "magistersart/datadog-mcp:latest"]
+      "command": "uv",
+      "args": ["run", "datadog_mcp/server.py"],
+      "cwd": "/path/to/datadog-mcp",
+      "env": {
+        "DD_API_KEY": "your-datadog-api-key",
+        "DD_APP_KEY": "your-datadog-application-key"
+      }
     }
   }
 }
