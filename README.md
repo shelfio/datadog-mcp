@@ -19,11 +19,14 @@ This MCP server enables Claude to:
 - **Service Definitions**: List and retrieve detailed service definitions with metadata, ownership, and configuration
 - **Team Management**: List teams, view member details, and manage team information
 
-## Quick Start
+## Installation
 
 Choose your preferred method to run the Datadog MCP server:
 
 ### 🚀 UVX Direct Run (Recommended)
+
+Install and run directly from GitHub without cloning:
+
 ```bash
 export DD_API_KEY="your-datadog-api-key" DD_APP_KEY="your-datadog-application-key"
 
@@ -31,19 +34,30 @@ export DD_API_KEY="your-datadog-api-key" DD_APP_KEY="your-datadog-application-ke
 uvx --from git+https://github.com/hacctarr/datadog-mcp.git datadog-mcp
 
 # Specific version (recommended for production)
-uvx --from git+https://github.com/hacctarr/datadog-mcp.git@v0.3.0 datadog-mcp
+# Replace LATEST_VERSION with actual version from https://github.com/hacctarr/datadog-mcp/releases
+uvx --from git+https://github.com/hacctarr/datadog-mcp.git@LATEST_VERSION datadog-mcp
 
 # Specific branch
 uvx --from git+https://github.com/hacctarr/datadog-mcp.git@main datadog-mcp
 ```
 
 ### 🔧 UV Quick Run (Development)
+
+For local development and testing:
+
 ```bash
-export DD_API_KEY="your-datadog-api-key" DD_APP_KEY="your-datadog-application-key"
-git clone https://github.com/hacctarr/datadog-mcp.git /tmp/datadog-mcp && cd /tmp/datadog-mcp && uv run ddmcp/server.py
+git clone https://github.com/hacctarr/datadog-mcp.git
+cd datadog-mcp
+uv sync
+export DD_API_KEY="your-datadog-api-key"
+export DD_APP_KEY="your-datadog-application-key"
+uv run datadog_mcp/server.py
 ```
 
 ### 🐳 Podman (Optional)
+
+For containerized environments:
+
 ```bash
 podman run -e DD_API_KEY="your-datadog-api-key" -e DD_APP_KEY="your-datadog-application-key" -i $(podman build -q https://github.com/hacctarr/datadog-mcp.git)
 ```
@@ -73,9 +87,9 @@ When using UVX, you can specify exact versions for reproducible deployments:
 
 ### Version Formats
 - **Latest**: `git+https://github.com/hacctarr/datadog-mcp.git` (HEAD)
-- **Specific Tag**: `git+https://github.com/hacctarr/datadog-mcp.git@v0.3.0`
+- **Specific Tag**: `git+https://github.com/hacctarr/datadog-mcp.git@LATEST_VERSION` (e.g., `@v0.3.3`)
 - **Branch**: `git+https://github.com/hacctarr/datadog-mcp.git@main`
-- **Commit Hash**: `git+https://github.com/hacctarr/datadog-mcp.git@59f0c15`
+- **Commit Hash**: `git+https://github.com/hacctarr/datadog-mcp.git@COMMIT_HASH`
 
 ### Recommendations
 - **Production**: Use specific tags (e.g., `@v0.3.0`) for stability
@@ -86,17 +100,15 @@ See [GitHub releases](https://github.com/hacctarr/datadog-mcp/releases) for all 
 
 ## Claude Desktop Integration
 
-### Using UVX (Recommended)
+Add to your Claude Desktop configuration (usually `~/.claude/claude_desktop_config.json`):
 
-Add to Claude Desktop configuration:
-
-**Latest version (bleeding edge)**:
+**Using UVX (Recommended for production)**:
 ```json
 {
   "mcpServers": {
     "datadog": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/hacctarr/datadog-mcp.git", "datadog-mcp"],
+      "args": ["--from", "git+https://github.com/hacctarr/datadog-mcp.git@LATEST_VERSION", "datadog-mcp"],
       "env": {
         "DD_API_KEY": "your-datadog-api-key",
         "DD_APP_KEY": "your-datadog-application-key"
@@ -106,37 +118,15 @@ Add to Claude Desktop configuration:
 }
 ```
 
-**Specific version (recommended for production)**:
-```json
-{
-  "mcpServers": {
-    "datadog": {
-      "command": "uvx",
-      "args": ["--from", "git+https://github.com/hacctarr/datadog-mcp.git@v0.3.0", "datadog-mcp"],
-      "env": {
-        "DD_API_KEY": "your-datadog-api-key",
-        "DD_APP_KEY": "your-datadog-application-key"
-      }
-    }
-  }
-}
-```
+Replace `LATEST_VERSION` with the version from [GitHub releases](https://github.com/hacctarr/datadog-mcp/releases) (e.g., `v0.3.3`).
 
-### Using Local Development Setup
-
-For development with local cloned repository:
-```bash
-git clone https://github.com/hacctarr/datadog-mcp.git
-cd datadog-mcp
-```
-
-Add to Claude Desktop configuration:
+**Using local development setup**:
 ```json
 {
   "mcpServers": {
     "datadog": {
       "command": "uv",
-      "args": ["run", "ddmcp/server.py"],
+      "args": ["run", "datadog_mcp/server.py"],
       "cwd": "/path/to/datadog-mcp",
       "env": {
         "DD_API_KEY": "your-datadog-api-key",
@@ -145,53 +135,6 @@ Add to Claude Desktop configuration:
     }
   }
 }
-```
-
-## Installation Options
-
-### UVX Installation (Recommended)
-
-Install and run directly from GitHub without cloning:
-
-```bash
-export DD_API_KEY="your-datadog-api-key"
-export DD_APP_KEY="your-datadog-application-key"
-
-# Latest version
-uvx --from git+https://github.com/hacctarr/datadog-mcp.git datadog-mcp
-
-# Specific version (recommended for production)
-uvx --from git+https://github.com/hacctarr/datadog-mcp.git@v0.3.0 datadog-mcp
-```
-
-### Development Installation
-
-For local development and testing:
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/hacctarr/datadog-mcp.git
-   cd datadog-mcp
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   uv sync
-   ```
-
-3. **Run the server:**
-   ```bash
-   export DD_API_KEY="your-datadog-api-key"
-   export DD_APP_KEY="your-datadog-application-key"
-   uv run ddmcp/server.py
-   ```
-
-### Podman Installation (Optional)
-
-For containerized environments:
-
-```bash
-podman run -e DD_API_KEY="your-key" -e DD_APP_KEY="your-app-key" -i $(podman build -q https://github.com/hacctarr/datadog-mcp.git)
 ```
 
 ## Tools
@@ -302,6 +245,136 @@ Lists teams and their members.
 - `team_name` (optional): Filter by team name
 - `include_members` (optional): Include member details (default: false)
 - `format` (optional): "table", "json", "summary"
+
+### `get_logs`
+Retrieves logs from Datadog with flexible filtering.
+
+**Arguments:**
+- `query` (optional): Free-text search query (e.g., 'error OR exception')
+- `filters` (optional): Dictionary of filters (e.g., {'service': 'web', 'status': 'error'})
+- `time_range` (optional): "1h", "4h", "8h", "1d", "7d", "14d", "30d"
+- `limit` (optional): Maximum number of log entries (default: 50, max: 1000)
+- `format` (optional): "table", "text", "json"
+
+### `query_metric_formula`
+Execute metric formulas for comparing/calculating multiple metrics.
+
+**Arguments:**
+- `formula` (required): Formula string using query variables (e.g., 'a / b * 100')
+- `queries` (required): Dictionary of metric queries with aggregation options
+- `filters` (optional): Filters to apply to all queries
+- `time_range` (optional): "1h", "4h", "8h", "1d", "7d", "14d", "30d"
+- `format` (optional): "summary", "timeseries", "json"
+
+### `check_deployment`
+Verify if a specific version is deployed to a service.
+
+**Arguments:**
+- `service` (required): Service name to check
+- `version_field` (required): Field name containing version info
+- `version_value` (required): Version value to search for
+- `environment` (optional): Environment filter (e.g., 'prod', 'staging')
+- `time_range` (optional): "1h", "4h", "8h", "1d", "7d", "14d", "30d"
+- `format` (optional): "summary", "detailed", "json"
+
+### `get_traces`
+Search and retrieve APM traces from Datadog.
+
+**Arguments:**
+- `query` (optional): Trace query string (e.g., '@duration:>5000000000')
+- `time_range` (optional): "1h", "4h", "8h", "1d", "7d", "14d", "30d"
+- `limit` (optional): Maximum number of traces (default: 10, max: 100)
+- `include_children` (optional): Include child spans (default: false)
+- `format` (optional): "table", "text", "json"
+
+### `aggregate_traces`
+Aggregate APM traces by grouping by specified dimensions.
+
+**Arguments:**
+- `query` (optional): Trace query string
+- `group_by` (optional): Fields to group by (e.g., ['service.name'])
+- `aggregation` (optional): Aggregation function - "count", "avg", "min", "max", "sum", "percentile"
+- `time_range` (optional): "1h", "4h", "8h", "1d", "7d", "14d", "30d"
+- `format` (optional): "table", "text", "json"
+
+### `list_notebooks`
+List all Datadog notebooks for organizing analysis and investigations.
+
+**Arguments:**
+- `limit` (optional): Maximum number of notebooks (default: 20, max: 100)
+- `offset` (optional): Offset for pagination (default: 0)
+- `format` (optional): "table", "json", "summary"
+
+### `get_notebook`
+Retrieve a specific notebook by ID with all cells and metadata.
+
+**Arguments:**
+- `notebook_id` (required): The notebook ID to retrieve
+
+### `create_notebook`
+Create a new notebook for analysis and investigations.
+
+**Arguments:**
+- `title` (required): Title of the notebook
+- `description` (optional): Description of the notebook's purpose
+- `cells` (optional): Initial cells for the notebook
+- `tags` (optional): Tags for organizing notebooks
+
+### `update_notebook`
+Update an existing notebook's metadata.
+
+**Arguments:**
+- `notebook_id` (required): The notebook ID to update
+- `title` (optional): New title for the notebook
+- `description` (optional): New description
+- `tags` (optional): New tags for the notebook
+
+### `add_notebook_cell`
+Add a new cell to a notebook.
+
+**Arguments:**
+- `notebook_id` (required): The notebook ID
+- `cell_type` (required): Type of cell - "markdown", "timeseries", "log_stream", "trace_list", "query_value"
+- `content` (optional): Content for markdown cells
+- `query` (optional): Query for metric/log/APM cells
+- `title` (optional): Title for the cell
+- `visualization` (optional): Visualization type for timeseries cells
+- `position` (optional): Position in the notebook
+
+### `update_notebook_cell`
+Update an existing cell in a notebook.
+
+**Arguments:**
+- `notebook_id` (required): The notebook ID containing the cell
+- `cell_id` (required): The cell ID to update
+- `content` (optional): New content for markdown cells
+- `query` (optional): New query for metric/log/APM cells
+- `title` (optional): New title
+- `visualization` (optional): New visualization type
+- `position` (optional): New position in notebook
+
+### `delete_notebook_cell`
+Delete a cell from a notebook.
+
+**Arguments:**
+- `notebook_id` (required): The notebook ID
+- `cell_id` (required): The cell ID to delete
+
+### `delete_notebook`
+Delete a notebook by ID.
+
+**Arguments:**
+- `notebook_id` (required): The notebook ID to delete
+
+### `setup_auth`
+Setup or verify Datadog authentication.
+
+**Arguments:**
+- `action` (optional): Action to perform - "detect", "configure_cookie", "configure_token", "verify", "status"
+- `api_key` (optional): Datadog API key (for configure_token)
+- `app_key` (optional): Datadog application key (for configure_token)
+- `cookie_value` (optional): Cookie value (for configure_cookie)
+- `csrf_token` (optional): CSRF token (for configure_cookie)
 
 ## Examples
 
