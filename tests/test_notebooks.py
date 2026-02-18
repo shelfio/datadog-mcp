@@ -182,6 +182,36 @@ class TestGetNotebook:
             assert len(result.content) > 0
             assert "Error fetching notebook" in result.content[0].text
 
+    @pytest.mark.asyncio
+    async def test_get_notebook_with_none_tags(self, sample_request, mock_env_credentials):
+        """Test retrieving notebook when tags is None (API response variance)"""
+        sample_request.arguments = {"notebook_id": SAMPLE_NOTEBOOK_ID}
+
+        notebook_with_none_tags = {
+            "id": SAMPLE_NOTEBOOK_ID,
+            "type": "notebook",
+            "attributes": {
+                "name": "Test Notebook",
+                "description": "Testing",
+                "author": "test@example.com",
+                "created": "2026-02-05T10:00:00Z",
+                "updated": "2026-02-05T10:00:00Z",
+                "tags": None,  # API sometimes returns None instead of []
+                "cells": [],
+            },
+        }
+
+        with patch(
+            "datadog_mcp.tools.get_notebook.client_get_notebook", new_callable=AsyncMock
+        ) as mock_get:
+            mock_get.return_value = notebook_with_none_tags
+
+            result = await get_notebook.handle_call(sample_request)
+
+            assert len(result.content) > 0
+            assert "Notebook Details" in result.content[0].text
+            assert "Error" not in result.content[0].text  # Should not error on None tags
+
 
 class TestUpdateNotebook:
     """Tests for update_notebook tool"""
@@ -240,6 +270,27 @@ class TestUpdateNotebook:
 
             assert len(result.content) > 0
             assert "Notebook Updated" in result.content[0].text
+
+    @pytest.mark.asyncio
+    async def test_update_notebook_bad_request(self, sample_request, mock_env_credentials):
+        """Test handling 400 Bad Request error when updating notebook"""
+        sample_request.arguments = {
+            "notebook_id": SAMPLE_NOTEBOOK_ID,
+            "title": "Updated Title",
+        }
+
+        with patch(
+            "datadog_mcp.tools.update_notebook.client_update_notebook",
+            new_callable=AsyncMock,
+        ) as mock_update:
+            # Simulate 400 Bad Request error from API
+            mock_update.side_effect = Exception("400 Bad Request: Invalid request body")
+
+            result = await update_notebook.handle_call(sample_request)
+
+            assert len(result.content) > 0
+            assert "Error updating notebook" in result.content[0].text
+            assert "400" in result.content[0].text or "Bad Request" in result.content[0].text
 
 
 class TestAddNotebookCell:
@@ -331,6 +382,30 @@ class TestAddNotebookCell:
 
             assert len(result.content) > 0
             assert "Error adding cell" in result.content[0].text
+
+    @pytest.mark.asyncio
+    async def test_add_cell_notebook_not_found(self, sample_request, mock_env_credentials):
+        """Test adding cell to non-existent notebook"""
+        sample_request.arguments = {
+            "notebook_id": "notebook-doesnotexist",
+            "cell_type": "markdown",
+            "position": 0,
+            "title": "Test",
+            "content": "Test content",
+        }
+
+        with patch(
+            "datadog_mcp.tools.add_notebook_cell.client_add_notebook_cell",
+            new_callable=AsyncMock,
+        ) as mock_add:
+            # Simulate the error that occurs in production when notebook doesn't exist
+            mock_add.side_effect = Exception("Notebook not found")
+
+            result = await add_notebook_cell.handle_call(sample_request)
+
+            assert len(result.content) > 0
+            assert "Error adding cell" in result.content[0].text
+            assert "Notebook not found" in result.content[0].text
 
 
 class TestUpdateNotebookCell:
