@@ -40,12 +40,16 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
                 cell_title = cell.get("title", "Untitled")
                 cells_text += f"\n{i}. **[{cell_type}]** {cell_title} (ID: {cell_id})"
 
+        # Get tags, handling None case
+        tags = result.get('attributes', {}).get('tags')
+        tags_str = ', '.join(tags) if tags else 'None'
+
         formatted_result = (
             f"**Notebook Details**\n\n"
             f"- **ID**: {result.get('id')}\n"
             f"- **Title**: {result.get('attributes', {}).get('name', 'N/A')}\n"
             f"- **Description**: {result.get('attributes', {}).get('description', 'N/A')}\n"
-            f"- **Tags**: {', '.join(result.get('attributes', {}).get('tags', []))}\n"
+            f"- **Tags**: {tags_str}\n"
             f"- **Author**: {result.get('attributes', {}).get('author', 'N/A')}\n"
             f"- **Created**: {result.get('attributes', {}).get('created', 'N/A')}\n"
             f"- **Updated**: {result.get('attributes', {}).get('updated', 'N/A')}\n"
