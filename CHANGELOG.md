@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3](https://github.com/hacctarr/datadog-mcp/compare/v0.3.2...v0.3.3) (2026-02-18)
+
+
+### Documentation
+
+* add explicit 'create branch first' instructions ([508c142](https://github.com/hacctarr/datadog-mcp/commit/508c14267d16876f64831dc393b7773f78cdc537))
+* update repository references from shelfio to hacctarr ([366ed31](https://github.com/hacctarr/datadog-mcp/commit/366ed31eefd275e4e0a8a7000ea8589872245c8e))
+* update repository references from shelfio to hacctarr ([2b534e4](https://github.com/hacctarr/datadog-mcp/commit/2b534e458b406d705c1bed61c497c9fbac378452))
+
 ## [0.3.2](https://github.com/hacctarr/datadog-mcp/compare/v0.3.1...v0.3.2) (2026-02-13)
 
 
