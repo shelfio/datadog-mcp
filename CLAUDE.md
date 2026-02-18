@@ -4,6 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Workflow (CRITICAL)
 
+### ⚠️ REPOSITORY WARNING (READ THIS FIRST)
+**This repository has multiple GitHub mirrors. Use ONLY the canonical repository:**
+
+| Repository | Purpose | PR Action |
+|------------|---------|-----------|
+| `hacctarr/datadog-mcp` | **Canonical** (use this) | ✅ Create PRs here |
+| `andreidore/datadog-mcp` | Read-only upstream reference | ❌ NEVER create PRs |
+| `shelfio/datadog-mcp` | Original source repository | ❌ NEVER create PRs |
+| `cobalt-robotics/datadog-mcp` | Internal fork (mirror only) | ❌ NEVER create PRs |
+
+**If you accidentally create a PR on andreidore or shelfio, it will be rejected. Always target hacctarr/datadog-mcp.**
+
 ### CREATE FEATURE BRANCH FIRST (DO THIS BEFORE ANY CODE CHANGES)
 **BEFORE making ANY edits:**
 1. `git checkout main && git pull origin main` - Start from latest main
@@ -39,14 +51,25 @@ git checkout -b fix/your-feature-name  ← CREATE BRANCH FIRST
 - `main` - only after PR review and approval
 
 ### Repository Identity (CRITICAL)
-- **Canonical repository**: `hacctarr/datadog-mcp` (origin remote)
-- **Upstream (read-only reference)**: `andreidore/datadog-mcp` - NEVER create PRs here
+- **Canonical repository**: `hacctarr/datadog-mcp` (origin remote) ← **USE THIS FOR ALL PRs**
+- **Upstream (read-only reference)**: `andreidore/datadog-mcp` - **NEVER create PRs here**
+- **Original repository**: `shelfio/datadog-mcp` - **NEVER create PRs here**
 - **Internal fork**: `cobalt-robotics/datadog-mcp` (cobalt remote)
-- **All PRs must target**: `hacctarr/datadog-mcp` unless explicitly told otherwise
-- **Before creating any PR**: Run `git remote -v` and confirm the target matches `hacctarr`
+
+**CRITICAL PR RULE:**
+- ✅ **ONLY create PRs to**: `hacctarr/datadog-mcp` main branch
+- ❌ **NEVER create PRs to**: `andreidore/datadog-mcp` (read-only upstream)
+- ❌ **NEVER create PRs to**: `shelfio/datadog-mcp` (original source)
+
+**Before creating any PR**:
+1. Run `git remote -v` and confirm the target matches `hacctarr`
+2. Check the PR target is set to `hacctarr/datadog-mcp` main, NOT andreidore or shelfio
 
 ### Pre-PR Checklist (Required Before Every PR)
-1. `git remote -v` - Confirm target repository is `hacctarr/datadog-mcp`
+1. ⚠️ **CRITICAL**: Verify the PR target is `hacctarr/datadog-mcp` main
+   - Run `git remote -v` and confirm origin is `hacctarr/datadog-mcp`
+   - When creating the PR, double-check the target repository dropdown
+   - **DO NOT create PRs on andreidore or shelfio**
 2. `uv run pytest tests/` - All tests pass
 3. `uv run python -m py_compile datadog_mcp/server.py` - No syntax errors
 4. Verify NO manual edits to: `pyproject.toml` version, `.release-please-manifest.json`, `CHANGELOG.md`
