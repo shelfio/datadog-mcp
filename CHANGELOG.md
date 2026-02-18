@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.4](https://github.com/hacctarr/datadog-mcp/compare/v0.3.3...v0.3.4) (2026-02-18)
+
+
+### Documentation
+
+* clarify that PRs must NEVER be created on andreidore or shelfio ([903a8ed](https://github.com/hacctarr/datadog-mcp/commit/903a8ed697398f1085bfa4b35bc337188f5f3f23))
+* consolidate and fix CLAUDE.md for clarity and correctness ([0a1a357](https://github.com/hacctarr/datadog-mcp/commit/0a1a357a561647a3289c01fe084a9179f27d741c))
+* consolidate documentation, fix module paths, and add missing tools ([2b4f156](https://github.com/hacctarr/datadog-mcp/commit/2b4f156896bcd95ab926f1e2444aae87cf1df643))
+
 ## [0.3.3](https://github.com/hacctarr/datadog-mcp/compare/v0.3.2...v0.3.3) (2026-02-18)
 
 
