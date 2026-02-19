@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.5](https://github.com/hacctarr/datadog-mcp/compare/v0.3.4...v0.3.5) (2026-02-19)
+
+
+### Bug Fixes
+
+* handle None tags in get_notebook response ([dfda1a3](https://github.com/hacctarr/datadog-mcp/commit/dfda1a35255b7141720eee2ab84c6d2b12325cea))
+* handle None tags in get_notebook response formatting ([d0167bc](https://github.com/hacctarr/datadog-mcp/commit/d0167bccd0d3c323eac0bcd2ca3172bd98a345ad))
+
+
+### Documentation
+
+* add explicit MCP tool testing methodology to CLAUDE.md ([#6](https://github.com/hacctarr/datadog-mcp/issues/6)) ([3bbef32](https://github.com/hacctarr/datadog-mcp/commit/3bbef32c5d0518a9d8a367c75fd71686c07f8102))
+
 ## [0.3.4](https://github.com/hacctarr/datadog-mcp/compare/v0.3.3...v0.3.4) (2026-02-18)
 
 
