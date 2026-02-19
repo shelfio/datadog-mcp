@@ -113,27 +113,38 @@ git checkout -b fix/your-feature-name  ← CREATE BRANCH FIRST
 
 ## MCP Testing & Validation (CRITICAL)
 
-### Test MCP Changes Using Claude Code Tools Only
+### Test MCP Changes Using Claude Code MCP Tools Only
 **NEVER test MCP changes by writing Python scripts.** Instead:
 
-1. **Configure MCP**: Ensure datadog-mcp server is running locally with `/mcp` command
-2. **Verify Auth**: Use `mcp__datadog__setup_auth` to configure Datadog credentials
-3. **Test via MCP Tools**: Use the actual MCP tool functions (e.g., `mcp__datadog__get_logs`, `mcp__datadog__list_notebooks`)
-4. **Validate Output**: Check that tool outputs are correctly formatted and match expectations
-5. **Document Results**: Record test results in incident reports or commit messages
+1. **Use Claude Code Tasks**: Launch Claude Code task agents with MCP tool tests
+2. **Configure MCP**: Ensure datadog-mcp server is running locally
+3. **Verify Auth**: Use `mcp__datadog__setup_auth` to configure Datadog credentials
+4. **Test via MCP Tools**: Use the actual MCP tool functions (e.g., `mcp__datadog__get_logs`, `mcp__datadog__list_notebooks`)
+5. **Validate Output**: Check that tool outputs are correctly formatted and match expectations
+6. **Document Results**: Record comprehensive test results in baseline files or commit messages
 
 ### Why This Matters
 - Tests via MCP tools validate the entire stack (including formatters, serialization)
 - Writing Python scripts bypasses the MCP interface and misses real integration issues
 - Claude Code using MCP tools mirrors actual user experience
+- MCP tool testing provides production-ready validation of all changes
+
+### Testing Baseline Improvements
+When testing improvements to the baseline:
+1. **Do NOT use Python scripts or code execution**
+2. **Use Claude Code MCP tools exclusively** (mcp__datadog__*)
+3. **Run comprehensive tests** covering all affected features
+4. **Document before/after** comparisons showing improvements
+5. **Verify edge cases** identified in previous baseline runs
 
 ### Pre-Release MCP Testing Checklist
 Before merging any MCP tool changes:
-- [ ] Tool executes without errors
+- [ ] Tool executes without errors via MCP interface
 - [ ] Output is correctly formatted (table, JSON, text)
 - [ ] Edge cases work (empty results, special characters, large datasets)
 - [ ] Error messages are clear and helpful
 - [ ] No data loss or corruption in formatting
+- [ ] All tests use Claude Code MCP tools, not scripts
 
 ## Architecture Overview
 
