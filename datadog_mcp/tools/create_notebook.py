@@ -25,37 +25,6 @@ def get_tool_definition() -> Tool:
                     "items": {"type": "string"},
                     "description": "Optional tags for organizing notebooks (e.g., ['rca:gun_detection', 'incident:p0'])",
                 },
-                "cells": {
-                    "type": "array",
-                    "description": "Optional initial cells. Each cell is an object with type and content",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "type": {
-                                "type": "string",
-                                "enum": ["markdown", "timeseries", "log_stream", "trace_list", "query_value"],
-                                "description": "Type of cell",
-                            },
-                            "title": {
-                                "type": "string",
-                                "description": "Title for the cell (for metric/log cells)",
-                            },
-                            "query": {
-                                "type": "string",
-                                "description": "Query for metric/log/APM cells",
-                            },
-                            "content": {
-                                "type": "string",
-                                "description": "Content for markdown cells",
-                            },
-                            "visualization": {
-                                "type": "string",
-                                "enum": ["line_chart", "bar", "table"],
-                                "description": "Visualization type for timeseries cells",
-                            },
-                        },
-                    },
-                },
             },
             "required": ["title"],
         },
@@ -68,13 +37,11 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         title = request.params.arguments.get("title")
         description = request.params.arguments.get("description")
         tags = request.params.arguments.get("tags")
-        cells = request.params.arguments.get("cells")
 
         result = await client_create_notebook(
             title=title,
             description=description,
             tags=tags,
-            cells=cells,
         )
 
         notebook_id = result.get("id")
@@ -89,8 +56,8 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
             f"- **Title**: {attrs.get('name', 'N/A')}\n"
             f"- **Description**: {attrs.get('description', 'N/A')}\n"
             f"- **Tags**: {', '.join(tags) if tags else 'None'}\n"
-            f"- **Cells**: {len(attrs.get('cells', []))}\n"
-            f"- **URL**: [{notebook_url}]({notebook_url})\n"
+            f"- **URL**: [{notebook_url}]({notebook_url})\n\n"
+            f"**To add cells**, use `add_notebook_cell` with notebook ID: `{notebook_id}`"
         )
 
         return CallToolResult(
