@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.6](https://github.com/hacctarr/datadog-mcp/compare/v0.3.5...v0.3.6) (2026-02-20)
+
+
+### Bug Fixes
+
+* remove unused cells parameter from create_notebook ([65dccbb](https://github.com/hacctarr/datadog-mcp/commit/65dccbb51c8f4f94e15da4bf07edfc3987d1dc38))
+* remove unused cells parameter from create_notebook ([1c3e9c0](https://github.com/hacctarr/datadog-mcp/commit/1c3e9c010f4f00e601795ad610582b18febe1bf7))
+
 ## [0.3.5](https://github.com/hacctarr/datadog-mcp/compare/v0.3.4...v0.3.5) (2026-02-19)
 
 
