@@ -2035,17 +2035,18 @@ async def create_notebook(
     title: str,
     description: Optional[str] = None,
     tags: Optional[List[str]] = None,
-    cells: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     """Create a new Datadog notebook.
 
     Supports both cookie-based (v1 internal) and token-based (v1 public) auth.
 
+    Note: The Datadog API v1 endpoint creates empty notebooks. Add cells separately
+    using add_notebook_cell().
+
     Args:
         title: Notebook title
         description: Optional notebook description
         tags: Optional list of tags
-        cells: Optional list of cell configurations
 
     Returns:
         Dict containing the created notebook details
