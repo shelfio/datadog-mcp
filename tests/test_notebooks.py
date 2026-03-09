@@ -30,16 +30,33 @@ SAMPLE_NOTEBOOK_RESPONSE = {
         "cells": [
             {
                 "id": "cell-001",
-                "type": "markdown",
-                "title": "Investigation Overview",
-                "content": "# RCA Investigation\n\nInitial findings...",
+                "type": "notebook_cells",
+                "attributes": {
+                    "definition": {
+                        "type": "markdown",
+                        "text": "# RCA Investigation\n\nInitial findings...",
+                    }
+                },
             },
             {
                 "id": "cell-002",
-                "type": "timeseries",
-                "title": "Error Rate",
-                "query": "avg:trace.web.request.errors{*}",
-                "visualization": "line_chart",
+                "type": "notebook_cells",
+                "attributes": {
+                    "definition": {
+                        "type": "timeseries",
+                        "title": "Error Rate",
+                        "requests": [
+                            {
+                                "queries": [
+                                    {
+                                        "query": "avg:trace.web.request.errors{*}",
+                                    }
+                                ],
+                                "display_type": "line_chart",
+                            }
+                        ],
+                    }
+                },
             },
         ],
     },
@@ -150,6 +167,27 @@ class TestGetNotebook:
             assert "markdown" in result.content[0].text
             assert "timeseries" in result.content[0].text
             assert "2" in result.content[0].text and "Cells" in result.content[0].text
+
+    @pytest.mark.asyncio
+    async def test_get_notebook_includes_cell_content(self, sample_request, mock_env_credentials):
+        """Test that cell content (queries, markdown) is included in output"""
+        sample_request.arguments = {"notebook_id": SAMPLE_NOTEBOOK_ID}
+
+        with patch(
+            "datadog_mcp.tools.get_notebook.client_get_notebook", new_callable=AsyncMock
+        ) as mock_get:
+            mock_get.return_value = SAMPLE_NOTEBOOK_RESPONSE
+
+            result = await get_notebook.handle_call(sample_request)
+
+            output_text = result.content[0].text
+            # Verify markdown cell content is included
+            assert "# RCA Investigation" in output_text
+            assert "Initial findings..." in output_text
+            # Verify timeseries cell query is included
+            assert "Error Rate" in output_text
+            assert "avg:trace.web.request.errors{*}" in output_text
+            assert "line_chart" in output_text
 
     @pytest.mark.asyncio
     async def test_get_notebook_empty(self, sample_request, mock_env_credentials):

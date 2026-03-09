@@ -36,9 +36,32 @@ async def handle_call(request: CallToolRequest) -> CallToolResult:
         if "attributes" in result and "cells" in result["attributes"]:
             for i, cell in enumerate(result["attributes"]["cells"], 1):
                 cell_id = cell.get("id", f"cell-{i}")
-                cell_type = cell.get("type", "unknown")
-                cell_title = cell.get("title", "Untitled")
-                cells_text += f"\n{i}. **[{cell_type}]** {cell_title} (ID: {cell_id})"
+
+                # Extract definition from cell attributes
+                definition = cell.get("attributes", {}).get("definition", {})
+                definition_type = definition.get("type", "unknown")
+                cell_title = definition.get("title", "Untitled")
+
+                cells_text += f"\n{i}. **[{definition_type}]** {cell_title} (ID: {cell_id})"
+
+                # Add cell content based on definition type
+                if definition_type == "markdown":
+                    text = definition.get("text")
+                    if text:
+                        cells_text += f"\n   ```\n   {text}\n   ```"
+                elif definition_type in ["timeseries", "log_stream", "trace_list", "query_value"]:
+                    # Extract queries from requests
+                    requests = definition.get("requests", [])
+                    for req in requests:
+                        queries = req.get("queries", [])
+                        for query_obj in queries:
+                            query_str = query_obj.get("query")
+                            if query_str:
+                                cells_text += f"\n   Query: `{query_str}`"
+                        # Show display type/visualization
+                        display_type = req.get("display_type")
+                        if display_type:
+                            cells_text += f"\n   Display: {display_type}"
 
         # Get tags, handling None case
         tags = result.get('attributes', {}).get('tags')
