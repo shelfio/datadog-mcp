@@ -24,5 +24,6 @@ build-backend = "hatchling.build"
 [tool.uv]
 package = true
 
+exclude-newer = "2 weeks"
 [project.scripts]
 datadog-mcp = "datadog_mcp.server:cli_main"
