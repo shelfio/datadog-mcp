@@ -760,31 +760,170 @@ async def fetch_slo_history(
 ) -> Dict[str, Any]:
     """Fetch SLO history data."""
     url = f"{DATADOG_API_URL}/api/v1/slo/{slo_id}/history"
-    
+
     headers = {
         "Content-Type": "application/json",
         "DD-API-KEY": DATADOG_API_KEY,
         "DD-APPLICATION-KEY": DATADOG_APP_KEY,
     }
-    
+
     params = {
         "from_ts": from_ts,
         "to_ts": to_ts,
     }
-    
+
     if target is not None:
         params["target"] = target
-    
+
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(url, headers=headers, params=params)
             response.raise_for_status()
             data = response.json()
             return data.get("data", {})
-            
+
         except httpx.HTTPError as e:
             logger.error(f"HTTP error fetching SLO history: {e}")
             raise
         except Exception as e:
             logger.error(f"Error fetching SLO history: {e}")
+            raise
+
+
+async def fetch_dashboards(
+    filter_shared: Optional[bool] = None,
+    filter_deleted: Optional[bool] = None,
+) -> Dict[str, Any]:
+    """Fetch list of all dashboards from Datadog API."""
+
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    url = f"{DATADOG_API_URL}/api/v1/dashboard"
+
+    params = {}
+    if filter_shared is not None:
+        params["filter[shared]"] = str(filter_shared).lower()
+    if filter_deleted is not None:
+        params["filter[deleted]"] = str(filter_deleted).lower()
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers, params=params)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching dashboards: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching dashboards: {e}")
+            raise
+
+
+async def fetch_dashboard(dashboard_id: str) -> Dict[str, Any]:
+    """Fetch a specific dashboard from Datadog API."""
+
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    url = f"{DATADOG_API_URL}/api/v1/dashboard/{dashboard_id}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching dashboard '{dashboard_id}': {e}")
+            if hasattr(e, 'response') and e.response.status_code == 404:
+                logger.warning(f"Dashboard '{dashboard_id}' not found")
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching dashboard '{dashboard_id}': {e}")
+            raise
+
+
+async def create_dashboard(dashboard_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Create a new dashboard in Datadog."""
+
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    url = f"{DATADOG_API_URL}/api/v1/dashboard"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, headers=headers, json=dashboard_data)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error creating dashboard: {e}")
+            if hasattr(e, 'response'):
+                logger.error(f"Response: {e.response.text}")
+            raise
+        except Exception as e:
+            logger.error(f"Error creating dashboard: {e}")
+            raise
+
+
+async def update_dashboard(dashboard_id: str, dashboard_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Update an existing dashboard in Datadog."""
+
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    url = f"{DATADOG_API_URL}/api/v1/dashboard/{dashboard_id}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.put(url, headers=headers, json=dashboard_data)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error updating dashboard '{dashboard_id}': {e}")
+            if hasattr(e, 'response'):
+                logger.error(f"Response: {e.response.text}")
+            raise
+        except Exception as e:
+            logger.error(f"Error updating dashboard '{dashboard_id}': {e}")
+            raise
+
+
+async def delete_dashboard(dashboard_id: str) -> Dict[str, Any]:
+    """Delete a dashboard from Datadog."""
+
+    headers = {
+        "DD-API-KEY": DATADOG_API_KEY,
+        "DD-APPLICATION-KEY": DATADOG_APP_KEY,
+    }
+
+    url = f"{DATADOG_API_URL}/api/v1/dashboard/{dashboard_id}"
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.delete(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error deleting dashboard '{dashboard_id}': {e}")
+            if hasattr(e, 'response') and e.response.status_code == 404:
+                logger.warning(f"Dashboard '{dashboard_id}' not found")
+            raise
+        except Exception as e:
+            logger.error(f"Error deleting dashboard '{dashboard_id}': {e}")
             raise

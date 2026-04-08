@@ -13,8 +13,9 @@ A Model Context Protocol (MCP) server that provides comprehensive Datadog monito
 This MCP server enables Claude to:
 
 - **CI/CD Pipeline Management**: List CI pipelines, extract fingerprints
-- **Service Logs Analysis**: Retrieve and analyze service logs with environment and time filtering  
+- **Service Logs Analysis**: Retrieve and analyze service logs with environment and time filtering
 - **Metrics Monitoring**: Query any Datadog metric with flexible filtering, aggregation, and field discovery
+- **Dashboard Management**: Create, read, update, and delete dashboards with full support for template variables and widgets
 - **Monitoring & Alerting**: List and manage Datadog monitors and Service Level Objectives (SLOs)
 - **Service Definitions**: List and retrieve detailed service definitions with metadata, ownership, and configuration
 - **Team Management**: List teams, view member details, and manage team information
@@ -263,6 +264,53 @@ Retrieves all values for a specific field of a metric.
 - `metric_name` (required): The metric name
 - `field_name` (required): The field name to get values for
 - `time_range` (optional): "1h", "4h", "8h", "1d", "7d", "14d", "30d"
+
+### `list_dashboards`
+Lists all dashboards from Datadog with optional filtering.
+
+**Arguments:**
+- `filter_shared` (optional): Filter for shared dashboards (true/false)
+- `filter_deleted` (optional): Filter for deleted dashboards (true/false)
+- `format` (optional): Output format - "table", "json", or "summary"
+
+### `get_dashboard`
+Retrieves a specific dashboard by its ID with full configuration details.
+
+**Arguments:**
+- `dashboard_id` (required): The ID of the dashboard to retrieve
+- `format` (optional): Output format - "json", "formatted", or "summary"
+
+### `create_dashboard`
+Creates a new dashboard in Datadog with full support for widgets and template variables.
+
+**Arguments:**
+- `dashboard_config` (required): JSON object containing the dashboard configuration
+  - `title` (required): Dashboard title
+  - `layout_type` (required): 'ordered' or 'free'
+  - `widgets` (required): Array of widget definitions
+  - `template_variables` (optional): Array of template variable definitions
+  - `description` (optional): Dashboard description
+  - `notify_list` (optional): List of users to notify on changes
+
+**Template Variables:**
+Template variables enable dynamic filtering across dashboard widgets. Each variable should include:
+- `name`: Variable name (referenced as $name in queries)
+- `prefix`: Tag prefix to filter by (e.g., 'env', 'service', 'region')
+- `default`: Default value
+- `available_values` (optional): Array of selectable values
+
+### `update_dashboard`
+Updates an existing dashboard with new configuration. This is a full replacement operation.
+
+**Arguments:**
+- `dashboard_id` (required): The ID of the dashboard to update
+- `dashboard_config` (required): Complete JSON object with new dashboard configuration
+
+### `delete_dashboard`
+Deletes a dashboard from Datadog (moves to trash, recoverable for 30 days).
+
+**Arguments:**
+- `dashboard_id` (required): The ID of the dashboard to delete
 
 ### `list_service_definitions`
 Lists all service definitions from Datadog with pagination and filtering.
