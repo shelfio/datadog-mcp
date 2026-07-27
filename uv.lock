@@ -213,6 +213,7 @@ dependencies = [
     { name = "datadog-api-client" },
     { name = "httpx" },
     { name = "mcp" },
+    { name = "urllib3" },
 ]
 
 [package.optional-dependencies]
@@ -230,6 +231,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'test'", specifier = ">=7.0.0" },
     { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.21.0" },
     { name = "pytest-mock", marker = "extra == 'test'", specifier = ">=3.10.0" },
+    { name = "urllib3", specifier = ">=2.6.3" },
 ]
 provides-extras = ["test"]
 

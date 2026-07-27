@@ -8,6 +8,7 @@ dependencies = [
     "datadog-api-client>=2.39.0",
     "httpx>=0.28.1",
     "mcp>=1.23.0",
+    "urllib3>=2.6.3",
 ]
 
 [project.optional-dependencies]
