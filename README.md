@@ -1,5 +1,8 @@
 # Datadog MCP Server
 
+> [!IMPORTANT]
+> This repository is archived and no longer maintained. Datadog now provides an [official Datadog MCP Server](https://docs.datadoghq.com/mcp_server/). Use the official server for new integrations. Shelf does not plan to maintain or update this implementation.
+
 [![CircleCI](https://img.shields.io/circleci/build/github/shelfio/datadog-mcp/main?style=flat&logo=circleci)](https://circleci.com/gh/shelfio/datadog-mcp/tree/main)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://python.org)
 [![UV](https://img.shields.io/badge/uv-package%20manager-blue)](https://github.com/astral-sh/uv)
