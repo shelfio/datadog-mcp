@@ -14,7 +14,7 @@ from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, ServerCapabilities, TextContent
 
-from .tools import get_fingerprints, list_pipelines, get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values
+from .tools import get_fingerprints, list_pipelines, get_logs, get_teams, get_metrics, get_metric_fields, get_metric_field_values, list_metrics, list_service_definitions, get_service_definition, list_monitors, list_slos, get_logs_field_values, list_dashboards, get_dashboard, create_dashboard, update_dashboard, delete_dashboard
 
 # Configure logging
 logging.basicConfig(
@@ -80,6 +80,26 @@ TOOLS = {
     "list_slos": {
         "definition": list_slos.get_tool_definition,
         "handler": list_slos.handle_call,
+    },
+    "list_dashboards": {
+        "definition": list_dashboards.get_tool_definition,
+        "handler": list_dashboards.handle_call,
+    },
+    "get_dashboard": {
+        "definition": get_dashboard.get_tool_definition,
+        "handler": get_dashboard.handle_call,
+    },
+    "create_dashboard": {
+        "definition": create_dashboard.get_tool_definition,
+        "handler": create_dashboard.handle_call,
+    },
+    "update_dashboard": {
+        "definition": update_dashboard.get_tool_definition,
+        "handler": update_dashboard.handle_call,
+    },
+    "delete_dashboard": {
+        "definition": delete_dashboard.get_tool_definition,
+        "handler": delete_dashboard.handle_call,
     },
 }
 
