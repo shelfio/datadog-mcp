@@ -189,7 +189,6 @@ async def fetch_logs(
             result = {
                 "data": [log.to_dict() for log in response.data] if response.data else [],
                 "meta": response.meta.to_dict() if response.meta else {},
-                "links": response.links.to_dict() if response.links else {},
             }
             
             return result
