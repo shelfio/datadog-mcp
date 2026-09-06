@@ -86,6 +86,7 @@ def get_datadog_configuration() -> Configuration:
     configuration.api_key["apiKeyAuth"] = DATADOG_API_KEY
     configuration.api_key["appKeyAuth"] = DATADOG_APP_KEY
     # Configure SDK to use the correct regional server
+    # server_variables["site"] expects site name like "datadoghq.eu", not full URL
     configuration.server_variables["site"] = DD_SITE
     return configuration
 
@@ -188,8 +189,8 @@ async def fetch_logs(
             # Convert to dict format for backward compatibility
             result = {
                 "data": [log.to_dict() for log in response.data] if response.data else [],
-                "meta": response.meta.to_dict() if response.meta else {},
-                "links": response.links.to_dict() if response.links else {},
+                "meta": response.meta.to_dict() if hasattr(response, 'meta') and response.meta else {},
+                "links": response.links.to_dict() if hasattr(response, 'links') and response.links else {},
             }
             
             return result
@@ -387,10 +388,10 @@ async def fetch_metrics(
         query_parts.append(f" by {{{by_clause}}}")
     
     query = "".join(query_parts)
-    
+
     # Log the constructed query for debugging
     logger.debug(f"Constructed query: {query}")
-    
+
     # Calculate time range in seconds
     import time
     to_timestamp = int(time.time())
